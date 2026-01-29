@@ -27,10 +27,12 @@ function App() {
 
   const codeString = `<SlopImage
   prompt="${prompt}"
-  location="${location}"
-  weather="${weather}"
-  style="${style}"
-  date="${date}"
+  variables={{
+    location: "${location}",
+    weather: "${weather}",
+    style: "${style}",
+    date: new Date().toLocaleDateString()
+  }}
 />`;
 
   return (
@@ -107,10 +109,12 @@ function App() {
           <div className="sticky top-8">
             <SlopImage
               prompt={prompt}
-              location={location}
-              weather={weather}
-              style={style}
-              date={date}
+              variables={{
+                location,
+                weather,
+                style,
+                date,
+              }}
               className="w-full h-full object-cover transition-opacity duration-500 aspect-square rounded-sm"
             />
           </div>
