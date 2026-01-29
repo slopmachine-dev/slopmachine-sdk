@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SlopImage } from '../../src';
+import { SlopImage } from '@slopmachine/react';
 
 function App() {
   const [location, setLocation] = useState('London');

@@ -6,6 +6,14 @@ export default defineConfig({
   base: '/slopmachine-sdk/',
   plugins: [react()],
   server: {
-    port: 3001
+    port: 3001,
+    fs: {
+      allow: ['..']
+    }
+  },
+  resolve: {
+    alias: {
+      '@slopmachine/react': '../src/index.ts'
+    }
   }
 })
