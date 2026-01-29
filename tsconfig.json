@@ -20,8 +20,12 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
-    "declaration": true
+    "declaration": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./demo/src/*"]
+    }
   },
-  "include": ["src"],
+  "include": ["src", "demo/src/components/ui/code-block.tsx"],
   "exclude": ["node_modules", "dist", "demo"]
 }

@@ -7,8 +7,12 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-interface SlopImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface SlopImageProps extends Omit<
+  React.ImgHTMLAttributes<HTMLImageElement>,
+  "style"
+> {
   prompt: string;
+  style?: string;
   // Dynamic props mapping
   [key: string]: any;
 }
@@ -17,7 +21,6 @@ interface SlopImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 const RESERVED_PROPS = [
   "prompt",
   "className",
-  "style",
   "alt",
   "width",
   "height",
@@ -33,18 +36,22 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   ...props
 }) => {
   // Interpolate prompt
-  const { finalPrompt } = useMemo(() => {
+  const finalPrompt = useMemo(() => {
     let text = prompt;
 
-    Object.keys(props).forEach((key) => {
+    // Combine props and style for interpolation
+    const interpolationProps: Record<string, any> = { ...props, style };
+
+    Object.keys(interpolationProps).forEach((key) => {
       if (RESERVED_PROPS.includes(key)) return;
 
-      const value = props[key];
+      const value = interpolationProps[key];
       // Replace {key} with value
-      text = text.replace(new RegExp(`{${key}}`, "g"), String(value));
+      if (value !== undefined && value !== null) {
+        text = text.replace(new RegExp(`{${key}}`, "g"), String(value));
+      }
     });
-
-    return { finalPrompt: text };
+    return text;
   }, [prompt, props, style]);
 
   // Construct API URL
@@ -55,19 +62,13 @@ export const SlopImage: React.FC<SlopImageProps> = ({
     aspectRatio: String(aspectRatio),
   });
 
-  // If style wasn't in the prompt template but passed as a prop, maybe append it?
-  // The API supports a 'style' param.
-  if (style && !prompt.includes("{style}")) {
-    params.append("style", String(style));
-  }
-
   const src = `${baseUrl}?${params.toString()}`;
 
   return (
     <img
       src={src}
       alt={finalPrompt}
-      className={cn("bg-gray-100 object-cover", className)}
+      className={cn("object-cover", className)}
       {...props}
     />
   );
