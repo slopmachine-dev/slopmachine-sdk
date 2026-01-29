@@ -37,7 +37,7 @@ function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <div className="min-h-screen p-8 font-sans max-w-4xl mx-auto space-y-4">
-        <h1 className="text-4xl font-heading">Slop Machine</h1>
+        <h1 className="text-4xl font-heading">Slop Machine SDK Demo</h1>
         <h2 className="font-subheading">Basic Example</h2>
         <p className="text-foreground/50">
           Image with variables provided at runtime.
