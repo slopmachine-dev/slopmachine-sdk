@@ -139,26 +139,27 @@ function App() {
                 </TabsContent>
                 <TabsContent value="silo" className="mt-0 h-full">
                   <div className="relative w-full h-full group">
-                     {/* 
-                        NOTE: Using a dummy silo/bucket here for visual demo purposes.
-                        In a real scenario, these IDs would need to exist in the DB.
-                        The loading state will trigger, then it might fail 404 if not in DB.
-                        For the purpose of the code demo, this is fine.
-                      */}
+                    {/* 
+                        DEMO TRICK: We are using the 'prompt' mode here to ensure the demo 
+                        works immediately without needing to seed the database with specific 
+                        silo/bucket IDs. 
+                        
+                        In a real app, you would use:
+                        <SlopImage silo="public_demo" bucket="weather_scene" ... />
+                     */}
                     <SlopImage
-                      silo="public_demo"
-                      bucket="weather_scene"
-                      version={1}
+                      prompt={prompt}
                       variables={{
                         location,
                         weather,
-                        // style might be baked into the bucket version!
+                        style, // We include style here to match the visual output of the direct mode
+                        date,
                       }}
                       className="w-full h-full object-cover rounded-sm shadow-md"
                     />
                      {/* Overlay to explain what's happening */}
                      <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                        Silo: public_demo / Bucket: weather_scene
+                        Simulating: public_demo / weather_scene
                      </div>
                   </div>
                 </TabsContent>
