@@ -136,6 +136,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
         // Use prompt or bucket ID as alt text fallback
         alt={props.prompt || `Slop generated from ${props.silo}/${props.bucket}`}
         onLoad={() => setIsLoading(false)}
+        onError={() => setIsLoading(false)}
         className={cn(
           "h-full w-full object-cover transition-opacity duration-500",
           isLoading ? "opacity-0" : "opacity-100"
