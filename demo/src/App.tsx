@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { SlopImage } from "../../src/index";
 import {
   Select,
@@ -8,16 +8,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CodeBlock, CodeBlockCopyButton } from "@/components/ui/code-block";
 import { ThemeProvider } from "./components/theme-provider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CodeBlock, CodeBlockCopyButton } from "@/components/ui/code-block";
 
 function App() {
   const [location, setLocation] = useState("London");
   const [weather, setWeather] = useState("Rainy");
   const [style, setStyle] = useState("Oil Painting");
-  const [date, setDate] = useState(new Date().toLocaleDateString());
+  const [date] = useState(new Date().toLocaleDateString());
 
   // Mode state
   const [activeTab, setActiveTab] = useState("direct");
@@ -36,9 +36,11 @@ function App() {
 
   // Example Silo IDs (Mock)
   const siloCodeString = `<SlopImage
-  silo="public_demo"
-  bucket="weather_scene"
-  version={1}
+  recipe={{
+    silo: "public_demo",
+    bucket: "weather_scene",
+    version: 1
+  }}
   variables={{
     location: "${location}",
     weather: "${weather}"
@@ -145,7 +147,7 @@ function App() {
                         silo/bucket IDs. 
                         
                         In a real app, you would use:
-                        <SlopImage silo="public_demo" bucket="weather_scene" ... />
+                        <SlopImage recipe={{ silo: "public_demo", bucket: "weather_scene" }} ... />
                      */}
                     <SlopImage
                       prompt={prompt}

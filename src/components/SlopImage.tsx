@@ -8,23 +8,25 @@ function cn(...inputs: ClassValue[]) {
 }
 
 // Two modes: Direct Prompt OR Silo Reference
+export type SlopImageRecipe = {
+  silo: string;
+  bucket: string;
+  version?: number;
+};
+
 type SlopImageProps = React.ImgHTMLAttributes<HTMLImageElement> &
   (
     | {
         mode?: "prompt";
         prompt: string;
-        silo?: never;
-        bucket?: never;
-        version?: never;
+        recipe?: never;
         aspectRatio?: string;
         variables?: Record<string, string | number | undefined | null>;
       }
     | {
         mode?: "silo";
         prompt?: never;
-        silo: string;
-        bucket: string;
-        version?: number;
+        recipe: SlopImageRecipe;
         aspectRatio?: string;
         variables?: Record<string, string | number | undefined | null>;
       }
@@ -44,12 +46,13 @@ export const SlopImage: React.FC<SlopImageProps> = ({
     const params = new URLSearchParams();
     params.append("aspectRatio", String(aspectRatio));
 
-    if (props.silo && props.bucket) {
+    if (props.recipe) {
       // Mode: Silo Reference
-      params.append("silo", props.silo);
-      params.append("bucket", props.bucket);
-      if (props.version) {
-        params.append("version", String(props.version));
+      const { silo, bucket, version } = props.recipe;
+      params.append("silo", silo);
+      params.append("bucket", bucket);
+      if (version) {
+        params.append("version", String(version));
       }
 
       // Pass variables as query params for server-side interpolation
@@ -73,7 +76,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
     }
 
     return `${baseUrl}?${params.toString()}`;
-  }, [props.silo, props.bucket, props.version, props.prompt, aspectRatio, variables]);
+  }, [props.recipe, props.prompt, aspectRatio, variables]);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -134,7 +137,10 @@ export const SlopImage: React.FC<SlopImageProps> = ({
         key={src}
         src={src}
         // Use prompt or bucket ID as alt text fallback
-        alt={props.prompt || `Slop generated from ${props.silo}/${props.bucket}`}
+        alt={
+          props.prompt ||
+          `Slop generated from ${props.recipe?.silo}/${props.recipe?.bucket}`
+        }
         onLoad={() => setIsLoading(false)}
         onError={() => setIsLoading(false)}
         className={cn(
