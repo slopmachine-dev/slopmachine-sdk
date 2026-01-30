@@ -10,6 +10,8 @@ function cn(...inputs: ClassValue[]) {
 interface SlopImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   prompt: string;
   aspectRatio?: string;
+  seed?: number;
+  bucket?: string;
   variables?: Record<string, string | number | undefined | null>;
 }
 
