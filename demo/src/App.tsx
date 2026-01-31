@@ -68,12 +68,12 @@ function App() {
 
   const codeLocation =
     location === "Auto"
-      ? `getLocation() // ${detectedLocation}`
-      : `"${effectiveLocation}"`;
+      ? `getLocation(), // ${detectedLocation}`
+      : `"${effectiveLocation},"`;
   const codeWeather =
     weather === "Auto"
-      ? `getWeather(getLocation()) // ${detectedWeather}`
-      : `"${effectiveWeather}"`;
+      ? `getWeather(getLocation()), // ${detectedWeather}`
+      : `"${effectiveWeather},"`;
 
   const basicExamplePrompt = `A beautiful scene in {location}, where the weather is {weather}, there are flying pigs in the background somewhere, and there is the text 'Slop Machine was here {date}', all in the style of {style}`;
 
@@ -102,8 +102,8 @@ function App() {
             code={`<SlopImage
   prompt="${basicExamplePrompt}"
   variables={{
-    location: ${codeLocation},
-    weather: ${codeWeather},
+    location: ${codeLocation}
+    weather: ${codeWeather}
     style: "${style}",
     date: new Date().toLocaleDateString()
   }}
@@ -193,16 +193,17 @@ function App() {
         <div className="space-y-2">
           <h2 className="font-subheading">Managed Example</h2>
           <p className="text-foreground/50">
-            Specific image from a Slop Machine bucket.{" "}
+            Image from a{" "}
             <a
-              href="http://slopmachine.dev/share/WHc9Wvh2O8"
+              href="http://slopmachine.dev"
               className="text-primary text-underline font-bold"
               target="_blank">
-              View on Slop Machine
-            </a>
+              Slop Machine
+            </a>{" "}
+            bucket.
           </p>
           <ExampleComponent
-            code={`<SlopImage bucket="WhQq52dMlu6LIEotNUG" seed="2010200834" />`}
+            code={`<SlopImage bucket="WhQq52dMlu6LIEotNUG" />`}
             output={
               // fake it for now
               <img
@@ -217,8 +218,6 @@ function App() {
                 <p className="bg-background p-2 rounded-sm">
                   WhQq52dMlu6LIEotNUG
                 </p>
-                <Label>Seed</Label>
-                <p className="bg-background p-2 rounded-sm">2010200834</p>
               </div>
             }
           />
