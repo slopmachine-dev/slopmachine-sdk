@@ -18,14 +18,15 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   prompt,
   className,
   aspectRatio = "1:1",
+  model,
   variables = {},
   baseUrl,
   ...props
 }) => {
   // Construct API URL
   const src = useMemo(
-    () => buildImageUrl({ prompt, aspectRatio, variables, baseUrl }),
-    [prompt, aspectRatio, variables, baseUrl],
+    () => buildImageUrl({ prompt, aspectRatio, variables, baseUrl, model }),
+    [prompt, aspectRatio, variables, baseUrl, model],
   );
 
   const [isLoading, setIsLoading] = useState(true);

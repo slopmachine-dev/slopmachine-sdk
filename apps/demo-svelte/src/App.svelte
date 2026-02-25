@@ -157,6 +157,7 @@
 				{:else}
 					<SlopImage
 						prompt={basicExamplePrompt}
+						model="gemini-flash"
 						variables={{
 							location: effectiveLocation,
 							weather: effectiveWeather,

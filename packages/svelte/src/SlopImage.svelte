@@ -1,18 +1,14 @@
 <script lang="ts">
   import { buildImageUrl, type SlopMachineOptions } from "@slopmachine/core";
 
-  interface Props {
-    prompt: string;
-    aspectRatio?: string;
-    variables?: Record<string, string | number | undefined | null>;
-    baseUrl?: string;
+  interface Props extends SlopMachineOptions{
     class?: string;
-    [key: string]: any;
   }
 
   let {
     prompt,
     aspectRatio = "1:1",
+    model,
     variables = {},
     baseUrl = undefined,
     class: className = "",
@@ -21,7 +17,7 @@
 
   let isLoading = $state(true);
 
-  let src = $derived(buildImageUrl({ prompt, aspectRatio, variables, baseUrl }));
+  let src = $derived(buildImageUrl({ prompt, aspectRatio, variables, baseUrl, model }));
   let prevSrc = $state("");
 
   $effect(() => {

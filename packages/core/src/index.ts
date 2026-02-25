@@ -1,6 +1,7 @@
 export interface SlopMachineOptions {
   prompt: string;
   aspectRatio?: string;
+  model?: string;
   variables?: Record<string, string | number | undefined | null>;
   baseUrl?: string;
 }
@@ -25,6 +26,7 @@ export function buildImageUrl(options: SlopMachineOptions): string {
   const {
     prompt,
     aspectRatio = "1:1",
+    model,
     variables = {},
     baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage",
   } = options;
@@ -34,6 +36,7 @@ export function buildImageUrl(options: SlopMachineOptions): string {
   const params = new URLSearchParams({
     prompt: finalPrompt,
     aspectRatio: String(aspectRatio),
+    ...(model && { model }),
   });
 
   return `${baseUrl}?${params.toString()}`;
