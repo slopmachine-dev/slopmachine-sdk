@@ -172,7 +172,15 @@
 </script>
 
 <div class="min-h-screen p-8 font-sans max-w-4xl mx-auto space-y-12">
-	<h1 class="text-4xl font-heading">Slop Machine SDK Demo</h1>
+	<div class="flex justify-between items-center border-b pb-4">
+		<h1 class="text-4xl font-heading">Slop Machine SDK Demo</h1>
+		<a
+			href={window.location.pathname.replace(/\/svelte\/?$/, '') + '/'}
+			class="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+		>
+			Switch to React Demo &rarr;
+		</a>
+	</div>
 
 	<div class="space-y-2">
 		<h2 class="font-subheading">Basic Example</h2>

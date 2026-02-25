@@ -181,7 +181,14 @@ function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <div className="min-h-screen p-8 font-sans max-w-4xl mx-auto space-y-12">
-        <h1 className="text-4xl font-heading">Slop Machine SDK Demo</h1>
+        <div className="flex justify-between items-center border-b pb-4">
+          <h1 className="text-4xl font-heading">Slop Machine SDK Demo</h1>
+          <a
+            href={window.location.pathname.replace(/\/$/, "") + "/svelte/"}
+            className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
+            Switch to Svelte Demo &rarr;
+          </a>
+        </div>
 
         <div className="space-y-2">
           <h2 className="font-subheading">Basic Example</h2>
