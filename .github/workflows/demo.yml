@@ -36,6 +36,7 @@ jobs:
 
       - name: Build Demo
         run: |
+          npm run build:packages
           npm run build:react
           npm run build:svelte
           mkdir -p dist-demo/svelte

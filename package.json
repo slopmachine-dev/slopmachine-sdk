@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
+    "build:packages": "npm run build --workspace=packages/core --workspace=packages/react --workspace=packages/svelte --if-present",
     "dev": "npm run dev --workspaces --if-present",
     "dev:react": "npm run dev --workspace=apps/demo-react",
     "dev:svelte": "npm run dev --workspace=apps/demo-svelte",
