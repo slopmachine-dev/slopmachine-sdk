@@ -21,11 +21,8 @@
     "noFallthroughCasesInSwitch": true,
 
     "declaration": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./demo/src/*"]
-    }
+    "baseUrl": "."
   },
-  "include": ["src", "demo/src/components/ui/code-block.tsx"],
-  "exclude": ["node_modules", "dist", "demo"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }

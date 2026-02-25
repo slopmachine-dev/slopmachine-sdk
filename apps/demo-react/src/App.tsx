@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { SlopImage } from "../../src/index";
+import { SlopImage } from "@slopmachine/react";
 import {
   Select,
   SelectContent,
@@ -17,7 +17,7 @@ function App() {
   const [location, setLocation] = useState("Auto");
   const [weather, setWeather] = useState("Auto");
   const [style, setStyle] = useState("Oil Painting");
-  const [date, setDate] = useState(new Date().toLocaleDateString());
+  const [date] = useState(new Date().toLocaleDateString());
 
   const [result, setResult] = useState("Auto");
   const [version, setVersion] = useState("Auto");

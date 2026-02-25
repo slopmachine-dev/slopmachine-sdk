@@ -2,49 +2,31 @@ import React, { useMemo, useState } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import { buildImageUrl, type SlopMachineOptions } from "@slopmachine/core";
+
 // Utility for Tailwind classes
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-interface SlopImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-  prompt: string;
-  aspectRatio?: string;
-  seed?: number;
-  bucket?: string;
-  variables?: Record<string, string | number | undefined | null>;
-}
+interface SlopImageProps
+  extends
+    Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt">,
+    SlopMachineOptions {}
 
 export const SlopImage: React.FC<SlopImageProps> = ({
   prompt,
   className,
   aspectRatio = "1:1",
   variables = {},
+  baseUrl,
   ...props
 }) => {
-  // Interpolate prompt
-  const finalPrompt = useMemo(() => {
-    let text = prompt;
-
-    Object.keys(variables).forEach((key) => {
-      const value = variables[key];
-      // Replace {key} with value
-      if (value !== undefined && value !== null) {
-        text = text.replace(new RegExp(`{${key}}`, "g"), String(value));
-      }
-    });
-    return text;
-  }, [prompt, variables]);
-
   // Construct API URL
-  const baseUrl =
-    "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage";
-  const params = new URLSearchParams({
-    prompt: finalPrompt,
-    aspectRatio: String(aspectRatio),
-  });
-
-  const src = `${baseUrl}?${params.toString()}`;
+  const src = useMemo(
+    () => buildImageUrl({ prompt, aspectRatio, variables, baseUrl }),
+    [prompt, aspectRatio, variables, baseUrl],
+  );
 
   const [isLoading, setIsLoading] = useState(true);
   const [currentSrc, setCurrentSrc] = useState(src);
@@ -174,7 +156,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
         <img
           key={src}
           src={src}
-          alt={finalPrompt}
+          alt={prompt}
           onLoad={() => setIsLoading(false)}
           className={cn(
             "h-full w-full object-cover transition-opacity duration-500",

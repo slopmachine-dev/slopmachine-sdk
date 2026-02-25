@@ -1,50 +1,16 @@
 {
-  "name": "@slopmachine/react",
-  "version": "0.0.1",
-  "description": "The official React SDK for Slop Machine",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsup",
-    "build:demo": "vite build",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/surrealroad/slopmachine-sdk.git"
-  },
-  "keywords": [
-    "react",
-    "ai",
-    "slop"
+  "name": "slopmachine-sdk-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
   ],
-  "author": "Slop Machine",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/react": "^19.2.10",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.2",
-    "autoprefixer": "^10.4.23",
-    "postcss": "^8.5.6",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "tailwindcss": "^4.1.18",
-    "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.1"
-  },
-  "dependencies": {
-    "@radix-ui/react-label": "^2.1.8",
-    "@radix-ui/react-select": "^2.2.6",
-    "@radix-ui/react-slot": "^1.2.4",
-    "@tailwindcss/postcss": "^4.1.18",
-    "@tailwindcss/vite": "^4.1.18",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.563.0",
-    "shiki": "^3.21.0",
-    "tailwind-merge": "^3.4.0",
-    "tailwindcss-animate": "^1.0.7"
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:react": "npm run dev --workspace=apps/demo-react",
+    "dev:svelte": "npm run dev --workspace=apps/demo-svelte",
+    "build:react": "npm run build --workspace=apps/demo-react",
+    "build:svelte": "npm run build --workspace=apps/demo-svelte"
   }
 }

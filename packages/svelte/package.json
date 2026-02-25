@@ -1,0 +1,20 @@
+{
+  "name": "@slopmachine/svelte",
+  "version": "1.0.0",
+  "description": "Svelte wrapper for SlopMachine",
+  "type": "module",
+  "main": "src/index.ts",
+  "svelte": "src/index.ts",
+  "exports": {
+    ".": {
+      "svelte": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@slopmachine/core": "*"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  }
+}
