@@ -18,8 +18,21 @@
 
 	let detectedLocation = $state('');
 	let detectedWeather = $state('');
+	let coords = $state<{ lat: number | null; lon: number | null }>({ lat: null, lon: null });
 	let locationAutoDisabled = $state(false);
 	let weatherAutoDisabled = $state(false);
+
+	const getWmoDescription = (code: number) => {
+		if (code === 0) return 'Clear sky';
+		if (code === 1 || code === 2 || code === 3) return 'Partly cloudy';
+		if (code === 45 || code === 48) return 'Fog';
+		if (code >= 51 && code <= 67) return 'Rainy';
+		if (code >= 71 && code <= 77) return 'Snowing';
+		if (code >= 80 && code <= 82) return 'Rain showers';
+		if (code >= 85 && code <= 86) return 'Snow showers';
+		if (code >= 95) return 'Thunderstorm';
+		return 'Unknown';
+	};
 
 	const v1r1src =
 		'https://firebasestorage.googleapis.com/v0/b/slopmachine-12bfb.firebasestorage.app/o/generations%2FzwIwYUODVAYar7PeXz0U%2F1769871708268_0.png?alt=media&token=71d9fb84-6c38-494a-b7dc-5caba21a9902';
@@ -39,13 +52,19 @@
 	$effect(() => {
 		if (location === 'Auto') {
 			detectedLocation = 'Detecting...';
-			fetch('https://ipapi.co/country_name/')
+			fetch('https://get.geojs.io/v1/ip/geo.json')
 				.then((res) => {
 					if (!res.ok) throw new Error('Failed to fetch location');
-					return res.text();
+					return res.json();
 				})
 				.then((data) => {
-					detectedLocation = data.trim();
+					detectedLocation = data.country || 'Unknown Location';
+					if (data.latitude && data.longitude) {
+						coords = {
+							lat: parseFloat(data.latitude),
+							lon: parseFloat(data.longitude)
+						};
+					}
 				})
 				.catch(() => {
 					detectedLocation = 'Unknown Location';
@@ -59,18 +78,30 @@
 
 	$effect(() => {
 		if (weather === 'Auto') {
-			if (effectiveLocation === 'Detecting...' || !effectiveLocation) {
+			if (
+				effectiveLocation === 'Detecting...' ||
+				!effectiveLocation ||
+				coords.lat === null ||
+				coords.lon === null
+			) {
 				detectedWeather = 'Waiting for location...';
 				return;
 			}
 			detectedWeather = 'Detecting...';
-			fetch(`https://wttr.in/${encodeURIComponent(effectiveLocation)}?format=%C`)
+			fetch(
+				`https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current_weather=true`
+			)
 				.then((res) => {
 					if (!res.ok) throw new Error('Failed to fetch weather');
-					return res.text();
+					return res.json();
 				})
 				.then((data) => {
-					detectedWeather = data.trim();
+					const condition = data?.current_weather?.weathercode;
+					if (condition !== undefined) {
+						detectedWeather = getWmoDescription(condition);
+					} else {
+						detectedWeather = 'Unknown';
+					}
 				})
 				.catch(() => {
 					detectedWeather = 'Unknown Weather';

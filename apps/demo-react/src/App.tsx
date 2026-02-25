@@ -27,6 +27,10 @@ function App() {
   const [slopColor, setSlopColor] = useState("pink");
 
   const [detectedLocation, setDetectedLocation] = useState("");
+  const [coords, setCoords] = useState<{
+    lat: number | null;
+    lon: number | null;
+  }>({ lat: null, lon: null });
   const [detectedWeather, setDetectedWeather] = useState("");
   const [locationAutoDisabled, setLocationAutoDisabled] = useState(false);
   const [weatherAutoDisabled, setWeatherAutoDisabled] = useState(false);
@@ -50,12 +54,21 @@ function App() {
   useEffect(() => {
     if (location === "Auto") {
       setDetectedLocation("Detecting...");
-      fetch("https://ipapi.co/country_name/")
+      fetch("https://get.geojs.io/v1/ip/geo.json")
         .then((res) => {
           if (!res.ok) throw new Error("Failed to fetch location");
-          return res.text();
+          return res.json();
         })
-        .then((data) => setDetectedLocation(data.trim()))
+        .then((data) => {
+          const locName = data.country || "Unknown Location";
+          setDetectedLocation(locName);
+          if (data.latitude && data.longitude) {
+            setCoords({
+              lat: parseFloat(data.latitude),
+              lon: parseFloat(data.longitude),
+            });
+          }
+        })
         .catch(() => {
           setDetectedLocation("Unknown Location");
           setLocation("London");
@@ -66,28 +79,52 @@ function App() {
 
   const effectiveLocation = location === "Auto" ? detectedLocation : location;
 
+  const getWmoDescription = (code: number) => {
+    if (code === 0) return "Clear sky";
+    if (code === 1 || code === 2 || code === 3) return "Partly cloudy";
+    if (code === 45 || code === 48) return "Fog";
+    if (code >= 51 && code <= 67) return "Rainy";
+    if (code >= 71 && code <= 77) return "Snowing";
+    if (code >= 80 && code <= 82) return "Rain showers";
+    if (code >= 85 && code <= 86) return "Snow showers";
+    if (code >= 95) return "Thunderstorm";
+    return "Unknown";
+  };
+
   useEffect(() => {
     if (weather === "Auto") {
-      if (effectiveLocation === "Detecting..." || !effectiveLocation) {
+      if (
+        effectiveLocation === "Detecting..." ||
+        !effectiveLocation ||
+        coords.lat === null ||
+        coords.lon === null
+      ) {
         setDetectedWeather("Waiting for location...");
         return;
       }
       setDetectedWeather("Detecting...");
       fetch(
-        `https://wttr.in/${encodeURIComponent(effectiveLocation)}?format=%C`,
+        `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current_weather=true`,
       )
         .then((res) => {
           if (!res.ok) throw new Error("Failed to fetch weather");
-          return res.text();
+          return res.json();
         })
-        .then((data) => setDetectedWeather(data.trim()))
+        .then((data) => {
+          const condition = data?.current_weather?.weathercode;
+          if (condition !== undefined) {
+            setDetectedWeather(getWmoDescription(condition));
+          } else {
+            setDetectedWeather("Unknown");
+          }
+        })
         .catch(() => {
           setDetectedWeather("Unknown Weather");
           setWeather("Rainy");
           setWeatherAutoDisabled(true);
         });
     }
-  }, [weather, effectiveLocation]);
+  }, [weather, effectiveLocation, coords.lat, coords.lon]);
 
   const effectiveWeather = weather === "Auto" ? detectedWeather : weather;
 
