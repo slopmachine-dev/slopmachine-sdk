@@ -10,9 +10,10 @@
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "dependencies": {
-    "@slopmachine/svelte": "*",
     "@slopmachine/demo-shared": "*",
+    "@slopmachine/svelte": "*",
     "@tailwindcss/vite": "^4.2.1",
+    "mode-watcher": "^1.1.0",
     "shiki": "^3.23.0"
   },
   "devDependencies": {

@@ -15,6 +15,8 @@
 		resultOptionsV2,
 		getManagedSrc
 	} from '@slopmachine/demo-shared';
+  	import { ModeWatcher } from 'mode-watcher';
+	
 
 	let location = $state('Auto');
 	let weather = $state('Auto');
@@ -129,6 +131,7 @@
 	});
 </script>
 
+<ModeWatcher />
 <div class="min-h-screen p-8 font-sans max-w-4xl mx-auto space-y-12">
 	<div class="flex justify-between items-center border-b pb-4">
 		<h1 class="text-4xl font-heading">Slop Machine SDK Demo</h1>
