@@ -147,7 +147,7 @@
 		<h2 class="font-subheading">Basic Example</h2>
 		<p class="text-foreground/50">Image with prompt provided at runtime.</p>
 		<ExampleComponent
-			code={`<SlopImage\n  prompt="${basicExamplePrompt}"\n  variables={{\n    location: ${codeLocation}\n    weather: ${codeWeather}\n    style: "${style}",\n    date: new Date().toLocaleDateString()\n  }}\n/>`}
+			code={`<SlopImage\n  prompt={"${basicExamplePrompt}"}\n  variables={{\n    location: ${codeLocation}\n    weather: ${codeWeather}\n    style: "${style}",\n    date: new Date().toLocaleDateString()\n  }}\n/>`}
 		>
 			{#snippet output()}
 				{#if isLoading}
