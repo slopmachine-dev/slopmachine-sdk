@@ -12,6 +12,10 @@ yarn add @slopmachine/svelte
 pnpm add @slopmachine/svelte
 ```
 
+## Demo
+
+https://slopmachine-dev.github.io/slopmachine-sdk/svelte/
+
 ## Usage
 
 ```svelte

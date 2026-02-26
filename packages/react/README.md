@@ -12,6 +12,10 @@ yarn add @slopmachine/react
 pnpm add @slopmachine/react
 ```
 
+## Demo
+
+https://slopmachine-dev.github.io/slopmachine-sdk/
+
 ## Usage
 
 ```tsx
