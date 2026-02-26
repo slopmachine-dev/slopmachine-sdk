@@ -5,7 +5,7 @@ import { twMerge } from "tailwind-merge";
 import {
   buildImageUrl,
   interpolatePrompt,
-  type SlopMachineOptions,
+  type SlopImageOptions,
 } from "@slopmachine/core";
 
 // Utility for Tailwind classes
@@ -16,7 +16,7 @@ function cn(...inputs: ClassValue[]) {
 interface SlopImageProps
   extends
     Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt">,
-    SlopMachineOptions {}
+    SlopImageOptions {}
 
 export const SlopImage: React.FC<SlopImageProps> = ({
   prompt,

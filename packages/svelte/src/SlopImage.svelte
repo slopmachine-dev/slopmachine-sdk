@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { buildImageUrl, interpolatePrompt, type SlopMachineOptions } from "@slopmachine/core";
+  import { buildImageUrl, interpolatePrompt, type SlopImageOptions } from "@slopmachine/core";
 
-  interface Props extends SlopMachineOptions{
+  interface Props extends SlopImageOptions{
     class?: string;
   }
 

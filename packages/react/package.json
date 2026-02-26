@@ -1,6 +1,6 @@
 {
   "name": "@slopmachine/react",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "The official React SDK for Slop Machine",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

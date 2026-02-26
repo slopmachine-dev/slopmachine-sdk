@@ -1,7 +1,7 @@
-export interface SlopMachineOptions {
+export interface SlopImageOptions {
   prompt: string;
   aspectRatio?: string;
-  model?: string;
+  model?: "gemini" | "gemini-flash" | "imagen";
   variables?: Record<string, string | number | undefined | null>;
   baseUrl?: string;
 }
@@ -22,7 +22,7 @@ export function interpolatePrompt(
   return text;
 }
 
-export function buildImageUrl(options: SlopMachineOptions): string {
+export function buildImageUrl(options: SlopImageOptions): string {
   const {
     prompt,
     aspectRatio = "1:1",
