@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { buildImageUrl, type SlopMachineOptions } from "@slopmachine/core";
+  import { buildImageUrl, interpolatePrompt, type SlopMachineOptions } from "@slopmachine/core";
 
   interface Props extends SlopMachineOptions{
     class?: string;
@@ -19,6 +19,7 @@
 
   let src = $derived(buildImageUrl({ prompt, aspectRatio, variables, baseUrl, model }));
   let prevSrc = $state("");
+  let alt = $derived(interpolatePrompt( prompt, variables ) ?? "Generated image");
 
   $effect(() => {
     if (src !== prevSrc) {
@@ -59,7 +60,7 @@
 
   <img
     {src}
-    alt={prompt}
+    {alt}
     onload={handleLoad}
     class:loaded={!isLoading}
     {...restProps}
