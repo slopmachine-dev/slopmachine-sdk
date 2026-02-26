@@ -1,7 +1,7 @@
 export interface SlopImageOptions {
   prompt: string;
   aspectRatio?: string;
-  model?: "gemini" | "gemini-flash" | "imagen";
+  model?: "gemini" | "gemini-flash" | "gemini-pro" | "imagen";
   variables?: Record<string, string | number | undefined | null>;
   baseUrl?: string;
 }
