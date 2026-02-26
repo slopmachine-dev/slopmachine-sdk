@@ -1,8 +1,17 @@
 # Slop Machine SDK
 
+## Getting Started
+
+To run the demo apps or work on this monorepo locally, you must first install dependencies and build the core packages. Building the packages is required to avoid module resolution errors like `Cannot find module '@slopmachine/core'` when running the apps.
+
+```bash
+npm install
+npm run build
+```
+
 ## React Demo
 
-````bash
+```bash
 npm run dev:react
 ```
 
@@ -10,7 +19,7 @@ npm run dev:react
 
 ```bash
 npm run dev:svelte
-````
+```
 
 ## Publishing to npm
 
