@@ -18,12 +18,12 @@ export function ExampleComponent({
   return (
     <div className="grid grid-cols-2 gap-0 items-stretch shadow-retro-lg">
       {/* Output */}
-      <div className="col-span-2 md:col-span-1 overflow-hidden rounded-none rounded-tr-sm border-2 border-neutral-800 border-b-0">
+      <div className="col-span-2 md:col-span-1 overflow-hidden rounded-none rounded-tl-sm border-2 border-neutral-800 border-b-0">
         {output}
       </div>
 
       {/* Controls */}
-      <Card className="col-span-2 md:col-span-1 bg-background rounded-none rounded-tl-sm border-2 border-neutral-800 border-b-0 border-r-none">
+      <Card className="col-span-2 md:col-span-1 bg-background rounded-none rounded-tr-sm border-2 border-neutral-800 border-b-0 border-r-none">
         <CardHeader>
           <CardTitle>{title}</CardTitle>
         </CardHeader>

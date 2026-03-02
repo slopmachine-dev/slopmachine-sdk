@@ -20,12 +20,12 @@
 
 <div class="grid grid-cols-2 gap-0 items-stretch shadow-retro-lg">
 	<!-- Output -->
-	<div class="col-span-2 md:col-span-1 overflow-hidden rounded-none rounded-tr-sm border-2 border-neutral-800 border-b-0">
+	<div class="col-span-2 md:col-span-1 overflow-hidden rounded-none rounded-tl-sm border-2 border-neutral-800 border-b-0">
 		{@render output()}
 	</div>
 
 	<!-- Controls -->
-	<Card.Root class="col-span-2 md:col-span-1 bg-background rounded-none rounded-tl-sm border-2 border-neutral-800 border-b-0 border-r-none">
+	<Card.Root class="col-span-2 md:col-span-1 bg-background rounded-none rounded-tr-sm border-2 border-neutral-800 border-b-0 border-r-none">
 		<Card.Header>
 			<Card.Title>{title}</Card.Title>
 		</Card.Header>
