@@ -1,7 +1,11 @@
 <script lang="ts">
-  import { buildImageUrl, interpolatePrompt, type SlopImageOptions } from "@slopmachine/core";
+  import {
+    buildImageUrl,
+    interpolatePrompt,
+    type SlopImageOptions,
+  } from "@slopmachine/core";
 
-  interface Props extends  SlopImageOptions {
+  interface Props extends SlopImageOptions {
     class?: string;
   }
 
@@ -18,9 +22,22 @@
 
   let isLoading = $state(true);
 
-  let src = $derived(buildImageUrl({ bucketId, prompt, aspectRatio, variables, baseUrl, model }));
+  let computedSrc = $derived(
+    buildImageUrl({ bucketId, prompt, aspectRatio, variables, baseUrl, model }),
+  );
+  let src = $state("");
   let prevSrc = $state("");
-  let alt = $derived(interpolatePrompt( prompt, variables ) ?? "Generated image");
+  let alt = $derived(interpolatePrompt(prompt, variables) ?? "Generated image");
+
+  $effect(() => {
+    const timeout = setTimeout(() => {
+      if (src !== computedSrc) {
+        src = computedSrc;
+      }
+    }, 50);
+
+    return () => clearTimeout(timeout);
+  });
 
   $effect(() => {
     if (src !== prevSrc) {
@@ -31,24 +48,33 @@
 
   $effect(() => {
     if (src) {
-      fetch(src, { method: 'HEAD' })
+      const abortController = new AbortController();
+      fetch(src, { method: "HEAD", signal: abortController.signal })
         .then(async (res) => {
           if (!res.ok) {
             // console.error(`Failed to load image from ${src}. Status: ${res.status} ${res.statusText}`);
             try {
-              const errRes = await fetch(src);
+              const errRes = await fetch(src, {
+                signal: abortController.signal,
+              });
               const errJson = await errRes.json();
-              console.error("SlopImage error:",res.status, errJson.error);
-            } catch (e) {
-              // Failed to fetch or parse error details
+              console.error("SlopImage error:", res.status, errJson.error);
+            } catch (e: any) {
+              if (e.name !== "AbortError") {
+                // Failed to fetch or parse error details
+              }
             }
             isLoading = false;
           }
         })
         .catch((err) => {
-          console.error(`Error fetching image from ${src}:`, err);
-          isLoading = false;
+          if (err.name !== "AbortError") {
+            console.error(`Error fetching image from ${src}:`, err);
+            isLoading = false;
+          }
         });
+
+      return () => abortController.abort();
     }
   });
 
@@ -74,7 +100,8 @@
           fill="none"
           viewBox="0 0 24 24"
         >
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
+          ></circle>
           <path
             fill="currentColor"
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
@@ -107,7 +134,10 @@
 
   .loading-overlay {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 10;
     display: flex;
     align-items: center;
@@ -129,8 +159,12 @@
     color: var(--muted-foreground, #6b7280);
     animation: slop-spin 1s linear infinite;
   }
-  .spinner circle { opacity: 0.25; }
-  .spinner path { opacity: 0.75; }
+  .spinner circle {
+    opacity: 0.25;
+  }
+  .spinner path {
+    opacity: 0.75;
+  }
 
   .spinner-container span {
     font-size: 0.75rem;
@@ -139,7 +173,10 @@
 
   .shimmer-effect {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: linear-gradient(
       90deg,
       var(--muted, #f3f4f6) 0%,
@@ -163,12 +200,20 @@
   }
 
   @keyframes slop-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
   }
 
   @keyframes slop-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 </style>

@@ -29,7 +29,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   ...props
 }) => {
   // Construct API URL
-  const src = useMemo(
+  const rawSrc = useMemo(
     () =>
       buildImageUrl({
         bucketId,
@@ -41,6 +41,15 @@ export const SlopImage: React.FC<SlopImageProps> = ({
       }),
     [bucketId, prompt, aspectRatio, variables, baseUrl, model],
   );
+
+  const [src, setSrc] = useState(rawSrc);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setSrc(rawSrc);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [rawSrc]);
 
   const alt = useMemo(
     () => interpolatePrompt(prompt, variables) ?? "Generated image",
