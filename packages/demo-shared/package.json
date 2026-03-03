@@ -1,6 +1,6 @@
 {
   "name": "@slopmachine/demo-shared",
-  "version": "1.0.0",
+  "version": "0.1.1",
   "description": "Shared code for Slop Machine demos",
   "main": "src/index.ts",
   "module": "src/index.ts",

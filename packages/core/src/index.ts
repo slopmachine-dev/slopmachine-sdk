@@ -1,5 +1,6 @@
 export interface SlopImageOptions {
-  prompt: string;
+  bucketId: string;
+  prompt?: string;
   aspectRatio?: string;
   model?: "gemini" | "gemini-flash" | "gemini-pro" | "imagen";
   variables?: Record<string, string | number | undefined | null>;
@@ -7,9 +8,10 @@ export interface SlopImageOptions {
 }
 
 export function interpolatePrompt(
-  prompt: string,
+  prompt?: string,
   variables?: Record<string, string | number | undefined | null>,
 ): string {
+  if (!prompt) return "";
   let text = prompt;
   if (!variables) return text;
 
@@ -24,6 +26,7 @@ export function interpolatePrompt(
 
 export function buildImageUrl(options: SlopImageOptions): string {
   const {
+    bucketId,
     prompt,
     aspectRatio = "1:1",
     model,
@@ -34,9 +37,20 @@ export function buildImageUrl(options: SlopImageOptions): string {
   const finalPrompt = interpolatePrompt(prompt, variables);
 
   const params = new URLSearchParams({
-    prompt: finalPrompt,
+    bucketId,
     aspectRatio: String(aspectRatio),
     ...(model && { model }),
+  });
+
+  if (finalPrompt) {
+    params.set("prompt", finalPrompt);
+  }
+
+  Object.keys(variables).forEach((key) => {
+    const value = variables[key];
+    if (value !== undefined && value !== null) {
+      params.set(key, String(value));
+    }
   });
 
   return `${baseUrl}?${params.toString()}`;

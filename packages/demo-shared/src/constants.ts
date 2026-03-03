@@ -16,6 +16,9 @@ export const v2r5src =
 export const basicExamplePrompt =
   "A beautiful scene in {location}, where the weather is {weather}, there are flying pigs in the background somewhere, and there is the text 'Slop Machine was here {date}', all in the style of {style}";
 
+export const basicExampleBucketId = "VXPbaUOn62fG74b7iIGt";
+export const managedExampleBucketId = "fFzg3gpfI03VdjTekcQd";
+
 export const managedExamplePromptV1 =
   "A hyper-realistic, slightly dystopian product photo of a can of 'Premium Slop' sitting on a stark concrete pedestal. The can label is minimalist neobrutalist design, bold black Helvetica text on raw aluminum that reads 'CONTENT SUBSTITUTE'. The background is a soft, clinical laboratory white with harsh, dramatic shadows. A single, perfect, viscous drip of iridescent, glowing pink goo is running down the side of the can. 8k resolution, ray-traced reflections, high fashion editorial lighting, sterile aesthetic.";
 export const managedExamplePromptV2 =

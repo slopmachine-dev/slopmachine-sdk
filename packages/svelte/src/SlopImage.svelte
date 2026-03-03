@@ -1,11 +1,12 @@
 <script lang="ts">
   import { buildImageUrl, interpolatePrompt, type SlopImageOptions } from "@slopmachine/core";
 
-  interface Props extends SlopImageOptions{
+  interface Props extends  SlopImageOptions {
     class?: string;
   }
 
   let {
+    bucketId,
     prompt,
     aspectRatio = "1:1",
     model,
@@ -17,7 +18,7 @@
 
   let isLoading = $state(true);
 
-  let src = $derived(buildImageUrl({ prompt, aspectRatio, variables, baseUrl, model }));
+  let src = $derived(buildImageUrl({ bucketId, prompt, aspectRatio, variables, baseUrl, model }));
   let prevSrc = $state("");
   let alt = $derived(interpolatePrompt( prompt, variables ) ?? "Generated image");
 
@@ -28,7 +29,34 @@
     }
   });
 
+  $effect(() => {
+    if (src) {
+      fetch(src, { method: 'HEAD' })
+        .then(async (res) => {
+          if (!res.ok) {
+            // console.error(`Failed to load image from ${src}. Status: ${res.status} ${res.statusText}`);
+            try {
+              const errRes = await fetch(src);
+              const errJson = await errRes.json();
+              console.error("SlopImage error:",res.status, errJson.error);
+            } catch (e) {
+              // Failed to fetch or parse error details
+            }
+            isLoading = false;
+          }
+        })
+        .catch((err) => {
+          console.error(`Error fetching image from ${src}:`, err);
+          isLoading = false;
+        });
+    }
+  });
+
   function handleLoad() {
+    isLoading = false;
+  }
+
+  function handleError() {
     isLoading = false;
   }
 </script>
@@ -62,6 +90,7 @@
     {src}
     {alt}
     onload={handleLoad}
+    onerror={handleError}
     class:loaded={!isLoading}
     {...restProps}
   />

@@ -23,6 +23,8 @@ import {
   resultOptionsV1,
   resultOptionsV2,
   getManagedSrc,
+  basicExampleBucketId,
+  managedExampleBucketId,
 } from "@slopmachine/demo-shared";
 
 function App() {
@@ -130,12 +132,14 @@ function App() {
 
   let managedCode;
   if (hasProps) {
-    managedCode = `<SlopImage\n  bucket="WhQq52dMlu6LIEotNUG"`;
+    managedCode = `<SlopImage\n  bucketId="${managedExampleBucketId}" // ${
+      version === "v1" ? managedExamplePromptV1 : managedExamplePromptV2
+    }`;
     if (hasVersion) managedCode += `\n  version="${versionLabel}"`;
     if (hasResult) managedCode += `\n  result="${resultLabel}"`;
     managedCode += `\n/>`;
   } else {
-    managedCode = `<SlopImage bucket="WhQq52dMlu6LIEotNUG" />`;
+    managedCode = `<SlopImage\n  bucketId="${managedExampleBucketId}"  // ${managedExamplePromptV2} />`;
   }
 
   return (
@@ -145,7 +149,8 @@ function App() {
           <h1 className="text-4xl font-heading">Slop Machine React SDK Demo</h1>
           <a
             href={window.location.pathname.replace(/\/$/, "") + "/svelte/"}
-            className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
+            className="text-sm text-primary"
+          >
             Switch to Svelte Demo &rarr;
           </a>
         </div>
@@ -157,7 +162,7 @@ function App() {
           </p>
           <ExampleComponent
             code={`<SlopImage
-  prompt="${basicExamplePrompt}"
+  bucketId="${basicExampleBucketId}" // "${basicExamplePrompt}"
   variables={{
     location: ${codeLocation}
     weather: ${codeWeather}
@@ -174,7 +179,7 @@ function App() {
                 </div>
               ) : (
                 <SlopImage
-                  prompt={basicExamplePrompt}
+                  bucketId={basicExampleBucketId}
                   model="gemini-flash"
                   variables={{
                     location: effectiveLocation,
@@ -188,6 +193,13 @@ function App() {
             }
             controls={
               <>
+                <div className="space-y-2">
+                  <Label>Bucket</Label>
+                  <p className="bg-background p-2 rounded-sm">
+                    {basicExampleBucketId}
+                  </p>
+                </div>
+
                 <div className="space-y-2">
                   <Label>Location</Label>
                   <Select value={location} onValueChange={setLocation}>
@@ -256,7 +268,8 @@ function App() {
             <a
               href="http://slopmachine.dev"
               className="text-primary text-underline font-bold"
-              target="_blank">
+              target="_blank"
+            >
               Slop Machine
             </a>{" "}
             bucket.
@@ -337,14 +350,15 @@ function App() {
             <a
               href="http://slopmachine.dev"
               className="text-primary text-underline font-bold"
-              target="_blank">
+              target="_blank"
+            >
               Slop Machine
             </a>{" "}
             bucket, with variables provided at runtime.
           </p>
           <ExampleComponent
             code={`<SlopImage
-  bucket="WhQq52dMlu6LIEotNUG"
+  bucket="${managedExampleBucketId}" // ${managedWithControlsExamplePrompt}
   variables={{
     textcolor: "${textColor}",
     bgcolor: "${bgColor}",
@@ -353,7 +367,8 @@ function App() {
 />`}
             output={
               <SlopImage
-                prompt={managedWithControlsExamplePrompt}
+                bucketId={basicExampleBucketId}
+                model="gemini-flash"
                 variables={{
                   textcolor: textColor,
                   bgcolor: bgColor,
@@ -367,7 +382,7 @@ function App() {
                 <div className="space-y-2">
                   <Label>Bucket</Label>
                   <p className="bg-background p-2 rounded-sm">
-                    fFzg3gpfI03VdjTekcQd
+                    {managedExampleBucketId}
                   </p>
                 </div>
 

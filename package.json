@@ -13,5 +13,9 @@
     "dev:svelte": "npm run dev --workspace=apps/demo-svelte",
     "build:react": "npm run build --workspace=apps/demo-react",
     "build:svelte": "npm run build --workspace=apps/demo-svelte"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.1",
+    "prettier-plugin-svelte": "^3.5.0"
   }
 }

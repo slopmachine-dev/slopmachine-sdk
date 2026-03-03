@@ -19,6 +19,7 @@ interface SlopImageProps
     SlopImageOptions {}
 
 export const SlopImage: React.FC<SlopImageProps> = ({
+  bucketId,
   prompt,
   className,
   aspectRatio = "1:1",
@@ -29,8 +30,16 @@ export const SlopImage: React.FC<SlopImageProps> = ({
 }) => {
   // Construct API URL
   const src = useMemo(
-    () => buildImageUrl({ prompt, aspectRatio, variables, baseUrl, model }),
-    [prompt, aspectRatio, variables, baseUrl, model],
+    () =>
+      buildImageUrl({
+        bucketId,
+        prompt,
+        aspectRatio,
+        variables,
+        baseUrl,
+        model,
+      }),
+    [bucketId, prompt, aspectRatio, variables, baseUrl, model],
   );
 
   const alt = useMemo(
@@ -45,6 +54,31 @@ export const SlopImage: React.FC<SlopImageProps> = ({
     setCurrentSrc(src);
     setIsLoading(true);
   }
+
+  React.useEffect(() => {
+    if (!src) return;
+
+    fetch(src, { method: "HEAD" })
+      .then(async (res) => {
+        if (!res.ok) {
+          // console.error(
+          //   `Failed to load image from ${src}. Status: ${res.status} ${res.statusText}`,
+          // );
+          try {
+            const errRes = await fetch(src);
+            const errJson = await errRes.json();
+            console.error("SlopImage error:", res.status, errJson.error);
+          } catch (e) {
+            // Failed to fetch or parse error details
+          }
+          setIsLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error(`Error fetching image from ${src}:`, err);
+        setIsLoading(false);
+      });
+  }, [src]);
 
   return (
     <>
@@ -73,7 +107,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
           backgroundColor: "var(--muted, #f3f4f6)",
           position: "relative",
           overflow: "hidden",
-        }}>
+        }}
+      >
         {/* Loading overlay */}
         <div
           className={cn(
@@ -94,7 +129,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
             opacity: isLoading ? 1 : 0,
             pointerEvents: isLoading ? "auto" : "none",
             transition: "opacity 300ms ease-in-out",
-          }}>
+          }}
+        >
           <div
             className="flex flex-col items-center gap-2"
             style={{
@@ -102,7 +138,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
               flexDirection: "column",
               alignItems: "center",
               gap: "0.5rem",
-            }}>
+            }}
+          >
             <svg
               className="spinner size-6 text-muted-foreground"
               xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +150,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
                 height: "24px",
                 color: "var(--muted-foreground, #6b7280)",
                 animation: "slop-spin 1s linear infinite",
-              }}>
+              }}
+            >
               <circle
                 className="opacity-25"
                 cx="12"
@@ -135,7 +173,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
               style={{
                 fontSize: "0.75rem",
                 color: "var(--muted-foreground, #6b7280)",
-              }}>
+              }}
+            >
               Loading...
             </span>
           </div>
@@ -168,6 +207,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
           src={src}
           alt={alt}
           onLoad={() => setIsLoading(false)}
+          onError={() => setIsLoading(false)}
           className={cn(
             "h-full w-full object-cover transition-opacity duration-500",
             isLoading ? "opacity-0" : "opacity-100",
