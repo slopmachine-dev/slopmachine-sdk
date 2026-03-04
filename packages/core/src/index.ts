@@ -46,12 +46,9 @@ export function buildImageUrl(options: SlopImageOptions): string {
     params.set("prompt", finalPrompt);
   }
 
-  Object.keys(variables).forEach((key) => {
-    const value = variables[key];
-    if (value !== undefined && value !== null) {
-      params.set(key, String(value));
-    }
-  });
+  if (Object.keys(variables).length > 0) {
+    params.set("variables", JSON.stringify(variables));
+  }
 
   return `${baseUrl}?${params.toString()}`;
 }
