@@ -1,6 +1,6 @@
 {
   "name": "@slopmachine/core",
-  "version": "0.1.4",
+  "version": "0.1.10",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -14,6 +14,10 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slopmachine-dev/slopmachine-sdk.git"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

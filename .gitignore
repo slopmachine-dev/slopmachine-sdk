@@ -2,3 +2,16 @@ node_modules
 dist
 dist-demo
 .DS_Store
+
+# Svelte output
+package
+.svelte-kit/
+.svelte-kit
+
+# Turbo
+.turbo
+.turbo/
+
+# TS build info
+*.tsbuildinfo
+

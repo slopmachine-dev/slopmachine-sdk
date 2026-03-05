@@ -1,6 +1,6 @@
 {
   "name": "@slopmachine/react",
-  "version": "0.1.3",
+  "version": "0.1.9",
   "description": "The official React SDK for Slop Machine",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/surrealroad/slopmachine-sdk.git"
+    "url": "git+https://github.com/slopmachine-dev/slopmachine-sdk.git"
   },
   "keywords": [
     "react",

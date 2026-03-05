@@ -1,6 +1,6 @@
 {
   "name": "@slopmachine/svelte",
-  "version": "0.1.3",
+  "version": "0.1.9",
   "description": "Svelte wrapper for SlopMachine",
   "type": "module",
   "main": "src/index.ts",
@@ -11,6 +11,10 @@
       "svelte": "./src/index.ts",
       "default": "./src/index.ts"
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slopmachine-dev/slopmachine-sdk.git"
   },
   "dependencies": {
     "@slopmachine/core": "*"
