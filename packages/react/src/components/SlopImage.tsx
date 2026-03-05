@@ -12,7 +12,9 @@ function cn(...inputs: ClassValue[]) {
 interface SlopImageProps
   extends
     Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt">,
-    SlopImageOptions {}
+    SlopImageOptions {
+  loader?: React.ReactNode;
+}
 
 export const SlopImage: React.FC<SlopImageProps> = ({
   bucketId,
@@ -23,6 +25,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   model,
   variables = {},
   baseUrl,
+  loader,
   ...props
 }) => {
   // Construct API URL
@@ -113,97 +116,125 @@ export const SlopImage: React.FC<SlopImageProps> = ({
           overflow: "hidden",
         }}
       >
-        {/* Loading overlay */}
-        <div
-          className={cn(
-            "absolute inset-0 z-10 flex items-center justify-center bg-muted transition-opacity duration-300",
-            isLoading ? "opacity-100" : "opacity-0 pointer-events-none",
-          )}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 10,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "var(--muted, #f3f4f6)",
-            opacity: isLoading ? 1 : 0,
-            pointerEvents: isLoading ? "auto" : "none",
-            transition: "opacity 300ms ease-in-out",
-          }}
-        >
+        {/* Loading UI */}
+        {loader ? (
           <div
-            className="flex flex-col items-center gap-2"
+            className={cn(
+              "absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-300",
+              isLoading ? "opacity-100" : "opacity-0 pointer-events-none",
+            )}
             style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 10,
               display: "flex",
-              flexDirection: "column",
               alignItems: "center",
-              gap: "0.5rem",
+              justifyContent: "center",
+              opacity: isLoading ? 1 : 0,
+              pointerEvents: isLoading ? "auto" : "none",
+              transition: "opacity 300ms ease-in-out",
             }}
           >
-            <svg
-              className="spinner size-6 text-muted-foreground"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              style={{
-                width: "24px",
-                height: "24px",
-                color: "var(--muted-foreground, #6b7280)",
-                animation: "slop-spin 1s linear infinite",
-              }}
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-                style={{ opacity: 0.25 }}
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                style={{ opacity: 0.75 }}
-              />
-            </svg>
-            <span
-              className="text-xs text-muted-foreground"
-              style={{
-                fontSize: "0.75rem",
-                color: "var(--muted-foreground, #6b7280)",
-              }}
-            >
-              Loading...
-            </span>
+            {loader}
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Loading overlay */}
+            <div
+              className={cn(
+                "absolute inset-0 z-10 flex items-center justify-center bg-muted transition-opacity duration-300",
+                isLoading ? "opacity-100" : "opacity-0 pointer-events-none",
+              )}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 10,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "var(--muted, #f3f4f6)",
+                opacity: isLoading ? 1 : 0,
+                pointerEvents: isLoading ? "auto" : "none",
+                transition: "opacity 300ms ease-in-out",
+              }}
+            >
+              <div
+                className="flex flex-col items-center gap-2"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                }}
+              >
+                <svg
+                  className="spinner size-6 text-muted-foreground"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    color: "var(--muted-foreground, #6b7280)",
+                    animation: "slop-spin 1s linear infinite",
+                  }}
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    style={{ opacity: 0.25 }}
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    style={{ opacity: 0.75 }}
+                  />
+                </svg>
+                <span
+                  className="text-xs text-muted-foreground"
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "var(--muted-foreground, #6b7280)",
+                  }}
+                >
+                  Loading...
+                </span>
+              </div>
+            </div>
 
-        {/* Shimmer effect underneath */}
-        <div
-          className={cn(
-            "shimmer-effect absolute inset-0 bg-gradient-to-r from-muted via-muted/50 to-muted",
-            isLoading ? "opacity-100" : "opacity-0",
-          )}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background:
-              "linear-gradient(90deg, var(--muted, #f3f4f6) 0%, var(--muted-foreground, #e5e7eb) 50%, var(--muted, #f3f4f6) 100%)",
-            backgroundSize: "200% 100%",
-            animation: "slop-shimmer 2s ease-in-out infinite",
-            opacity: isLoading ? 1 : 0,
-            transition: "opacity 300ms",
-          }}
-        />
+            {/* Shimmer effect underneath */}
+            <div
+              className={cn(
+                "shimmer-effect absolute inset-0 bg-gradient-to-r from-muted via-muted/50 to-muted",
+                isLoading ? "opacity-100" : "opacity-0",
+              )}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background:
+                  "linear-gradient(90deg, var(--muted, #f3f4f6) 0%, var(--muted-foreground, #e5e7eb) 50%, var(--muted, #f3f4f6) 100%)",
+                backgroundSize: "200% 100%",
+                animation: "slop-shimmer 2s ease-in-out infinite",
+                opacity: isLoading ? 1 : 0,
+                transition: "opacity 300ms",
+              }}
+            />
+          </>
+        )}
 
         {/* Image */}
         <img
