@@ -6,30 +6,36 @@
   import {
     fetchLocation,
     fetchWeather,
-    basicExamplePrompt,
-    managedExamplePromptV1,
-    managedExamplePromptV2,
     managedWithControlsExamplePrompt,
     versionOptions,
     resultOptionsV1,
     resultOptionsV2,
-    getManagedSrc,
-    basicExampleBucketId,
     managedExampleBucketId,
+    simpleVersionedExampleBucketId,
+    simpleVersionedExamplePromptV1,
+    simpleVersionedExamplePromptV2,
+    DEFAULT_STATE,
+    DROPDOWN_OPTIONS,
+    generateCodeLocation,
+    generateCodeWeather,
+    generateSimpleCode,
+    proceduralExampleBucketId,
+    proceduralExamplePrompt,
   } from "@slopmachine/demo-shared";
+
   import { ModeWatcher } from "mode-watcher";
 
-  let location = $state("Auto");
-  let weather = $state("Auto");
-  let style = $state("Oil Painting");
+  let location = $state(DEFAULT_STATE.location);
+  let weather = $state(DEFAULT_STATE.weather);
+  let style = $state(DEFAULT_STATE.style);
   let date = $state(new Date().toLocaleDateString());
 
-  let result = $state("Auto");
-  let version = $state("Auto");
+  let result = $state(DEFAULT_STATE.result);
+  let version = $state(DEFAULT_STATE.version);
 
-  let bgColor = $state("white");
-  let textColor = $state("black");
-  let slopColor = $state("pink");
+  let bgColor = $state(DEFAULT_STATE.bgColor);
+  let textColor = $state(DEFAULT_STATE.textColor);
+  let slopColor = $state(DEFAULT_STATE.slopColor);
 
   let detectedLocation = $state("");
   let detectedWeather = $state("");
@@ -94,14 +100,10 @@
   );
 
   let codeLocation = $derived(
-    location === "Auto"
-      ? `getLocation(), // ${detectedLocation}`
-      : `"${effectiveLocation}",`,
+    generateCodeLocation(location, detectedLocation, effectiveLocation),
   );
   let codeWeather = $derived(
-    weather === "Auto"
-      ? `getWeather(getLocation()), // ${detectedWeather}`
-      : `"${effectiveWeather}",`,
+    generateCodeWeather(weather, detectedWeather, effectiveWeather),
   );
 
   let isLocationLoading = $derived(
@@ -116,13 +118,11 @@
   );
   let isLoading = $derived(isLocationLoading || isWeatherLoading);
 
-  let effectiveVersion = $derived(version === "Auto" ? "v2" : version);
+  let effectiveVersion = $derived(version === "Auto" ? "2" : version);
 
   let currentResultOptions = $derived(
-    effectiveVersion === "v1" ? resultOptionsV1 : resultOptionsV2,
+    effectiveVersion === "1" ? resultOptionsV1 : resultOptionsV2,
   );
-
-  let managedSrc = $derived.by(() => getManagedSrc(effectiveVersion, result));
 
   let versionLabel = $derived(
     versionOptions.find((o) => o.value === version)?.label || version,
@@ -135,19 +135,18 @@
   let hasResult = $derived(result !== "Auto");
   let hasProps = $derived(hasVersion || hasResult);
 
-  let managedCode = $derived.by(() => {
-    if (hasProps) {
-      let code = `<SlopImage\n  bucketId="${managedExampleBucketId}" // ${
-        version === "v1" ? managedExamplePromptV1 : managedExamplePromptV2
-      }`;
-      if (hasVersion) code += `\n  version="${versionLabel}"`;
-      if (hasResult) code += `\n  result="${resultLabel}"`;
-      code += `\n/>`;
-      return code;
-    } else {
-      return `<SlopImage\n  bucketId="${managedExampleBucketId}"  // ${managedExamplePromptV2} />`;
-    }
-  });
+  let simpleCode = $derived(
+    generateSimpleCode(
+      hasProps,
+      hasVersion,
+      hasResult,
+      version,
+      result,
+      simpleVersionedExampleBucketId,
+      simpleVersionedExamplePromptV1,
+      simpleVersionedExamplePromptV2,
+    ),
+  );
 </script>
 
 <ModeWatcher />
@@ -163,115 +162,9 @@
   </div>
 
   <div class="space-y-2">
-    <h2 class="font-subheading">Basic Example</h2>
-    <p class="text-foreground/50">Image with prompt provided at runtime.</p>
-    <ExampleComponent
-      code={`<SlopImage
-  bucketId="${basicExampleBucketId}" // "${basicExamplePrompt}"
-  variables={{
-    location: ${codeLocation}
-    weather: ${codeWeather}
-    style: "${style}",
-    date: new Date().toLocaleDateString()
-  }}
-/>`}
-    >
-      {#snippet output()}
-        {#if isLoading}
-          <div
-            class="w-full h-full flex items-center justify-center bg-muted aspect-square"
-          >
-            <p class="text-muted-foreground animate-pulse">
-              Generating parameters...
-            </p>
-          </div>
-        {:else}
-          <SlopImage
-            bucketId={basicExampleBucketId}
-            model="gemini-flash"
-            variables={{
-              location: effectiveLocation,
-              weather: effectiveWeather,
-              style,
-              date,
-            }}
-            class="w-full h-full object-cover transition-opacity duration-500 aspect-square"
-          />
-        {/if}
-      {/snippet}
-
-      {#snippet controls()}
-        <div class="space-y-2">
-          <Label>Bucket</Label>
-          <p class="bg-background p-2 rounded-sm">
-            {basicExampleBucketId}
-          </p>
-        </div>
-
-        <div class="space-y-2">
-          <Label>Location</Label>
-          <Select.Root type="single" bind:value={location}>
-            <Select.Trigger class="w-full">
-              {location}
-            </Select.Trigger>
-            <Select.Content>
-              <Select.Item value="Auto" disabled={locationAutoDisabled}
-                >Auto</Select.Item
-              >
-              <Select.Item value="London">London</Select.Item>
-              <Select.Item value="Tokyo">Tokyo</Select.Item>
-              <Select.Item value="New York">New York</Select.Item>
-              <Select.Item value="Mars">Mars</Select.Item>
-            </Select.Content>
-          </Select.Root>
-        </div>
-
-        <div class="space-y-2">
-          <Label>Weather</Label>
-          <Select.Root type="single" bind:value={weather}>
-            <Select.Trigger class="w-full">
-              {weather}
-            </Select.Trigger>
-            <Select.Content>
-              <Select.Item value="Auto" disabled={weatherAutoDisabled}
-                >Auto</Select.Item
-              >
-              <Select.Item value="Rainy">Rainy</Select.Item>
-              <Select.Item value="Sunny">Sunny</Select.Item>
-              <Select.Item value="Snowing">Snowing</Select.Item>
-              <Select.Item value="Apocalyptic">Apocalyptic</Select.Item>
-            </Select.Content>
-          </Select.Root>
-        </div>
-
-        <div class="space-y-2">
-          <Label>Style</Label>
-          <Select.Root type="single" bind:value={style}>
-            <Select.Trigger class="w-full">
-              {style}
-            </Select.Trigger>
-            <Select.Content>
-              <Select.Item value="Oil Painting">Oil Painting</Select.Item>
-              <Select.Item value="Cyberpunk">Cyberpunk</Select.Item>
-              <Select.Item value="Minimalist Vector"
-                >Minimalist Vector</Select.Item
-              >
-              <Select.Item value="Claymation">Claymation</Select.Item>
-            </Select.Content>
-          </Select.Root>
-        </div>
-        <div class="space-y-2">
-          <Label>Date</Label>
-          <p class="bg-background p-2 rounded-sm">{date}</p>
-        </div>
-      {/snippet}
-    </ExampleComponent>
-  </div>
-
-  <div class="space-y-2">
-    <h2 class="font-subheading">Managed Example</h2>
+    <h2 class="font-subheading">Simple Example</h2>
     <p class="text-foreground/50">
-      Image based on a
+      Grab the latest approved image from a
       <a
         href="http://slopmachine.dev"
         class="text-primary text-underline font-bold"
@@ -281,20 +174,20 @@
       </a>
       bucket.
     </p>
-    <ExampleComponent code={managedCode}>
+    <ExampleComponent code={simpleCode}>
       {#snippet output()}
-        <img
-          src={managedSrc}
-          alt={version === "v1"
-            ? managedExamplePromptV1
-            : managedExamplePromptV2}
-          class="w-full h-full object-cover transition-opacity duration-500 aspect-square"
+        <SlopImage
+          bucketId={simpleVersionedExampleBucketId}
+          version={effectiveVersion === "1" ? 1 : 2}
+          resultId={result === "Auto" ? undefined : result}
         />
       {/snippet}
       {#snippet controls()}
         <div class="space-y-2">
           <Label>Bucket</Label>
-          <p class="bg-background p-2 rounded-sm">{managedExampleBucketId}</p>
+          <p class="bg-background p-2 rounded-sm">
+            {simpleVersionedExampleBucketId}
+          </p>
         </div>
         <div class="space-y-2">
           <Label>Version</Label>
@@ -316,7 +209,7 @@
           </Select.Root>
         </div>
         <div class="space-y-2">
-          <Label>Result</Label>
+          <Label>Image</Label>
           <Select.Root type="single" bind:value={result}>
             <Select.Trigger class="w-full">
               {resultLabel}
@@ -326,7 +219,7 @@
                 >{currentResultOptions[0].label}</Select.Item
               >
               <Select.Group>
-                <Select.GroupHeading>Specific Result</Select.GroupHeading>
+                <Select.GroupHeading>Specific Image ID</Select.GroupHeading>
                 {#each currentResultOptions.slice(1) as option}
                   <Select.Item value={option.value}>{option.label}</Select.Item>
                 {/each}
@@ -339,9 +232,9 @@
   </div>
 
   <div class="space-y-2">
-    <h2 class="font-subheading">Managed with Controls Example</h2>
+    <h2 class="font-subheading">Controlled Example</h2>
     <p class="text-foreground/50">
-      Image based on a
+      Generate an image based on a
       <a
         href="http://slopmachine.dev"
         class="text-primary text-underline font-bold"
@@ -349,7 +242,7 @@
       >
         Slop Machine
       </a>
-      bucket, with variables provided at runtime.
+      bucket, with specific changes allowed at runtime.
     </p>
     <ExampleComponent
       code={`<SlopImage
@@ -369,6 +262,7 @@
             bgcolor: bgColor,
             slopcolor: slopColor,
           }}
+          model="gemini-pro"
           class="w-full h-full object-cover transition-opacity duration-500 aspect-square"
         />
       {/snippet}
@@ -385,11 +279,9 @@
               {textColor.charAt(0).toUpperCase() + textColor.slice(1)}
             </Select.Trigger>
             <Select.Content>
-              <Select.Item value="black">Black</Select.Item>
-              <Select.Item value="white">White</Select.Item>
-              <Select.Item value="gray">Gray</Select.Item>
-              <Select.Item value="red">Red</Select.Item>
-              <Select.Item value="blue">Blue</Select.Item>
+              {#each DROPDOWN_OPTIONS.textColors as opt}
+                <Select.Item value={opt.value}>{opt.label}</Select.Item>
+              {/each}
             </Select.Content>
           </Select.Root>
         </div>
@@ -401,11 +293,9 @@
               {bgColor.charAt(0).toUpperCase() + bgColor.slice(1)}
             </Select.Trigger>
             <Select.Content>
-              <Select.Item value="white">White</Select.Item>
-              <Select.Item value="black">Black</Select.Item>
-              <Select.Item value="gray">Gray</Select.Item>
-              <Select.Item value="red">Red</Select.Item>
-              <Select.Item value="blue">Blue</Select.Item>
+              {#each DROPDOWN_OPTIONS.bgColors as opt}
+                <Select.Item value={opt.value}>{opt.label}</Select.Item>
+              {/each}
             </Select.Content>
           </Select.Root>
         </div>
@@ -417,11 +307,99 @@
               {slopColor.charAt(0).toUpperCase() + slopColor.slice(1)}
             </Select.Trigger>
             <Select.Content>
-              <Select.Item value="pink">Pink</Select.Item>
-              <Select.Item value="green">Green</Select.Item>
-              <Select.Item value="blue">Blue</Select.Item>
-              <Select.Item value="yellow">Yellow</Select.Item>
-              <Select.Item value="purple">Purple</Select.Item>
+              {#each DROPDOWN_OPTIONS.slopColors as opt}
+                <Select.Item value={opt.value}>{opt.label}</Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        </div>
+      {/snippet}
+    </ExampleComponent>
+  </div>
+
+  <div class="space-y-2">
+    <h2 class="font-subheading">Procedural Example</h2>
+    <p class="text-foreground/50">
+      Generate an image based on a
+      <a
+        href="http://slopmachine.dev"
+        class="text-primary text-underline font-bold"
+        target="_blank"
+      >
+        Slop Machine
+      </a>
+      bucket, based on the current date and personalized to the user's location and
+      weather.
+    </p>
+    <ExampleComponent
+      code={`<SlopImage
+  bucketId="${proceduralExampleBucketId}" // "${proceduralExamplePrompt}"
+  variables={{
+    location: ${codeLocation},
+    weather: ${codeWeather}
+  }}
+/>`}
+    >
+      {#snippet output()}
+        {#if isLoading}
+          <div
+            class="w-full h-full flex items-center justify-center bg-muted aspect-square"
+          >
+            <p class="text-muted-foreground animate-pulse">
+              Generating parameters...
+            </p>
+          </div>
+        {:else}
+          <SlopImage
+            bucketId={proceduralExampleBucketId}
+            model="gemini-flash"
+            variables={{
+              location: effectiveLocation,
+              weather: effectiveWeather,
+            }}
+            class="w-full h-full object-cover transition-opacity duration-500 aspect-square"
+          />
+        {/if}
+      {/snippet}
+
+      {#snippet controls()}
+        <div class="space-y-2">
+          <Label>Bucket</Label>
+          <p class="bg-background p-2 rounded-sm">
+            {proceduralExampleBucketId}
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <Label>Location</Label>
+          <Select.Root type="single" bind:value={location}>
+            <Select.Trigger class="w-full">
+              {location}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="Auto" disabled={locationAutoDisabled}
+                >Auto</Select.Item
+              >
+              {#each DROPDOWN_OPTIONS.locations as opt}
+                <Select.Item value={opt.value}>{opt.label}</Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        </div>
+
+        <div class="space-y-2">
+          <Label>Weather</Label>
+          <Select.Root type="single" bind:value={weather}>
+            <Select.Trigger class="w-full">
+              {weather}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="Auto" disabled={weatherAutoDisabled}
+                >Auto</Select.Item
+              >
+              {#each DROPDOWN_OPTIONS.weather as opt}
+                <Select.Item value={opt.value}>{opt.label}</Select.Item>
+              {/each}
             </Select.Content>
           </Select.Root>
         </div>

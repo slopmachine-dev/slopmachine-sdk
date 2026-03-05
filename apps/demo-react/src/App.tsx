@@ -15,37 +15,40 @@ import { ExampleComponent } from "./components/example-component";
 import {
   fetchLocation,
   fetchWeather,
-  basicExamplePrompt,
-  managedExamplePromptV1,
-  managedExamplePromptV2,
   managedWithControlsExamplePrompt,
   versionOptions,
   resultOptionsV1,
   resultOptionsV2,
-  getManagedSrc,
-  basicExampleBucketId,
   managedExampleBucketId,
+  simpleVersionedExampleBucketId,
+  simpleVersionedExamplePromptV1,
+  simpleVersionedExamplePromptV2,
+  proceduralExampleBucketId,
+  proceduralExamplePrompt,
+  DEFAULT_STATE,
+  DROPDOWN_OPTIONS,
+  generateCodeLocation,
+  generateCodeWeather,
+  generateSimpleCode,
 } from "@slopmachine/demo-shared";
 
 function App() {
-  const [location, setLocation] = useState("Auto");
-  const [weather, setWeather] = useState("Auto");
-  const [style, setStyle] = useState("Oil Painting");
-  const [date] = useState(new Date().toLocaleDateString());
+  const [location, setLocation] = useState(DEFAULT_STATE.location);
+  const [weather, setWeather] = useState(DEFAULT_STATE.weather);
 
-  const [result, setResult] = useState("Auto");
-  const [version, setVersion] = useState("Auto");
+  const [result, setResult] = useState(DEFAULT_STATE.result);
+  const [version, setVersion] = useState(DEFAULT_STATE.version);
 
-  const [bgColor, setBgColor] = useState("white");
-  const [textColor, setTextColor] = useState("black");
-  const [slopColor, setSlopColor] = useState("pink");
+  const [bgColor, setBgColor] = useState(DEFAULT_STATE.bgColor);
+  const [textColor, setTextColor] = useState(DEFAULT_STATE.textColor);
+  const [slopColor, setSlopColor] = useState(DEFAULT_STATE.slopColor);
 
   const [detectedLocation, setDetectedLocation] = useState("");
+  const [detectedWeather, setDetectedWeather] = useState("");
   const [coords, setCoords] = useState<{
     lat: number | null;
     lon: number | null;
   }>({ lat: null, lon: null });
-  const [detectedWeather, setDetectedWeather] = useState("");
   const [locationAutoDisabled, setLocationAutoDisabled] = useState(false);
   const [weatherAutoDisabled, setWeatherAutoDisabled] = useState(false);
 
@@ -95,14 +98,16 @@ function App() {
 
   const effectiveWeather = weather === "Auto" ? detectedWeather : weather;
 
-  const codeLocation =
-    location === "Auto"
-      ? `getLocation(), // ${detectedLocation}`
-      : `"${effectiveLocation},"`;
-  const codeWeather =
-    weather === "Auto"
-      ? `getWeather(getLocation()), // ${detectedWeather}`
-      : `"${effectiveWeather},"`;
+  const codeLocation = generateCodeLocation(
+    location,
+    detectedLocation,
+    effectiveLocation,
+  );
+  const codeWeather = generateCodeWeather(
+    weather,
+    detectedWeather,
+    effectiveWeather,
+  );
 
   const isLocationLoading =
     location === "Auto" &&
@@ -114,12 +119,10 @@ function App() {
       !detectedWeather);
   const isLoading = isLocationLoading || isWeatherLoading;
 
-  const effectiveVersion = version === "Auto" ? "v2" : version;
+  const effectiveVersion = version === "Auto" ? "2" : version;
 
   const currentResultOptions =
-    effectiveVersion === "v1" ? resultOptionsV1 : resultOptionsV2;
-
-  const managedSrc = getManagedSrc(effectiveVersion, result);
+    effectiveVersion === "1" ? resultOptionsV1 : resultOptionsV2;
 
   const versionLabel =
     versionOptions.find((o) => o.value === version)?.label || version;
@@ -130,17 +133,16 @@ function App() {
   const hasResult = result !== "Auto";
   const hasProps = hasVersion || hasResult;
 
-  let managedCode;
-  if (hasProps) {
-    managedCode = `<SlopImage\n  bucketId="${managedExampleBucketId}" // ${
-      version === "v1" ? managedExamplePromptV1 : managedExamplePromptV2
-    }`;
-    if (hasVersion) managedCode += `\n  version="${versionLabel}"`;
-    if (hasResult) managedCode += `\n  result="${resultLabel}"`;
-    managedCode += `\n/>`;
-  } else {
-    managedCode = `<SlopImage\n  bucketId="${managedExampleBucketId}"  // ${managedExamplePromptV2} />`;
-  }
+  const simpleCode = generateSimpleCode(
+    hasProps,
+    hasVersion,
+    hasResult,
+    version,
+    result,
+    simpleVersionedExampleBucketId,
+    simpleVersionedExamplePromptV1,
+    simpleVersionedExamplePromptV2,
+  );
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
@@ -148,7 +150,9 @@ function App() {
         <div className="flex justify-between items-center border-b pb-4">
           <h1 className="text-4xl font-heading">Slop Machine React SDK Demo</h1>
           <a
-            href={window.location.pathname.replace(/\/$/, "") + "/svelte/"}
+            href={
+              window.location.pathname.replace(/\/react\/?$/, "") + "/svelte/"
+            }
             className="text-sm text-primary"
           >
             Switch to Svelte Demo &rarr;
@@ -156,115 +160,9 @@ function App() {
         </div>
 
         <div className="space-y-2">
-          <h2 className="font-subheading">Basic Example</h2>
+          <h2 className="font-subheading">Simple Example</h2>
           <p className="text-foreground/50">
-            Image with prompt provided at runtime.
-          </p>
-          <ExampleComponent
-            code={`<SlopImage
-  bucketId="${basicExampleBucketId}" // "${basicExamplePrompt}"
-  variables={{
-    location: ${codeLocation}
-    weather: ${codeWeather}
-    style: "${style}",
-    date: new Date().toLocaleDateString()
-  }}
-/>`}
-            output={
-              isLoading ? (
-                <div className="w-full h-full flex items-center justify-center bg-muted aspect-square">
-                  <p className="text-muted-foreground animate-pulse">
-                    Generating parameters...
-                  </p>
-                </div>
-              ) : (
-                <SlopImage
-                  bucketId={basicExampleBucketId}
-                  model="gemini-flash"
-                  variables={{
-                    location: effectiveLocation,
-                    weather: effectiveWeather,
-                    style,
-                    date,
-                  }}
-                  className="w-full h-full object-cover transition-opacity duration-500 aspect-square"
-                />
-              )
-            }
-            controls={
-              <>
-                <div className="space-y-2">
-                  <Label>Bucket</Label>
-                  <p className="bg-background p-2 rounded-sm">
-                    {basicExampleBucketId}
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Location</Label>
-                  <Select value={location} onValueChange={setLocation}>
-                    <SelectTrigger className="w-full ">
-                      <SelectValue placeholder="Select location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Auto" disabled={locationAutoDisabled}>
-                        Auto
-                      </SelectItem>
-                      <SelectItem value="London">London</SelectItem>
-                      <SelectItem value="Tokyo">Tokyo</SelectItem>
-                      <SelectItem value="New York">New York</SelectItem>
-                      <SelectItem value="Mars">Mars</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Weather</Label>
-                  <Select value={weather} onValueChange={setWeather}>
-                    <SelectTrigger className="w-full ">
-                      <SelectValue placeholder="Select weather" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Auto" disabled={weatherAutoDisabled}>
-                        Auto
-                      </SelectItem>
-                      <SelectItem value="Rainy">Rainy</SelectItem>
-                      <SelectItem value="Sunny">Sunny</SelectItem>
-                      <SelectItem value="Snowing">Snowing</SelectItem>
-                      <SelectItem value="Apocalyptic">Apocalyptic</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Style</Label>
-                  <Select value={style} onValueChange={setStyle}>
-                    <SelectTrigger className="w-full ">
-                      <SelectValue placeholder="Select style" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Oil Painting">Oil Painting</SelectItem>
-                      <SelectItem value="Cyberpunk">Cyberpunk</SelectItem>
-                      <SelectItem value="Minimalist Vector">
-                        Minimalist Vector
-                      </SelectItem>
-                      <SelectItem value="Claymation">Claymation</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Date</Label>
-                  <p className="bg-background p-2 rounded-sm">{date}</p>
-                </div>
-              </>
-            }
-          />
-        </div>
-
-        <div className="space-y-2">
-          <h2 className="font-subheading">Managed Example</h2>
-          <p className="text-foreground/50">
-            Image based on a{" "}
+            Grab the latest approved image from a{" "}
             <a
               href="http://slopmachine.dev"
               className="text-primary text-underline font-bold"
@@ -275,17 +173,12 @@ function App() {
             bucket.
           </p>
           <ExampleComponent
-            code={managedCode}
+            code={simpleCode}
             output={
-              // fake it for now
-              <img
-                src={managedSrc}
-                alt={
-                  version === "v1"
-                    ? managedExamplePromptV1
-                    : managedExamplePromptV2
-                }
-                className="w-full h-full object-cover transition-opacity duration-500 aspect-square"
+              <SlopImage
+                bucketId={simpleVersionedExampleBucketId}
+                version={effectiveVersion === "1" ? 1 : 2}
+                resultId={result === "Auto" ? undefined : result}
               />
             }
             controls={
@@ -293,14 +186,16 @@ function App() {
                 <div className="space-y-2">
                   <Label>Bucket</Label>
                   <p className="bg-background p-2 rounded-sm">
-                    fFzg3gpfI03VdjTekcQd
+                    {simpleVersionedExampleBucketId}
                   </p>
                 </div>
                 <div className="space-y-2">
                   <Label>Version</Label>
                   <Select value={version} onValueChange={setVersion}>
-                    <SelectTrigger className="w-full ">
-                      <SelectValue placeholder="Select version" />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={versionLabel}>
+                        {versionLabel}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={versionOptions[0].value}>
@@ -318,17 +213,19 @@ function App() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Result</Label>
+                  <Label>Image</Label>
                   <Select value={result} onValueChange={setResult}>
-                    <SelectTrigger className="w-full ">
-                      <SelectValue placeholder="Select result" />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={resultLabel}>
+                        {resultLabel}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={currentResultOptions[0].value}>
                         {currentResultOptions[0].label}
                       </SelectItem>
                       <SelectGroup>
-                        <SelectLabel>Specific Result</SelectLabel>
+                        <SelectLabel>Specific Image ID</SelectLabel>
                         {currentResultOptions.slice(1).map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
@@ -344,9 +241,9 @@ function App() {
         </div>
 
         <div className="space-y-2">
-          <h2 className="font-subheading">Managed with Controls Example</h2>
+          <h2 className="font-subheading">Controlled Example</h2>
           <p className="text-foreground/50">
-            Image based on a{" "}
+            Generate an image based on a{" "}
             <a
               href="http://slopmachine.dev"
               className="text-primary text-underline font-bold"
@@ -354,7 +251,7 @@ function App() {
             >
               Slop Machine
             </a>{" "}
-            bucket, with variables provided at runtime.
+            bucket, with specific changes allowed at runtime.
           </p>
           <ExampleComponent
             code={`<SlopImage
@@ -367,13 +264,13 @@ function App() {
 />`}
             output={
               <SlopImage
-                bucketId={basicExampleBucketId}
-                model="gemini-flash"
+                bucketId={managedExampleBucketId}
                 variables={{
                   textcolor: textColor,
                   bgcolor: bgColor,
                   slopcolor: slopColor,
                 }}
+                model="gemini-pro"
                 className="w-full h-full object-cover transition-opacity duration-500 aspect-square"
               />
             }
@@ -390,14 +287,16 @@ function App() {
                   <Label>Text Color</Label>
                   <Select value={textColor} onValueChange={setTextColor}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select text color" />
+                      <SelectValue placeholder="Select text color">
+                        {textColor.charAt(0).toUpperCase() + textColor.slice(1)}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="black">Black</SelectItem>
-                      <SelectItem value="white">White</SelectItem>
-                      <SelectItem value="gray">Gray</SelectItem>
-                      <SelectItem value="red">Red</SelectItem>
-                      <SelectItem value="blue">Blue</SelectItem>
+                      {DROPDOWN_OPTIONS.textColors.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -406,14 +305,16 @@ function App() {
                   <Label>Background Color</Label>
                   <Select value={bgColor} onValueChange={setBgColor}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select background color" />
+                      <SelectValue placeholder="Select background color">
+                        {bgColor.charAt(0).toUpperCase() + bgColor.slice(1)}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="white">White</SelectItem>
-                      <SelectItem value="black">Black</SelectItem>
-                      <SelectItem value="gray">Gray</SelectItem>
-                      <SelectItem value="red">Red</SelectItem>
-                      <SelectItem value="blue">Blue</SelectItem>
+                      {DROPDOWN_OPTIONS.bgColors.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -422,14 +323,112 @@ function App() {
                   <Label>Slop Color</Label>
                   <Select value={slopColor} onValueChange={setSlopColor}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select slop color" />
+                      <SelectValue placeholder="Select slop color">
+                        {slopColor.charAt(0).toUpperCase() + slopColor.slice(1)}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pink">Pink</SelectItem>
-                      <SelectItem value="green">Green</SelectItem>
-                      <SelectItem value="blue">Blue</SelectItem>
-                      <SelectItem value="yellow">Yellow</SelectItem>
-                      <SelectItem value="purple">Purple</SelectItem>
+                      {DROPDOWN_OPTIONS.slopColors.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            }
+          />
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="font-subheading">Procedural Example</h2>
+          <p className="text-foreground/50">
+            Generate an image based on a{" "}
+            <a
+              href="http://slopmachine.dev"
+              className="text-primary text-underline font-bold"
+              target="_blank"
+            >
+              Slop Machine
+            </a>{" "}
+            bucket, based on the current date and personalized to the user's
+            location and weather.
+          </p>
+          <ExampleComponent
+            code={`<SlopImage
+  bucketId="${proceduralExampleBucketId}" // "${proceduralExamplePrompt}"
+  variables={{
+    location: ${codeLocation},
+    weather: ${codeWeather}
+  }}
+/>`}
+            output={
+              isLoading ? (
+                <div className="w-full h-full flex items-center justify-center bg-muted aspect-square">
+                  <p className="text-muted-foreground animate-pulse">
+                    Generating parameters...
+                  </p>
+                </div>
+              ) : (
+                <SlopImage
+                  bucketId={proceduralExampleBucketId}
+                  model="gemini-flash"
+                  variables={{
+                    location: effectiveLocation,
+                    weather: effectiveWeather,
+                  }}
+                  className="w-full h-full object-cover transition-opacity duration-500 aspect-square"
+                />
+              )
+            }
+            controls={
+              <>
+                <div className="space-y-2">
+                  <Label>Bucket</Label>
+                  <p className="bg-background p-2 rounded-sm">
+                    {proceduralExampleBucketId}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Location</Label>
+                  <Select value={location} onValueChange={setLocation}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select location">
+                        {location}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Auto" disabled={locationAutoDisabled}>
+                        Auto
+                      </SelectItem>
+                      {DROPDOWN_OPTIONS.locations.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Weather</Label>
+                  <Select value={weather} onValueChange={setWeather}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select weather">
+                        {weather}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Auto" disabled={weatherAutoDisabled}>
+                        Auto
+                      </SelectItem>
+                      {DROPDOWN_OPTIONS.weather.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
