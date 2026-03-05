@@ -21,14 +21,16 @@
     generateSimpleCode,
     proceduralExampleBucketId,
     proceduralExamplePrompt,
+    generateCodeTheme,
+    titleCase,
   } from "@slopmachine/demo-shared";
 
-  import { ModeWatcher } from "mode-watcher";
+  import { mode, ModeWatcher } from "mode-watcher";
+
+  let theme = $state<"Auto" | "Light" | "Dark">("Auto");
 
   let location = $state(DEFAULT_STATE.location);
   let weather = $state(DEFAULT_STATE.weather);
-  let style = $state(DEFAULT_STATE.style);
-  let date = $state(new Date().toLocaleDateString());
 
   let result = $state(DEFAULT_STATE.result);
   let version = $state(DEFAULT_STATE.version);
@@ -99,12 +101,17 @@
     weather === "Auto" ? detectedWeather : weather,
   );
 
+  let effectiveTheme = $derived(
+    theme === "Auto" ? titleCase(mode.current ?? "Light") : theme,
+  );
+
   let codeLocation = $derived(
     generateCodeLocation(location, detectedLocation, effectiveLocation),
   );
   let codeWeather = $derived(
     generateCodeWeather(weather, detectedWeather, effectiveWeather),
   );
+  let codeTheme = $derived(generateCodeTheme(theme, mode.current ?? "light"));
 
   let isLocationLoading = $derived(
     location === "Auto" &&
@@ -335,8 +342,9 @@
       code={`<SlopImage
   bucketId="${proceduralExampleBucketId}" // "${proceduralExamplePrompt}"
   variables={{
-    location: ${codeLocation},
+    location: ${codeLocation}
     weather: ${codeWeather}
+    theme: ${codeTheme}
   }}
 />`}
     >
@@ -356,6 +364,7 @@
             variables={{
               location: effectiveLocation,
               weather: effectiveWeather,
+              theme: effectiveTheme,
             }}
             class="w-full h-full object-cover transition-opacity duration-500 aspect-square"
           />
@@ -400,6 +409,20 @@
               {#each DROPDOWN_OPTIONS.weather as opt}
                 <Select.Item value={opt.value}>{opt.label}</Select.Item>
               {/each}
+            </Select.Content>
+          </Select.Root>
+        </div>
+
+        <div class="space-y-2">
+          <Label>Theme</Label>
+          <Select.Root type="single" bind:value={theme}>
+            <Select.Trigger class="w-full">
+              {theme}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="Auto">Auto</Select.Item>
+              <Select.Item value="Light">Light</Select.Item>
+              <Select.Item value="Dark">Dark</Select.Item>
             </Select.Content>
           </Select.Root>
         </div>

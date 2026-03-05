@@ -30,6 +30,18 @@ export const generateCodeWeather = (
     : `"${effectiveWeather}",`;
 };
 
+export const generateCodeTheme = (
+  theme: "Auto" | "Dark" | "Light",
+  detectedTheme: string,
+) => {
+  return theme === "Auto"
+    ? `getTheme(), // ${titleCase(detectedTheme)}`
+    : `"${theme}",`;
+};
+
+export const titleCase = (str: string) =>
+  str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
 export const generateSimpleCode = (
   hasProps: boolean,
   hasVersion: boolean,

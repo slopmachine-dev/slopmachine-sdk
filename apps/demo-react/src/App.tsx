@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ThemeProvider } from "./components/theme-provider";
+import { ThemeProvider, useTheme } from "./components/theme-provider";
 import { ExampleComponent } from "./components/example-component";
 import {
   fetchLocation,
@@ -30,9 +30,20 @@ import {
   generateCodeLocation,
   generateCodeWeather,
   generateSimpleCode,
+  generateCodeTheme,
+  titleCase,
 } from "@slopmachine/demo-shared";
 
 function App() {
+  const { theme: siteTheme } = useTheme();
+  const resolvedTheme =
+    siteTheme === "system"
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"
+      : siteTheme;
+
+  const [theme, setTheme] = useState<"Auto" | "Light" | "Dark">("Auto");
   const [location, setLocation] = useState(DEFAULT_STATE.location);
   const [weather, setWeather] = useState(DEFAULT_STATE.weather);
 
@@ -98,6 +109,8 @@ function App() {
 
   const effectiveWeather = weather === "Auto" ? detectedWeather : weather;
 
+  const effectiveTheme = theme === "Auto" ? titleCase(resolvedTheme) : theme;
+
   const codeLocation = generateCodeLocation(
     location,
     detectedLocation,
@@ -108,6 +121,7 @@ function App() {
     detectedWeather,
     effectiveWeather,
   );
+  const codeTheme = generateCodeTheme(theme, resolvedTheme);
 
   const isLocationLoading =
     location === "Auto" &&
@@ -359,8 +373,9 @@ function App() {
             code={`<SlopImage
   bucketId="${proceduralExampleBucketId}" // "${proceduralExamplePrompt}"
   variables={{
-    location: ${codeLocation},
+    location: ${codeLocation}
     weather: ${codeWeather}
+    theme: ${codeTheme}
   }}
 />`}
             output={
@@ -377,6 +392,7 @@ function App() {
                   variables={{
                     location: effectiveLocation,
                     weather: effectiveWeather,
+                    theme: effectiveTheme,
                   }}
                   className="w-full h-full object-cover transition-opacity duration-500 aspect-square"
                 />
@@ -429,6 +445,23 @@ function App() {
                           {opt.label}
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Theme</Label>
+                  <Select
+                    value={theme}
+                    onValueChange={(val: any) => setTheme(val)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Theme">{theme}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Auto">Auto</SelectItem>
+                      <SelectItem value="Light">Light</SelectItem>
+                      <SelectItem value="Dark">Dark</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
