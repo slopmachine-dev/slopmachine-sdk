@@ -1,6 +1,7 @@
 export interface SlopImageOptions {
   bucketId: string;
-  prompt?: string;
+  version?: number;
+  resultId?: string;
   aspectRatio?: string;
   model?: "gemini" | "gemini-flash" | "gemini-pro" | "imagen";
   variables?: Record<string, string | number | undefined | null>;
@@ -27,23 +28,29 @@ export function interpolatePrompt(
 export function buildImageUrl(options: SlopImageOptions): string {
   const {
     bucketId,
-    prompt,
+    version,
+    resultId,
     aspectRatio = "1:1",
     model,
     variables = {},
     baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage",
   } = options;
 
-  const finalPrompt = interpolatePrompt(prompt, variables);
+  const params = new URLSearchParams();
+  params.set("bucketId", bucketId);
 
-  const params = new URLSearchParams({
-    bucketId,
-    aspectRatio: String(aspectRatio),
-    ...(model && { model }),
-  });
+  if (aspectRatio) {
+    params.set("aspectRatio", aspectRatio);
+  }
 
-  if (finalPrompt) {
-    params.set("prompt", finalPrompt);
+  if (model) {
+    params.set("model", model);
+  }
+  if (version) {
+    params.set("version", String(version));
+  }
+  if (resultId) {
+    params.set("resultId", resultId);
   }
 
   if (Object.keys(variables).length > 0) {

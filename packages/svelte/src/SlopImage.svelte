@@ -1,9 +1,5 @@
 <script lang="ts">
-  import {
-    buildImageUrl,
-    interpolatePrompt,
-    type SlopImageOptions,
-  } from "@slopmachine/core";
+  import { buildImageUrl, type SlopImageOptions } from "@slopmachine/core";
 
   interface Props extends SlopImageOptions {
     class?: string;
@@ -11,8 +7,9 @@
 
   let {
     bucketId,
-    prompt,
     aspectRatio = "1:1",
+    version,
+    resultId,
     model,
     variables = {},
     baseUrl = undefined,
@@ -23,16 +20,25 @@
   let isLoading = $state(true);
 
   let computedSrc = $derived(
-    buildImageUrl({ bucketId, prompt, aspectRatio, variables, baseUrl, model }),
+    buildImageUrl({
+      bucketId,
+      aspectRatio,
+      version,
+      resultId,
+      variables,
+      baseUrl,
+      model,
+    }),
   );
   let src = $state("");
   let prevSrc = $state("");
-  let alt = $derived(interpolatePrompt(prompt, variables) ?? "Generated image");
+  let alt = "Generated image";
 
   $effect(() => {
+    const currentComputedSrc = computedSrc;
     const timeout = setTimeout(() => {
-      if (src !== computedSrc) {
-        src = computedSrc;
+      if (src !== currentComputedSrc) {
+        src = currentComputedSrc;
       }
     }, 50);
 

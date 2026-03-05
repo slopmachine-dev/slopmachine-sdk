@@ -2,11 +2,7 @@ import React, { useMemo, useState } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-import {
-  buildImageUrl,
-  interpolatePrompt,
-  type SlopImageOptions,
-} from "@slopmachine/core";
+import { buildImageUrl, type SlopImageOptions } from "@slopmachine/core";
 
 // Utility for Tailwind classes
 function cn(...inputs: ClassValue[]) {
@@ -20,9 +16,10 @@ interface SlopImageProps
 
 export const SlopImage: React.FC<SlopImageProps> = ({
   bucketId,
-  prompt,
   className,
   aspectRatio = "1:1",
+  version,
+  resultId,
   model,
   variables = {},
   baseUrl,
@@ -33,13 +30,14 @@ export const SlopImage: React.FC<SlopImageProps> = ({
     () =>
       buildImageUrl({
         bucketId,
-        prompt,
         aspectRatio,
+        version,
+        resultId,
         variables,
         baseUrl,
         model,
       }),
-    [bucketId, prompt, aspectRatio, variables, baseUrl, model],
+    [bucketId, aspectRatio, version, resultId, variables, baseUrl, model],
   );
 
   const [src, setSrc] = useState(rawSrc);
@@ -51,10 +49,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
     return () => clearTimeout(timer);
   }, [rawSrc]);
 
-  const alt = useMemo(
-    () => interpolatePrompt(prompt, variables) ?? "Generated image",
-    [prompt, variables],
-  );
+  const alt = "Generated image";
 
   const [isLoading, setIsLoading] = useState(true);
   const [currentSrc, setCurrentSrc] = useState(src);
