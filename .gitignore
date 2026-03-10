@@ -15,3 +15,7 @@ package
 # TS build info
 *.tsbuildinfo
 
+# VitePress output and cache
+.vitepress/dist
+.vitepress/cache
+
