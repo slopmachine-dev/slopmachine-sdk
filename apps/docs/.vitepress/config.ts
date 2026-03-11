@@ -3,6 +3,7 @@ import { defineConfig } from "vitepress";
 export default defineConfig({
   title: "Slop Machine SDK",
   description: "Documentation for @slopmachine/react and @slopmachine/svelte",
+  base: "/slopmachine-sdk/",
   outDir: ".vitepress/dist",
   themeConfig: {
     nav: [
