@@ -11,8 +11,10 @@
     "dev": "npm run dev --workspaces --if-present",
     "dev:react": "npm run dev --workspace=apps/demo-react",
     "dev:svelte": "npm run dev --workspace=apps/demo-svelte",
+    "docs:dev": "npm run dev --workspace=apps/docs",
     "build:react": "npm run build --workspace=apps/demo-react",
-    "build:svelte": "npm run build --workspace=apps/demo-svelte"
+    "build:svelte": "npm run build --workspace=apps/demo-svelte",
+    "docs:build": "npm run build --workspace=apps/docs"
   },
   "devDependencies": {
     "prettier": "^3.8.1",

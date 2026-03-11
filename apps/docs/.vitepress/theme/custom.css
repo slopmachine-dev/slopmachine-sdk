@@ -1,0 +1,175 @@
+:root {
+  /* Core neubrutalist properties */
+  --shadow-offset: 6px;
+  --shadow-color: oklch(0 0 0); /* Pure black for shadows */
+  --border-width: 3px;
+  --border-color: oklch(0 0 0);
+
+  /* VitePress Brands mapped to neubrutalism scheme */
+  --vp-c-brand-1: oklch(0.712 0.194 13.428); /* primary rose-400 */
+  --vp-c-brand-2: oklch(0.75 0.18 305); /* secondary purple */
+  --vp-c-brand-3: oklch(0.85 0.12 210); /* accent blue */
+  --vp-c-brand-soft: oklch(0.88 0.08 15); /* muted pink */
+
+  /* Borders */
+  --vp-c-border: var(--border-color);
+  --vp-c-divider: var(--border-color);
+  --vp-c-gutter: var(--border-color);
+
+  /* Light mode backgrounds */
+  --vp-c-bg: oklch(0.98 0.05 85); /* background */
+  --vp-c-bg-alt: oklch(0.95 0.15 95); /* popover / alt */
+  --vp-c-bg-elv: oklch(0.98 0.05 85); /* card */
+  --vp-c-bg-soft: oklch(0.95 0.15 95); /* muted */
+
+  /* Light mode text */
+  --vp-c-text-1: oklch(0.15 0 0);
+  --vp-c-text-2: oklch(0.25 0 0);
+  --vp-c-text-3: oklch(0.35 0 0);
+
+  /* Buttons */
+  --vp-button-brand-border: var(--border-color);
+  --vp-button-brand-hover-border: var(--border-color);
+  --vp-button-brand-active-border: var(--border-color);
+
+  --vp-button-alt-border: var(--border-color);
+  --vp-button-alt-hover-border: var(--border-color);
+  --vp-button-alt-active-border: var(--border-color);
+}
+
+.dark {
+  /* Dark mode backgrounds */
+  --vp-c-bg: oklch(0.22 0.04 280);
+  --vp-c-bg-alt: oklch(0.4 0.15 95);
+  --vp-c-bg-elv: oklch(0.3 0.08 290);
+  --vp-c-bg-soft: oklch(0.35 0.08 15);
+
+  /* Dark mode text */
+  --vp-c-text-1: oklch(0.98 0 0);
+  --vp-c-text-2: oklch(0.88 0 0);
+  --vp-c-text-3: oklch(0.78 0 0);
+
+  /* Ensure borders remain black in dark mode */
+  --vp-c-border: var(--border-color);
+  --vp-c-divider: var(--border-color);
+  --vp-c-gutter: var(--border-color);
+}
+
+/* Global Typography tweaks */
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3,
+.vp-doc h4,
+.vp-doc h5,
+.vp-doc h6 {
+  font-weight: 900 !important;
+  letter-spacing: -0.025em;
+}
+
+/* Neubrutalist global components override */
+
+/* Buttons */
+.VPButton,
+.vp-doc a.button {
+  border: var(--border-width) solid var(--border-color) !important;
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color) !important;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s !important;
+  border-radius: 0.5rem !important;
+  font-weight: bold !important;
+  color: var(--vp-c-text-1) !important;
+}
+
+.VPButton.brand {
+  background-color: var(--vp-c-brand-1) !important;
+}
+
+.VPButton.alt {
+  background-color: var(--vp-c-bg-alt) !important;
+}
+
+.VPButton:hover,
+.vp-doc a.button:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 4px 4px 0 var(--shadow-color) !important;
+}
+
+.VPButton:active,
+.vp-doc a.button:active {
+  transform: translate(var(--shadow-offset), var(--shadow-offset)) !important;
+  box-shadow: 0 0 0 var(--shadow-color) !important;
+}
+
+/* Home Features / Cards */
+.VPFeature,
+.VPCard {
+  border: var(--border-width) solid var(--border-color) !important;
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color) !important;
+  border-radius: 0.5rem !important;
+  background-color: var(--vp-c-bg-elv) !important;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s !important;
+}
+
+.VPFeature:hover,
+.VPCard:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 4px 4px 0 var(--shadow-color) !important;
+}
+
+/* Code Blocks */
+div[class*="language-"] {
+  border: var(--border-width) solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 4px 4px 0 var(--shadow-color) !important;
+  margin-bottom: 1.5rem;
+}
+
+/* Search Box */
+.DocSearch-Button {
+  border: 2px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 4px 4px 0 var(--shadow-color) !important;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s !important;
+}
+
+.DocSearch-Button:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 3px 3px 0 var(--shadow-color) !important;
+}
+
+/* Images / Assets */
+.vp-doc img {
+  border: var(--border-width) solid var(--border-color) !important;
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color) !important;
+  border-radius: 0.5rem !important;
+}
+
+/* Sidebar and Header separators */
+.VPNavBar {
+  border-bottom: var(--border-width) solid var(--border-color) !important;
+}
+
+.VPSidebar {
+  border-right: var(--border-width) solid var(--border-color) !important;
+}
+
+.VPLocalNav {
+  border-bottom: var(--border-width) solid var(--border-color) !important;
+}
+
+.VPDocFooter {
+  border-top: var(--border-width) solid var(--border-color) !important;
+}
+
+/* Badge */
+.VPBadge {
+  border: 2px solid var(--border-color) !important;
+  box-shadow: 2px 2px 0 var(--shadow-color) !important;
+  border-radius: 0.25rem !important;
+  font-weight: bold;
+}
