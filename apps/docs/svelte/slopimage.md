@@ -4,7 +4,7 @@ The `@slopmachine/svelte` package provides a top-tier Developer Experience (DX) 
 
 The Svelte component handles fetching logic, caching, and state transitions, and takes advantage of Svelte 5 snippets for the custom `loader` template. It maintains the layout through its `aspectRatio` property to prevent annoying Content Layout Shifts (CLS), and cleanly fades in the final image once it's completely ready.
 
-Try the [Live Interactive Svelte Demo](https://slopmachine-dev.github.io/slopmachine-sdk/demo-svelte/) to see the component in action!
+Try the [Live Interactive Svelte Demo](https://slopmachine.github.io/slopmachine-sdk/demo-svelte/) to see the component in action!
 
 ## Installation
 
