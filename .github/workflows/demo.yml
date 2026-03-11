@@ -46,6 +46,11 @@ jobs:
           cp -a apps/demo-react/dist/. dist-demo/react/
           cp -a apps/demo-svelte/dist/. dist-demo/svelte/
           touch dist-demo/.nojekyll
+          echo "=== DEBUG OUTPUT START ==="
+          ls -la dist-demo
+          ls -la dist-demo/react
+          ls -la dist-demo/svelte
+          echo "=== DEBUG OUTPUT END ==="
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
