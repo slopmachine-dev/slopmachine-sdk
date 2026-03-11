@@ -45,6 +45,7 @@ jobs:
           mkdir -p dist-demo/react dist-demo/svelte
           cp -a apps/demo-react/dist/. dist-demo/react/
           cp -a apps/demo-svelte/dist/. dist-demo/svelte/
+          touch dist-demo/.nojekyll
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
