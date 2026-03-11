@@ -45,12 +45,13 @@ jobs:
           mkdir -p dist-demo/react dist-demo/svelte
           cp -a apps/demo-react/dist/. dist-demo/react/
           cp -a apps/demo-svelte/dist/. dist-demo/svelte/
-          touch dist-demo/.nojekyll
-          echo "=== DEBUG OUTPUT START ==="
-          ls -la dist-demo
-          ls -la dist-demo/react
-          ls -la dist-demo/svelte
-          echo "=== DEBUG OUTPUT END ==="
+
+      - name: Debug - check index.html
+        run: |
+          echo "=== REACT INDEX ==="
+          cat dist-demo/react/index.html
+          echo "=== SVELTE INDEX ==="
+          cat dist-demo/svelte/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
