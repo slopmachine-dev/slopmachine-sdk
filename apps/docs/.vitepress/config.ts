@@ -1,13 +1,14 @@
 import { defineConfig } from "vitepress";
 
 export default defineConfig({
-  title: "Slop Machine SDK",
-  description: "Documentation for @slopmachine/react and @slopmachine/svelte",
+  title: "Slop Machine for Developers",
+  description: "Documentation for Slop Machine Developer Tools",
   base: "/slopmachine-sdk/",
   outDir: ".vitepress/dist",
   themeConfig: {
     nav: [
-      { text: "Home", link: "/" },
+      { text: "Slop Machine", link: "https://slopmachine.dev" },
+      { text: "For Developers", link: "/" },
       { text: "Getting Started", link: "/getting-started" },
     ],
     sidebar: [
