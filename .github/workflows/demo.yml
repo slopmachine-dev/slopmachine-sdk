@@ -37,10 +37,12 @@ jobs:
       - name: Build Demo
         run: |
           npm run build:packages
+          npm run docs:build
           npm run build:react
           npm run build:svelte
-          mkdir -p dist-demo/svelte
-          cp -r apps/demo-react/dist/* dist-demo/
+          mkdir -p dist-demo/react dist-demo/svelte
+          cp -r apps/docs/.vitepress/dist/* dist-demo/
+          cp -r apps/demo-react/dist/* dist-demo/react/
           cp -r apps/demo-svelte/dist/* dist-demo/svelte/
 
       - name: Setup Pages
