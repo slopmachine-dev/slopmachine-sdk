@@ -11,10 +11,10 @@ hero:
       link: /getting-started
     - theme: alt
       text: React Demo
-      link: https://slopmachine.github.io/slopmachine-sdk/demo-react/
+      link: https://slopmachine-dev.github.io/slopmachine-sdk/demo-react/
     - theme: alt
       text: Svelte Demo
-      link: https://slopmachine.github.io/slopmachine-sdk/demo-svelte/
+      link: https://slopmachine-dev.github.io/slopmachine-sdk/demo-svelte/
 
 features:
   - title: React Support

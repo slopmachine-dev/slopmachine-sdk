@@ -4,7 +4,7 @@ The `@slopmachine/react` package provides a top-tier Developer Experience (DX) f
 
 By default, the component handles loading states with a nice built-in shimmer effect and loading spinner. It ensures the layout respects the `aspectRatio` without layout shifts (CLS), and cleanly fades in the final image once it is ready.
 
-Try the [Live Interactive React Demo](https://slopmachine.github.io/slopmachine-sdk/demo-react/) to see the component in action!
+Try the [Live Interactive React Demo](https://slopmachine-dev.github.io/slopmachine-sdk/demo-react/) to see the component in action!
 
 ## Installation
 
