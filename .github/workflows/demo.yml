@@ -40,18 +40,11 @@ jobs:
           npm run docs:build
           npm run build:react
           npm run build:svelte
-          mkdir -p dist-demo
-          cp -r apps/docs/.vitepress/dist/* dist-demo/
-          mkdir -p dist-demo/react dist-demo/svelte
-          cp -a apps/demo-react/dist/. dist-demo/react/
-          cp -a apps/demo-svelte/dist/. dist-demo/svelte/
-
-      - name: Debug - check index.html
-        run: |
-          echo "=== REACT INDEX ==="
-          cat dist-demo/react/index.html
-          echo "=== SVELTE INDEX ==="
-          cat dist-demo/svelte/index.html
+          mkdir -p dist-demo/docs dist-demo/demo-react dist-demo/demo-svelte
+          cp -a apps/docs/.vitepress/dist/. dist-demo/docs/
+          cp -a apps/demo-react/dist/. dist-demo/demo-react/
+          cp -a apps/demo-svelte/dist/. dist-demo/demo-svelte/
+          echo '<meta http-equiv="refresh" content="0; url=./docs/" />' > dist-demo/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

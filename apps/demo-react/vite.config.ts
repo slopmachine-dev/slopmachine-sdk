@@ -5,7 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   root: ".",
-  base: "/slopmachine-sdk/react/",
+  base: "/slopmachine-sdk/demo-react/",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

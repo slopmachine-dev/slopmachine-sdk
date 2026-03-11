@@ -4,7 +4,7 @@ export default defineConfig({
   title: "Slop Machine SDK",
   description: "Documentation for @slopmachine/react and @slopmachine/svelte",
   outDir: ".vitepress/dist",
-  base: "/slopmachine-sdk/",
+  base: "/slopmachine-sdk/docs/",
   themeConfig: {
     nav: [
       { text: "Home", link: "/" },

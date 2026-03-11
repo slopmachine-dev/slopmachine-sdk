@@ -5,7 +5,7 @@ import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/slopmachine-sdk/svelte/",
+  base: "/slopmachine-sdk/demo-svelte/",
   plugins: [tailwindcss(), svelte()],
   resolve: {
     alias: {
