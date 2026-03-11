@@ -161,7 +161,10 @@
   <div class="flex justify-between items-center border-b pb-4">
     <h1 class="text-4xl font-heading">Slop Machine Svelte SDK Demo</h1>
     <a
-      href={window.location.pathname.replace(/\/svelte\/?$/, "") + "/"}
+      href={window.location.pathname.replace(
+        /\/demo-svelte\/?$/,
+        "/demo-react/",
+      )}
       class="text-sm text-primary"
     >
       Switch to React Demo &rarr;
