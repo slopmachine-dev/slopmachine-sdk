@@ -43,8 +43,8 @@ jobs:
           mkdir -p dist-demo
           cp -r apps/docs/.vitepress/dist/* dist-demo/
           mkdir -p dist-demo/react dist-demo/svelte
-          cp -r apps/demo-react/dist/* dist-demo/react/
-          cp -r apps/demo-svelte/dist/* dist-demo/svelte/
+          cp -a apps/demo-react/dist/. dist-demo/react/
+          cp -a apps/demo-svelte/dist/. dist-demo/svelte/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
