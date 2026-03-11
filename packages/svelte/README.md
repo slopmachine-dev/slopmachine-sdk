@@ -14,13 +14,13 @@ pnpm add @slopmachine/svelte
 
 ## Demo
 
-https://slopmachine-dev.github.io/slopmachine-sdk/svelte/
+https://slopmachine-dev.github.io/slopmachine-sdk/demo-svelte/
 
 ## Usage
 
 ```svelte
 <script lang="ts">
-  import { SlopImage } from '@slopmachine/svelte';
+  import { SlopImage } from "@slopmachine/svelte";
 </script>
 
 <div style="width: 400px; height: 400px;">
