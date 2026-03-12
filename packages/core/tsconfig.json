@@ -5,6 +5,7 @@
     "moduleResolution": "bundler",
     "strict": true,
     "declaration": true,
+    "declarationMap": true,
     "skipLibCheck": true
   },
   "include": ["src"]

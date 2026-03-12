@@ -1,6 +1,6 @@
 # Svelte `<SlopImage />`
 
-The `@slopmachine/svelte` package provides a top-tier Developer Experience (DX) for seamlessly rendering SlopMachine generated images in your Svelte applications.
+The `@slopmachine/svelte` package provides a top-tier Developer Experience (DX) for seamlessly rendering Slop Machine generated images in your Svelte applications.
 
 The Svelte component handles fetching logic, caching, and state transitions, and takes advantage of Svelte 5 snippets for the custom `loader` template. It maintains the layout through its `aspectRatio` property to prevent annoying Content Layout Shifts (CLS), and cleanly fades in the final image once it's completely ready.
 
@@ -87,7 +87,7 @@ A dictionary of prompt variables interpolated dynamically. Example: `{ character
 ### `baseUrl`
 
 **Type:** `string` (Optional)
-Override the default SlopMachine API URL if you are using a self-hosted or proxy backend.
+Override the default Slop Machine API URL if you are using a self-hosted or proxy backend.
 
 ### `class`
 

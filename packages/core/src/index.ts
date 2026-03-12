@@ -1,10 +1,37 @@
 export interface SlopImageOptions {
+  /**
+   * The unique identifier of your Slop Machine bucket.
+   */
   bucketId: string;
+  /**
+   * The specific version of the prompt/settings to use.
+   * If omitted, the latest version will be used.
+   */
   version?: number;
+  /**
+   * Result ID to retrieve a specific previously generated image
+   * instead of generating a new one.
+   */
   resultId?: string;
+  /**
+   * The aspect ratio of the generated image. Defaults to "1:1".
+   * Common values: "1:1", "16:9", "9:16", "4:3", "3:4".
+   */
   aspectRatio?: string;
+  /**
+   * The AI model to use for generation.
+   * Overrides the default model specified in the bucket settings.
+   */
   model?: "gemini" | "gemini-flash" | "gemini-pro" | "imagen";
+  /**
+   * Dynamic variables to interpolate into the prompt.
+   * E.g., if prompt is "A photo of a {color} dog", pass { color: "brown" }.
+   */
   variables?: Record<string, string | number | undefined | null>;
+  /**
+   * The base URL for the Slop Machine API.
+   * Defaults to the production URL. Useful for testing against local deployments.
+   */
   baseUrl?: string;
 }
 

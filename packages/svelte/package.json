@@ -1,7 +1,7 @@
 {
   "name": "@slopmachine/svelte",
-  "version": "0.1.10",
-  "description": "Svelte wrapper for SlopMachine",
+  "version": "0.1.11",
+  "description": "The official Svelte SDK for Slop Machine",
   "type": "module",
   "main": "src/index.ts",
   "svelte": "src/index.ts",

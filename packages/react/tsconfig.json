@@ -21,6 +21,7 @@
     "noFallthroughCasesInSwitch": true,
 
     "declaration": true,
+    "declarationMap": true,
     "baseUrl": "."
   },
   "include": ["src"],

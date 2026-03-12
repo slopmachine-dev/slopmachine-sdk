@@ -1,6 +1,6 @@
 # React `<SlopImage />`
 
-The `@slopmachine/react` package provides a top-tier Developer Experience (DX) for seamlessly rendering SlopMachine generated images in your React applications.
+The `@slopmachine/react` package provides a top-tier Developer Experience (DX) for seamlessly rendering Slop Machine generated images in your React applications.
 
 By default, the component handles loading states with a nice built-in shimmer effect and loading spinner. It ensures the layout respects the `aspectRatio` without layout shifts (CLS), and cleanly fades in the final image once it is ready.
 
@@ -90,7 +90,7 @@ A dictionary of prompt variables interpolated dynamically. Example: `{ character
 ### `baseUrl`
 
 **Type:** `string` (Optional)
-Override the default SlopMachine API URL if you are using a self-hosted or proxy backend.
+Override the default Slop Machine API URL if you are using a self-hosted or proxy backend.
 
 ### `loader`
 

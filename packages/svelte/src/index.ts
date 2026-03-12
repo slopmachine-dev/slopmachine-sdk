@@ -1,1 +1,1 @@
-export { default as SlopImage } from "./SlopImage.svelte";
+export { default as SlopImage, type SlopImageProps } from "./SlopImage.svelte";

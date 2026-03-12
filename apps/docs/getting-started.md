@@ -1,8 +1,8 @@
 # Getting Started
 
-Welcome to the **SlopMachine SDK** documentation!
+Welcome to the **Slop Machine SDK** documentation!
 
-SlopMachine is a powerful tool to seamlessly integrate AI-generated images into your React and Svelte applications. It handles all the heavy lifting of calling the SlopMachine API, displaying loading states, rendering shimmer effects, and gracefully showing the resulting images.
+Slop Machine is a powerful tool to seamlessly integrate AI-generated images into your React and Svelte applications. It handles all the heavy lifting of calling the Slop Machine API, displaying loading states, rendering shimmer effects, and gracefully showing the resulting images.
 
 The core package `@slopmachine/core` contains the shared logic, while framework-specific packages like `@slopmachine/react` and `@slopmachine/svelte` provide idiomatic components for a superior Developer Experience (DX).
 

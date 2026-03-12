@@ -1,6 +1,6 @@
 # Render Image API
 
-The Render Image API is the primary endpoint for generating and retrieving images from SlopMachine. It is designed to be used directly in your application's `<img>` tags, CSS backgrounds, or anywhere else you'd normally use an image URL.
+The Render Image API is the primary endpoint for generating and retrieving images from Slop Machine. It is designed to be used directly in your application's `<img>` tags, CSS backgrounds, or anywhere else you'd normally use an image URL.
 
 Behind the scenes, the API handles template resolution, heavy caching, concurrency protection, and on-demand image generation, ensuring your application remains fast and cost-effective.
 

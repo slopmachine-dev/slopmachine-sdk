@@ -1,1 +1,1 @@
-export { SlopImage } from './components/SlopImage';
+export { SlopImage, type SlopImageProps } from "./components/SlopImage";
