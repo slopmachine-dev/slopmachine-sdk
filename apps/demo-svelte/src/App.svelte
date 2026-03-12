@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SlopImage } from "@slopmachine/svelte";
+  import { SlopImage, SlopVideo } from "@slopmachine/svelte";
   import * as Select from "$lib/components/ui/select";
   import { Label } from "$lib/components/ui/label";
   import ExampleComponent from "./lib/components/ExampleComponent.svelte";
@@ -21,6 +21,8 @@
     generateSimpleCode,
     proceduralExampleBucketId,
     proceduralExamplePrompt,
+    videoExampleBucketId,
+    videoExamplePrompt,
     generateCodeTheme,
     titleCase,
   } from "@slopmachine/demo-shared";
@@ -28,6 +30,7 @@
   import { mode, ModeWatcher } from "mode-watcher";
 
   let theme = $state<"Auto" | "Light" | "Dark">("Auto");
+  let videoTheme = $state<"Auto" | "Light" | "Dark">("Auto");
 
   let location = $state(DEFAULT_STATE.location);
   let weather = $state(DEFAULT_STATE.weather);
@@ -105,6 +108,10 @@
     theme === "Auto" ? titleCase(mode.current ?? "Light") : theme,
   );
 
+  let effectiveVideoTheme = $derived(
+    videoTheme === "Auto" ? titleCase(mode.current ?? "Light") : videoTheme,
+  );
+
   let codeLocation = $derived(
     generateCodeLocation(location, detectedLocation, effectiveLocation),
   );
@@ -112,6 +119,9 @@
     generateCodeWeather(weather, detectedWeather, effectiveWeather),
   );
   let codeTheme = $derived(generateCodeTheme(theme, mode.current ?? "light"));
+  let codeVideoTheme = $derived(
+    generateCodeTheme(videoTheme, mode.current ?? "light"),
+  );
 
   let isLocationLoading = $derived(
     location === "Auto" &&
@@ -421,6 +431,58 @@
           <Select.Root type="single" bind:value={theme}>
             <Select.Trigger class="w-full">
               {theme}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="Auto">Auto</Select.Item>
+              <Select.Item value="Light">Light</Select.Item>
+              <Select.Item value="Dark">Dark</Select.Item>
+            </Select.Content>
+          </Select.Root>
+        </div>
+      {/snippet}
+    </ExampleComponent>
+  </div>
+
+  <div class="space-y-2">
+    <h2 class="font-subheading">Video Example</h2>
+    <p class="text-foreground/50">
+      Generate a video based on a
+      <a
+        href="http://slopmachine.dev"
+        class="text-primary text-underline font-bold"
+        target="_blank"
+      >
+        Slop Machine
+      </a>
+      bucket, passing variables to configure the output.
+    </p>
+    <ExampleComponent
+      code={`<SlopVideo
+  bucketId="${videoExampleBucketId}"  // "${videoExamplePrompt}"
+  variables={{
+    theme: ${codeVideoTheme}
+  }}
+/>`}
+    >
+      {#snippet output()}
+        <SlopVideo
+          bucketId={videoExampleBucketId}
+          variables={{ theme: effectiveVideoTheme }}
+          class="w-full h-full object-cover transition-opacity duration-500 aspect-square"
+        />
+      {/snippet}
+
+      {#snippet controls()}
+        <div class="space-y-2">
+          <Label>Bucket</Label>
+          <p class="bg-background p-2 rounded-sm">{videoExampleBucketId}</p>
+        </div>
+
+        <div class="space-y-2">
+          <Label>Theme</Label>
+          <Select.Root type="single" bind:value={videoTheme}>
+            <Select.Trigger class="w-full">
+              {videoTheme}
             </Select.Trigger>
             <Select.Content>
               <Select.Item value="Auto">Auto</Select.Item>

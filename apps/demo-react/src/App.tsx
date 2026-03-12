@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { SlopImage } from "@slopmachine/react";
+import { SlopImage, SlopVideo } from "@slopmachine/react";
 import {
   Select,
   SelectContent,
@@ -25,6 +25,8 @@ import {
   simpleVersionedExamplePromptV2,
   proceduralExampleBucketId,
   proceduralExamplePrompt,
+  videoExampleBucketId,
+  videoExamplePrompt,
   DEFAULT_STATE,
   DROPDOWN_OPTIONS,
   generateCodeLocation,
@@ -44,6 +46,9 @@ function App() {
       : siteTheme;
 
   const [theme, setTheme] = useState<"Auto" | "Light" | "Dark">("Auto");
+  const [videoTheme, setVideoTheme] = useState<"Auto" | "Light" | "Dark">(
+    "Auto",
+  );
   const [location, setLocation] = useState(DEFAULT_STATE.location);
   const [weather, setWeather] = useState(DEFAULT_STATE.weather);
 
@@ -110,6 +115,8 @@ function App() {
   const effectiveWeather = weather === "Auto" ? detectedWeather : weather;
 
   const effectiveTheme = theme === "Auto" ? titleCase(resolvedTheme) : theme;
+  const effectiveVideoTheme =
+    videoTheme === "Auto" ? titleCase(resolvedTheme) : videoTheme;
 
   const codeLocation = generateCodeLocation(
     location,
@@ -122,6 +129,7 @@ function App() {
     effectiveWeather,
   );
   const codeTheme = generateCodeTheme(theme, resolvedTheme);
+  const codeVideoTheme = generateCodeTheme(videoTheme, resolvedTheme);
 
   const isLocationLoading =
     location === "Auto" &&
@@ -458,6 +466,66 @@ function App() {
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Theme">{theme}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Auto">Auto</SelectItem>
+                      <SelectItem value="Light">Light</SelectItem>
+                      <SelectItem value="Dark">Dark</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            }
+          />
+        </div>
+        <div className="space-y-2">
+          <h2 className="font-subheading">Video Example</h2>
+          <p className="text-foreground/50">
+            Generate a video based on a{" "}
+            <a
+              href="http://slopmachine.dev"
+              className="text-primary text-underline font-bold"
+              target="_blank"
+            >
+              Slop Machine
+            </a>{" "}
+            bucket, passing variables to configure the output.
+          </p>
+          <ExampleComponent
+            code={`<SlopVideo
+  bucketId="${videoExampleBucketId}"  // "${videoExamplePrompt}"
+  variables={{
+    theme: ${codeVideoTheme}
+  }}
+/>`}
+            output={
+              <SlopVideo
+                bucketId={videoExampleBucketId}
+                variables={{
+                  theme: effectiveVideoTheme,
+                }}
+                className="w-full h-full object-cover transition-opacity duration-500 aspect-square"
+              />
+            }
+            controls={
+              <>
+                <div className="space-y-2">
+                  <Label>Bucket</Label>
+                  <p className="bg-background p-2 rounded-sm">
+                    {videoExampleBucketId}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Theme</Label>
+                  <Select
+                    value={videoTheme}
+                    onValueChange={(val: any) => setVideoTheme(val)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Theme">
+                        {videoTheme}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Auto">Auto</SelectItem>

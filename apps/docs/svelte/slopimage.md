@@ -61,7 +61,7 @@ The unique identifier for the specific image generation session/bucket.
 
 ### `aspectRatio`
 
-**Type:** `string` (Optional, Default: `"1:1"`)
+**Type:** `"1:1" | "2:3" | "3:2" | "3:4" | "4:3" | "4:5" | "5:4" | "9:16" | "16:9" | "21:9"` (Optional, Default: `"1:1"`)
 Sets the CSS aspect ratio of the wrapper element to prevent layout shifts. Examples: `"16:9"`, `"4:3"`.
 
 ### `model`

@@ -2,6 +2,7 @@ export const simpleVersionedExampleBucketId = "ERoiCqBgrKqwTjhxcHJw";
 export const basicExampleBucketId = "VXPbaUOn62fG74b7iIGt";
 export const managedExampleBucketId = "fFzg3gpfI03VdjTekcQd";
 export const proceduralExampleBucketId = "0Risb3L5eS76tidF3ug9";
+export const videoExampleBucketId = "i7ydY0005DyuXyUgj7tl";
 
 export const basicExamplePrompt =
   "A beautiful scene in {location}, where the weather is {weather}, there are flying pigs in the background somewhere, and there is the text 'Slop Machine was here {date}', all in the style of {style}";
@@ -16,6 +17,9 @@ export const managedWithControlsExamplePrompt =
 
 export const proceduralExamplePrompt =
   "An infographic featuring flying pigs and demonstrating how Slop Machine helps creatives define brand-safe generative assets such as images, that developers can take and personalize to end users at runtime without compromising on the original vision. Note also the current location which is {location}, and the weather which is {weather}. Try to incorporate these into the image elements in a creative way. The brand color is rose and the overall style should be neo-brutalism.";
+
+export const videoExamplePrompt =
+  "A flying pig, __doing something cool__. Looped video, neu-brutalist style, rose-400 main color, white wings suitable for web page background {theme} theme.";
 
 export const versionOptions = [
   { value: "Auto", label: "Auto (Latest)" },
