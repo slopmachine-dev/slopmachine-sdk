@@ -46,14 +46,14 @@ https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage?bucketId=yo
 
 ## Query Parameters
 
-| Parameter     | Type     | Required | Default    | Description                                                                                                        |
-| :------------ | :------- | :------: | :--------- | :----------------------------------------------------------------------------------------------------------------- |
-| `bucketId`    | `string` | **Yes**  |            | The unique identifier of the Bucket you are generating an image from.                                              |
-| `variables`   | `string` |    No    | `{}`       | A URL-encoded JSON string containing variables to inject into your prompt templates. Example: `{"name": "Alice"}`. |
-| `aspectRatio` | `string` |    No    | `"1:1"`    | Target aspect ratio (`"1:1"`, `"2:3"`, `"3:2"`, `"3:4"`, `"4:3"`, `"4:5"`, `"5:4"`, `"9:16"`, `"16:9"`, `"21:9"`). |
-| `model`       | `string` |    No    | `"gemini"` | Overrides the AI model used for generation.                                                                        |
-| `version`     | `number` |    No    | _Current_  | The specific version number of the Bucket to target. Defaults to the active version.                               |
-| `resultId`    | `string` |    No    |            | If provided, directly returns a specific, previously generated result by its ID.                                   |
+| Parameter     | Type     | Required | Default    | Description                                                                                                                                                                                                            |
+| :------------ | :------- | :------: | :--------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bucketId`    | `string` | **Yes**  |            | The unique identifier of the Bucket you are generating an image from.                                                                                                                                                  |
+| `variables`   | `string` |    No    | `{}`       | A URL-encoded JSON string containing variables to inject into your prompt templates. Example: `{"name": "Alice"}`. Extraneous or unused variables are automatically stripped out to prevent unnecessary cache busting. |
+| `aspectRatio` | `string` |    No    | `"1:1"`    | Target aspect ratio (`"1:1"`, `"2:3"`, `"3:2"`, `"3:4"`, `"4:3"`, `"4:5"`, `"5:4"`, `"9:16"`, `"16:9"`, `"21:9"`).                                                                                                     |
+| `model`       | `string` |    No    | `"gemini"` | Overrides the AI model used for generation.                                                                                                                                                                            |
+| `version`     | `number` |    No    | _Current_  | The specific version number of the Bucket to target. Defaults to the active version.                                                                                                                                   |
+| `resultId`    | `string` |    No    |            | If provided, directly returns a specific, previously generated result by its ID.                                                                                                                                       |
 
 ## How It Works
 

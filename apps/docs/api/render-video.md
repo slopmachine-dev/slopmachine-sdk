@@ -46,15 +46,15 @@ https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderVideo?bucketId=yo
 
 ## Query Parameters
 
-| Parameter     | Type     | Required | Default   | Description                                                                                                        |
-| :------------ | :------- | :------: | :-------- | :----------------------------------------------------------------------------------------------------------------- |
-| `bucketId`    | `string` | **Yes**  |           | The unique identifier of the Bucket you are generating a video from.                                               |
-| `variables`   | `string` |    No    | `{}`      | A URL-encoded JSON string containing variables to inject into your prompt templates. Example: `{"name": "Alice"}`. |
-| `aspectRatio` | `string` |    No    | `"16:9"`  | Target aspect ratio (`"9:16"`, `"16:9"`).                                                                          |
-| `duration`    | `number` |    No    | `4`       | The duration of the generated video in seconds. Must be between 4 and 8. Ignored if `resultId` is provided.        |
-| `model`       | `string` |    No    |           | Overrides the AI model used for generation.                                                                        |
-| `version`     | `number` |    No    | _Current_ | The specific version number of the Bucket to target. Defaults to the active version.                               |
-| `resultId`    | `string` |    No    |           | If provided, directly returns a specific, previously generated result by its ID.                                   |
+| Parameter     | Type     | Required | Default   | Description                                                                                                                                                                                                            |
+| :------------ | :------- | :------: | :-------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bucketId`    | `string` | **Yes**  |           | The unique identifier of the Bucket you are generating a video from.                                                                                                                                                   |
+| `variables`   | `string` |    No    | `{}`      | A URL-encoded JSON string containing variables to inject into your prompt templates. Example: `{"name": "Alice"}`. Extraneous or unused variables are automatically stripped out to prevent unnecessary cache busting. |
+| `aspectRatio` | `string` |    No    | `"16:9"`  | Target aspect ratio (`"9:16"`, `"16:9"`).                                                                                                                                                                              |
+| `duration`    | `number` |    No    | `4`       | The duration of the generated video in seconds. Must be between 4 and 8. Ignored if `resultId` is provided.                                                                                                            |
+| `model`       | `string` |    No    |           | Overrides the AI model used for generation.                                                                                                                                                                            |
+| `version`     | `number` |    No    | _Current_ | The specific version number of the Bucket to target. Defaults to the active version.                                                                                                                                   |
+| `resultId`    | `string` |    No    |           | If provided, directly returns a specific, previously generated result by its ID.                                                                                                                                       |
 
 ## How It Works
 

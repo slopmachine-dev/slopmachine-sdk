@@ -90,7 +90,7 @@ If a specific result ID is known, it can be fetched directly.
 ### `variables`
 
 **Type:** `Record<string, string | number | undefined | null>` (Optional)
-A dictionary of prompt variables interpolated dynamically. Example: `{ subject: "dog", style: "neon" }`.
+A dictionary of prompt variables interpolated dynamically. Example: `{ subject: "dog", style: "neon" }`. Any extraneous or unused variables provided that are not required by the resolved templates are automatically stripped out to ensure they do not unnecessarily bust the cache.
 
 ### `baseUrl`
 
