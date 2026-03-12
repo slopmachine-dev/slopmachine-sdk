@@ -19,7 +19,7 @@ export const proceduralExamplePrompt =
   "An infographic featuring flying pigs and demonstrating how Slop Machine helps creatives define brand-safe generative assets such as images, that developers can take and personalize to end users at runtime without compromising on the original vision. Note also the current location which is {location}, and the weather which is {weather}. Try to incorporate these into the image elements in a creative way. The brand color is rose and the overall style should be neo-brutalism.";
 
 export const videoExamplePrompt =
-  "A flying pig, __doing something cool__. Looped video, neu-brutalist style, rose-400 main color, white wings suitable for web page background {theme} theme.";
+  "A flying pig, __doing something cool__. Neu-brutalist aesthetic with high-contrast cinematic lighting, emphasizing matte rose-400 surfaces and raw concrete textures, white wings. Suitable for a looped web page background {theme} theme. A low-angle tracking shot reveals bold sans-serif text integrated into the concrete architecture: Slop Machine.";
 
 export const versionOptions = [
   { value: "Auto", label: "Auto (Latest)" },
