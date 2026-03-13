@@ -99,4 +99,4 @@ Replaces the default spinner and shimmer effect. Render a custom skeleton or tex
 
 ### HTML `<img>` Props
 
-You can pass standard attributes like `className`, `style`, `onLoad`, `onError`, `loading="lazy"`, etc. The component will spread these onto the underlying `<img>` element or wrapper where appropriate.
+You can pass standard attributes like `className`, `style`, `onLoad`, `onError`, `loading="lazy"`, etc. The `className` and `style` props will be applied to the outer wrapper `div`, while most event handlers and `img`-specific attributes are spread onto the underlying `<img>` element.

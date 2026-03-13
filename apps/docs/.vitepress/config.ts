@@ -41,7 +41,7 @@ export default defineConfig({
     socialLinks: [
       {
         icon: "github",
-        link: "https://github.com/slopmachine/slopmachine-sdk",
+        link: "https://github.com/slopmachine-dev/slopmachine-sdk",
       },
     ],
   },

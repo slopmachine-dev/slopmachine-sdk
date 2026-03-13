@@ -104,4 +104,4 @@ Replaces the default spinner and shimmer effect. Render a custom skeleton or tex
 
 ### HTML `<video>` Props
 
-You can pass standard attributes like `className`, `style`, `onLoad`, `onError`, `autoPlay`, `loop`, `muted`, `controls`, etc. The component will spread these onto the underlying `<video>` element or wrapper where appropriate.
+You can pass standard attributes like `className`, `style`, `onLoad`, `onError`, `autoPlay`, `loop`, `muted`, `controls`, etc. The `className` and `style` props will be applied to the outer wrapper `div`, while most event handlers and `video`-specific attributes are spread onto the underlying `<video>` element.

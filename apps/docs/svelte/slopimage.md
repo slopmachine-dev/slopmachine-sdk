@@ -101,4 +101,4 @@ Replaces the default spinner and shimmer effect. Pass a snippet to render custom
 
 ### HTML Props
 
-You can pass standard attributes like `alt`, `loading`, etc. The component will spread `...restProps` onto the underlying `<img>` tag where applicable.
+You can pass standard attributes like `alt`, `loading`, etc. The component applies the `class` property to the outer wrapper `div`, while spreading `...restProps` onto the underlying `<img>` tag where applicable.
