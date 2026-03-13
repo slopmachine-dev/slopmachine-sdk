@@ -504,7 +504,7 @@ function App() {
                 variables={{
                   theme: effectiveVideoTheme,
                 }}
-                className="w-full h-full object-cover transition-opacity duration-500 aspect-square"
+                className="w-full h-full object-cover transition-opacity duration-500"
               />
             }
             controls={

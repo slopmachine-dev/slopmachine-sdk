@@ -468,7 +468,7 @@
         <SlopVideo
           bucketId={videoExampleBucketId}
           variables={{ theme: effectiveVideoTheme }}
-          class="w-full h-full object-cover transition-opacity duration-500 aspect-square"
+          class="w-full h-full object-cover transition-opacity duration-500"
         />
       {/snippet}
 
