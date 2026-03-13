@@ -41,6 +41,12 @@ export interface SlopImageOptions {
    */
   variables?: Record<string, string | number | undefined | null>;
   /**
+   * The target quality ("fast" or "high"). Only affects new generations and is ignored for caching.
+   * Ignored if `model` is provided.
+   * Defaults to "fast".
+   */
+  quality?: "fast" | "high";
+  /**
    * The base URL for the Slop Machine API.
    * Defaults to the production URL. Useful for testing against local deployments.
    */
@@ -71,6 +77,7 @@ export function buildImageUrl(options: SlopImageOptions): string {
     resultId,
     aspectRatio = "1:1",
     model,
+    quality = "fast",
     variables = {},
     baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage",
   } = options;
@@ -90,6 +97,11 @@ export function buildImageUrl(options: SlopImageOptions): string {
   }
   if (resultId) {
     params.set("resultId", resultId);
+  }
+  if (quality && quality !== "fast") {
+    params.set("quality", quality);
+  } else if (quality === "fast") {
+    params.set("quality", "fast");
   }
 
   if (Object.keys(variables).length > 0) {
@@ -137,6 +149,12 @@ export interface SlopVideoOptions {
    */
   duration?: number;
   /**
+   * The target quality ("fast" or "high"). Only affects new generations and is ignored for caching.
+   * Ignored if `model` is provided.
+   * Defaults to "fast".
+   */
+  quality?: "fast" | "high";
+  /**
    * The base URL for the Slop Machine API.
    * Defaults to the production URL. Useful for testing against local deployments.
    */
@@ -150,6 +168,7 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
     resultId,
     aspectRatio = "16:9",
     model,
+    quality = "fast",
     variables = {},
     duration = 4,
     baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderVideo",
@@ -174,6 +193,11 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
     // Only append duration if resultId is NOT provided
     const clampedDuration = Math.max(4, Math.min(8, duration));
     params.set("duration", String(clampedDuration));
+  }
+  if (quality && quality !== "fast") {
+    params.set("quality", quality);
+  } else if (quality === "fast") {
+    params.set("quality", "fast");
   }
 
   if (Object.keys(variables).length > 0) {

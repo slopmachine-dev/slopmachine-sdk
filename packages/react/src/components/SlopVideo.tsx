@@ -54,6 +54,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
   version,
   resultId,
   model,
+  quality = "fast",
   variables = {},
   duration,
   baseUrl,
@@ -76,6 +77,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
         duration,
         baseUrl,
         model,
+        quality,
       }),
     [
       bucketId,
@@ -86,6 +88,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
       duration,
       baseUrl,
       model,
+      quality,
     ],
   );
 

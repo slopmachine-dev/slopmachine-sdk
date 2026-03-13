@@ -56,6 +56,7 @@
     version,
     resultId,
     model,
+    quality = "fast",
     variables = {},
     duration,
     baseUrl = undefined,
@@ -80,6 +81,7 @@
       duration,
       baseUrl,
       model,
+      quality,
     }),
   );
   let src = $state("");
