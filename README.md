@@ -5,7 +5,7 @@ The official SDK for integrating Slop Machine into your web applications. Provid
 ![Slop Machine Infographic](https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage?bucketId=0Risb3L5eS76tidF3ug9&resultId=C7rAqS6PkHL70lyHLVtV)
 
 [![npm version](https://img.shields.io/npm/v/@slopmachine/core.svg)](https://www.npmjs.com/package/@slopmachine/core)
-[![License](https://img.shields.io/npm/l/@slopmachine/core.svg)](https://github.com/slopmachine-dev/slopmachine-sdk/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/slopmachine-dev/slopmachine-sdk.svg)](https://github.com/slopmachine-dev/slopmachine-sdk/blob/main/LICENSE)
 
 ## Packages
 
