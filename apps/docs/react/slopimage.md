@@ -1,3 +1,7 @@
+---
+description: Documentation and API reference for the React SlopImage component.
+---
+
 # React `<SlopImage />`
 
 The `@slopmachine/react` package provides a top-tier Developer Experience (DX) for seamlessly rendering Slop Machine generated images in your React applications.

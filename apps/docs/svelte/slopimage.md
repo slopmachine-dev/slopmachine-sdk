@@ -1,3 +1,7 @@
+---
+description: Documentation and API reference for the Svelte SlopImage component.
+---
+
 # Svelte `<SlopImage />`
 
 The `@slopmachine/svelte` package provides a top-tier Developer Experience (DX) for seamlessly rendering Slop Machine generated images in your Svelte applications.

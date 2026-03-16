@@ -1,3 +1,7 @@
+---
+description: Reference documentation for the Slop Machine Render Video API.
+---
+
 # Render Video API
 
 The Render Video API is the primary endpoint for generating and retrieving videos from Slop Machine. It is designed to be used directly in your application's `<video>` tags or anywhere else you'd normally use a video URL.

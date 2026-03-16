@@ -1,4 +1,5 @@
 ---
+description: Slop Machine SDK documentation, features, and demo links.
 layout: home
 
 hero:

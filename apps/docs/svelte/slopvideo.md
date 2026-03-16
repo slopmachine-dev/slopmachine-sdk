@@ -1,3 +1,7 @@
+---
+description: Documentation and API reference for the Svelte SlopVideo component.
+---
+
 # Svelte `<SlopVideo />`
 
 The `@slopmachine/svelte` package provides a top-tier Developer Experience (DX) for seamlessly rendering Slop Machine generated videos in your Svelte applications.

@@ -1,3 +1,7 @@
+---
+description: Getting started guide and core concepts for the Slop Machine SDK.
+---
+
 # Getting Started
 
 Welcome to the **Slop Machine SDK** documentation!

@@ -1,6 +1,8 @@
 {
   "name": "@slopmachine/react",
   "version": "0.1.14",
+  "llms": "https://slopmachine-dev.github.io/slopmachine-sdk/llms.txt",
+  "llmsFull": "https://slopmachine-dev.github.io/slopmachine-sdk/llms-full.txt",
   "description": "The official React SDK for Slop Machine",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

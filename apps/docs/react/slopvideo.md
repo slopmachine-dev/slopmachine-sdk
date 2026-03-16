@@ -1,3 +1,7 @@
+---
+description: Documentation and API reference for the React SlopVideo component.
+---
+
 # React `<SlopVideo />`
 
 The `@slopmachine/react` package provides a top-tier Developer Experience (DX) for seamlessly rendering Slop Machine generated videos in your React applications.

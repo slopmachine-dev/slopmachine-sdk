@@ -11,5 +11,8 @@
   "devDependencies": {
     "vitepress": "^1.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "vitepress-plugin-llms": "^1.11.1"
+  }
 }

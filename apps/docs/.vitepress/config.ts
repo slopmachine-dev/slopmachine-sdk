@@ -1,6 +1,11 @@
 import { defineConfig } from "vitepress";
+import llmstxt from "vitepress-plugin-llms";
 
 export default defineConfig({
+  vite: {
+    // @ts-expect-error type mismatch with vite versions
+    plugins: [llmstxt()],
+  },
   title: "Slop Machine for Developers",
   description: "Documentation for Slop Machine Developer Tools",
   base: "/slopmachine-sdk/",
