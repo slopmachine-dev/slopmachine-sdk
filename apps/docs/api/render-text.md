@@ -24,12 +24,12 @@ You can consume the API by constructing a URL with the appropriate query paramet
 
 ### Using `@slopmachine/core`
 
-The `buildRenderTextUrl` utility function safely constructs the URL, automatically handling URL-encoding for your variables.
+The `buildTextUrl` utility function safely constructs the URL, automatically handling URL-encoding for your variables.
 
 ```typescript
-import { buildRenderTextUrl } from "@slopmachine/core";
+import { buildTextUrl } from "@slopmachine/core";
 
-const textUrl = buildRenderTextUrl({
+const textUrl = buildTextUrl({
   bucketId: "your-bucket-id",
   variables: {
     theme: "dark",
