@@ -8,11 +8,19 @@ const root = path.resolve(__dirname, "..");
 const targets = [
   {
     package: "packages/react",
-    files: ["src/components/SlopImage.tsx"],
+    files: [
+      "src/components/SlopImage.tsx",
+      "src/components/SlopText.tsx",
+      "src/components/SlopVideo.tsx",
+    ],
   },
   {
     package: "packages/svelte",
-    files: ["src/SlopImage.svelte"],
+    files: [
+      "src/SlopImage.svelte",
+      "src/SlopText.svelte",
+      "src/SlopVideo.svelte",
+    ],
   },
 ];
 

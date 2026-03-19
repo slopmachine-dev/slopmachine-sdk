@@ -25,6 +25,7 @@ export default defineConfig({
         text: "React",
         items: [
           { text: "SlopImage", link: "/react/slopimage" },
+          { text: "SlopText", link: "/react/sloptext" },
           { text: "SlopVideo", link: "/react/slopvideo" },
         ],
       },
@@ -32,6 +33,7 @@ export default defineConfig({
         text: "Svelte",
         items: [
           { text: "SlopImage", link: "/svelte/slopimage" },
+          { text: "SlopText", link: "/svelte/sloptext" },
           { text: "SlopVideo", link: "/svelte/slopvideo" },
         ],
       },
@@ -39,6 +41,7 @@ export default defineConfig({
         text: "Core API",
         items: [
           { text: "renderImage", link: "/api/render-image" },
+          { text: "renderText", link: "/api/render-text" },
           { text: "renderVideo", link: "/api/render-video" },
         ],
       },

@@ -3,6 +3,7 @@ export const basicExampleBucketId = "VXPbaUOn62fG74b7iIGt";
 export const managedExampleBucketId = "fFzg3gpfI03VdjTekcQd";
 export const proceduralExampleBucketId = "0Risb3L5eS76tidF3ug9";
 export const videoExampleBucketId = "i7ydY0005DyuXyUgj7tl";
+export const textExampleBucketId = "A4arl0ziUSIbrUBFsQSO";
 
 export const basicExamplePrompt =
   "A beautiful scene in {location}, where the weather is {weather}, there are flying pigs in the background somewhere, and there is the text 'Slop Machine was here {date}', all in the style of {style}";
@@ -20,6 +21,9 @@ export const proceduralExamplePrompt =
 
 export const videoExamplePrompt =
   "A flying pig, __doing something cool__. Neu-brutalist aesthetic with high-contrast cinematic lighting, emphasizing matte rose-400 surfaces and raw concrete textures, white wings. Suitable for a looped web page background {theme} theme. A low-angle tracking shot reveals bold sans-serif text integrated into the concrete architecture: Slop Machine.";
+
+export const textExamplePrompt =
+  "Write a mildly amusing one-paragraph story involving the location {location}, the current weather {weather}, __the current top trending topic__, and flying pigs.";
 
 export const versionOptions = [
   { value: "Auto", label: "Auto (Latest)" },

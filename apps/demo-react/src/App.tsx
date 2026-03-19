@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { SlopImage, SlopVideo } from "@slopmachine/react";
+import { SlopImage, SlopVideo, SlopText } from "@slopmachine/react";
 import {
   Select,
   SelectContent,
@@ -34,6 +34,8 @@ import {
   generateSimpleCode,
   generateCodeTheme,
   titleCase,
+  textExamplePrompt,
+  textExampleBucketId,
 } from "@slopmachine/demo-shared";
 
 function App() {
@@ -52,6 +54,9 @@ function App() {
   const [location, setLocation] = useState(DEFAULT_STATE.location);
   const [weather, setWeather] = useState(DEFAULT_STATE.weather);
 
+  const [textLocation, setTextLocation] = useState(DEFAULT_STATE.location);
+  const [textWeather, setTextWeather] = useState(DEFAULT_STATE.weather);
+
   const [result, setResult] = useState(DEFAULT_STATE.result);
   const [version, setVersion] = useState(DEFAULT_STATE.version);
 
@@ -67,6 +72,16 @@ function App() {
   }>({ lat: null, lon: null });
   const [locationAutoDisabled, setLocationAutoDisabled] = useState(false);
   const [weatherAutoDisabled, setWeatherAutoDisabled] = useState(false);
+
+  const [textDetectedLocation, setTextDetectedLocation] = useState("");
+  const [textDetectedWeather, setTextDetectedWeather] = useState("");
+  const [textCoords, setTextCoords] = useState<{
+    lat: number | null;
+    lon: number | null;
+  }>({ lat: null, lon: null });
+  const [textLocationAutoDisabled, setTextLocationAutoDisabled] =
+    useState(false);
+  const [textWeatherAutoDisabled, setTextWeatherAutoDisabled] = useState(false);
 
   useEffect(() => {
     if (location === "Auto") {
@@ -86,7 +101,27 @@ function App() {
     }
   }, [location]);
 
+  useEffect(() => {
+    if (textLocation === "Auto") {
+      setTextDetectedLocation("Detecting...");
+      fetchLocation()
+        .then((data) => {
+          setTextDetectedLocation(data.locName);
+          if (data.lat && data.lon) {
+            setTextCoords({ lat: data.lat, lon: data.lon });
+          }
+        })
+        .catch(() => {
+          setTextDetectedLocation("Unknown Location");
+          setTextLocation("London");
+          setTextLocationAutoDisabled(true);
+        });
+    }
+  }, [textLocation]);
+
   const effectiveLocation = location === "Auto" ? detectedLocation : location;
+  const textEffectiveLocation =
+    textLocation === "Auto" ? textDetectedLocation : textLocation;
 
   useEffect(() => {
     if (weather === "Auto") {
@@ -112,7 +147,33 @@ function App() {
     }
   }, [weather, effectiveLocation, coords.lat, coords.lon]);
 
+  useEffect(() => {
+    if (textWeather === "Auto") {
+      if (
+        textEffectiveLocation === "Detecting..." ||
+        !textEffectiveLocation ||
+        textCoords.lat === null ||
+        textCoords.lon === null
+      ) {
+        setTextDetectedWeather("Waiting for location...");
+        return;
+      }
+      setTextDetectedWeather("Detecting...");
+      fetchWeather(textCoords.lat, textCoords.lon)
+        .then((weatherDesc) => {
+          setTextDetectedWeather(weatherDesc);
+        })
+        .catch(() => {
+          setTextDetectedWeather("Unknown Weather");
+          setTextWeather("Rainy");
+          setTextWeatherAutoDisabled(true);
+        });
+    }
+  }, [textWeather, textEffectiveLocation, textCoords.lat, textCoords.lon]);
+
   const effectiveWeather = weather === "Auto" ? detectedWeather : weather;
+  const textEffectiveWeather =
+    textWeather === "Auto" ? textDetectedWeather : textWeather;
 
   const effectiveTheme = theme === "Auto" ? titleCase(resolvedTheme) : theme;
   const effectiveVideoTheme =
@@ -128,6 +189,16 @@ function App() {
     detectedWeather,
     effectiveWeather,
   );
+  const textCodeLocation = generateCodeLocation(
+    textLocation,
+    textDetectedLocation,
+    textEffectiveLocation,
+  );
+  const textCodeWeather = generateCodeWeather(
+    textWeather,
+    textDetectedWeather,
+    textEffectiveWeather,
+  );
   const codeTheme = generateCodeTheme(theme, resolvedTheme);
   const codeVideoTheme = generateCodeTheme(videoTheme, resolvedTheme);
 
@@ -140,6 +211,16 @@ function App() {
       detectedWeather === "Waiting for location..." ||
       !detectedWeather);
   const isLoading = isLocationLoading || isWeatherLoading;
+
+  const isTextLocationLoading =
+    textLocation === "Auto" &&
+    (textDetectedLocation === "Detecting..." || !textDetectedLocation);
+  const isTextWeatherLoading =
+    textWeather === "Auto" &&
+    (textDetectedWeather === "Detecting..." ||
+      textDetectedWeather === "Waiting for location..." ||
+      !textDetectedWeather);
+  const isTextLoading = isTextLocationLoading || isTextWeatherLoading;
 
   const effectiveVersion = version === "Auto" ? "2" : version;
 
@@ -492,7 +573,7 @@ function App() {
             bucket, passing variables to configure the output.
           </p>
           <ExampleComponent
-            code={`<SlopVideo
+            code={`<SlopText
   bucketId="${videoExampleBucketId}"  // "${videoExamplePrompt}"
   variables={{
     theme: ${codeVideoTheme}
@@ -531,6 +612,106 @@ function App() {
                       <SelectItem value="Auto">Auto</SelectItem>
                       <SelectItem value="Light">Light</SelectItem>
                       <SelectItem value="Dark">Dark</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            }
+          />
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="font-subheading">Text Example</h2>
+          <p className="text-foreground/50">
+            Generate text based on a{" "}
+            <a
+              href="http://slopmachine.dev"
+              className="text-primary text-underline font-bold"
+              target="_blank"
+            >
+              Slop Machine
+            </a>{" "}
+            bucket, passing variables to configure the output.
+          </p>
+          <ExampleComponent
+            code={`<SlopText
+  bucketId="${textExampleBucketId}"  // "${textExamplePrompt}"
+  variables={{
+    location: ${textCodeLocation}
+    weather: ${textCodeWeather}
+  }}
+/>`}
+            output={
+              isTextLoading ? (
+                <div className="w-full h-full flex items-center justify-center bg-muted">
+                  <p className="text-muted-foreground animate-pulse">
+                    Generating parameters...
+                  </p>
+                </div>
+              ) : (
+                <SlopText
+                  bucketId={textExampleBucketId}
+                  variables={{
+                    location: textEffectiveLocation,
+                    weather: textEffectiveWeather,
+                  }}
+                  className="p-2"
+                />
+              )
+            }
+            controls={
+              <>
+                <div className="space-y-2">
+                  <Label>Bucket</Label>
+                  <p className="bg-background p-2 rounded-sm">
+                    {textExampleBucketId}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Location</Label>
+                  <Select value={textLocation} onValueChange={setTextLocation}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select location">
+                        {textLocation}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        value="Auto"
+                        disabled={textLocationAutoDisabled}
+                      >
+                        Auto
+                      </SelectItem>
+                      {DROPDOWN_OPTIONS.locations.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Weather</Label>
+                  <Select value={textWeather} onValueChange={setTextWeather}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select weather">
+                        {textWeather}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        value="Auto"
+                        disabled={textWeatherAutoDisabled}
+                      >
+                        Auto
+                      </SelectItem>
+                      {DROPDOWN_OPTIONS.weather.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

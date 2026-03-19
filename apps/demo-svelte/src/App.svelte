@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SlopImage, SlopVideo } from "@slopmachine/svelte";
+  import { SlopImage, SlopVideo, SlopText } from "@slopmachine/svelte";
   import * as Select from "$lib/components/ui/select";
   import { Label } from "$lib/components/ui/label";
   import ExampleComponent from "./lib/components/ExampleComponent.svelte";
@@ -25,6 +25,8 @@
     videoExamplePrompt,
     generateCodeTheme,
     titleCase,
+    textExampleBucketId,
+    textExamplePrompt,
   } from "@slopmachine/demo-shared";
 
   import { mode, ModeWatcher } from "mode-watcher";
@@ -34,6 +36,9 @@
 
   let location = $state(DEFAULT_STATE.location);
   let weather = $state(DEFAULT_STATE.weather);
+
+  let textLocation = $state(DEFAULT_STATE.location);
+  let textWeather = $state(DEFAULT_STATE.weather);
 
   let result = $state(DEFAULT_STATE.result);
   let version = $state(DEFAULT_STATE.version);
@@ -50,6 +55,15 @@
   });
   let locationAutoDisabled = $state(false);
   let weatherAutoDisabled = $state(false);
+
+  let textDetectedLocation = $state("");
+  let textDetectedWeather = $state("");
+  let textCoords = $state<{ lat: number | null; lon: number | null }>({
+    lat: null,
+    lon: null,
+  });
+  let textLocationAutoDisabled = $state(false);
+  let textWeatherAutoDisabled = $state(false);
 
   $effect(() => {
     if (location === "Auto") {
@@ -72,8 +86,33 @@
     }
   });
 
+  $effect(() => {
+    if (textLocation === "Auto") {
+      textDetectedLocation = "Detecting...";
+      fetchLocation()
+        .then((data) => {
+          textDetectedLocation = data.locName;
+          if (data.lat && data.lon) {
+            textCoords = {
+              lat: data.lat,
+              lon: data.lon,
+            };
+          }
+        })
+        .catch(() => {
+          textDetectedLocation = "Unknown Location";
+          textLocation = "London";
+          textLocationAutoDisabled = true;
+        });
+    }
+  });
+
   let effectiveLocation = $derived(
     location === "Auto" ? detectedLocation : location,
+  );
+
+  let textEffectiveLocation = $derived(
+    textLocation === "Auto" ? textDetectedLocation : textLocation,
   );
 
   $effect(() => {
@@ -100,8 +139,36 @@
     }
   });
 
+  $effect(() => {
+    if (textWeather === "Auto") {
+      if (
+        textEffectiveLocation === "Detecting..." ||
+        !textEffectiveLocation ||
+        textCoords.lat === null ||
+        textCoords.lon === null
+      ) {
+        textDetectedWeather = "Waiting for location...";
+        return;
+      }
+      textDetectedWeather = "Detecting...";
+      fetchWeather(textCoords.lat, textCoords.lon)
+        .then((weatherDesc) => {
+          textDetectedWeather = weatherDesc;
+        })
+        .catch(() => {
+          textDetectedWeather = "Unknown Weather";
+          textWeather = "Rainy";
+          textWeatherAutoDisabled = true;
+        });
+    }
+  });
+
   let effectiveWeather = $derived(
     weather === "Auto" ? detectedWeather : weather,
+  );
+
+  let textEffectiveWeather = $derived(
+    textWeather === "Auto" ? textDetectedWeather : textWeather,
   );
 
   let effectiveTheme = $derived(
@@ -117,6 +184,16 @@
   );
   let codeWeather = $derived(
     generateCodeWeather(weather, detectedWeather, effectiveWeather),
+  );
+  let textCodeLocation = $derived(
+    generateCodeLocation(
+      textLocation,
+      textDetectedLocation,
+      textEffectiveLocation,
+    ),
+  );
+  let textCodeWeather = $derived(
+    generateCodeWeather(textWeather, textDetectedWeather, textEffectiveWeather),
   );
   let codeTheme = $derived(generateCodeTheme(theme, mode.current ?? "light"));
   let codeVideoTheme = $derived(
@@ -134,6 +211,18 @@
         !detectedWeather),
   );
   let isLoading = $derived(isLocationLoading || isWeatherLoading);
+
+  let isTextLocationLoading = $derived(
+    textLocation === "Auto" &&
+      (textDetectedLocation === "Detecting..." || !textDetectedLocation),
+  );
+  let isTextWeatherLoading = $derived(
+    textWeather === "Auto" &&
+      (textDetectedWeather === "Detecting..." ||
+        textDetectedWeather === "Waiting for location..." ||
+        !textDetectedWeather),
+  );
+  let isTextLoading = $derived(isTextLocationLoading || isTextWeatherLoading);
 
   let effectiveVersion = $derived(version === "Auto" ? "2" : version);
 
@@ -488,6 +577,92 @@
               <Select.Item value="Auto">Auto</Select.Item>
               <Select.Item value="Light">Light</Select.Item>
               <Select.Item value="Dark">Dark</Select.Item>
+            </Select.Content>
+          </Select.Root>
+        </div>
+      {/snippet}
+    </ExampleComponent>
+  </div>
+
+  <div class="space-y-2">
+    <h2 class="font-subheading">Text Example</h2>
+    <p class="text-foreground/50">
+      Generate text based on a
+      <a
+        href="http://slopmachine.dev"
+        class="text-primary text-underline font-bold"
+        target="_blank"
+      >
+        Slop Machine
+      </a>
+      bucket, passing variables to configure the output.
+    </p>
+    <ExampleComponent
+      code={`<SlopText
+  bucketId="${textExampleBucketId}"  // "${textExamplePrompt}"
+  variables={{
+    location: ${textCodeLocation}
+    weather: ${textCodeWeather}
+  }}
+/>`}
+    >
+      {#snippet output()}
+        {#if isTextLoading}
+          <div class="w-full h-full flex items-center justify-center bg-muted">
+            <p class="text-muted-foreground animate-pulse">
+              Generating parameters...
+            </p>
+          </div>
+        {:else}
+          <SlopText
+            bucketId={textExampleBucketId}
+            variables={{
+              location: textEffectiveLocation,
+              weather: textEffectiveWeather,
+            }}
+            class="p-2"
+          />
+        {/if}
+      {/snippet}
+
+      {#snippet controls()}
+        <div class="space-y-2">
+          <Label>Bucket</Label>
+          <p class="bg-background p-2 rounded-sm">
+            {textExampleBucketId}
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <Label>Location</Label>
+          <Select.Root type="single" bind:value={textLocation}>
+            <Select.Trigger class="w-full">
+              {textLocation}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="Auto" disabled={textLocationAutoDisabled}
+                >Auto</Select.Item
+              >
+              {#each DROPDOWN_OPTIONS.locations as opt}
+                <Select.Item value={opt.value}>{opt.label}</Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        </div>
+
+        <div class="space-y-2">
+          <Label>Weather</Label>
+          <Select.Root type="single" bind:value={textWeather}>
+            <Select.Trigger class="w-full">
+              {textWeather}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="Auto" disabled={textWeatherAutoDisabled}
+                >Auto</Select.Item
+              >
+              {#each DROPDOWN_OPTIONS.weather as opt}
+                <Select.Item value={opt.value}>{opt.label}</Select.Item>
+              {/each}
             </Select.Content>
           </Select.Root>
         </div>

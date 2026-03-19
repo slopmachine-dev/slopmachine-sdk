@@ -1,6 +1,6 @@
 {
   "name": "@slopmachine/react",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "llms": "https://slopmachine-dev.github.io/slopmachine-sdk/llms.txt",
   "llmsFull": "https://slopmachine-dev.github.io/slopmachine-sdk/llms-full.txt",
   "description": "The official React SDK for Slop Machine",
@@ -50,9 +50,11 @@
     "@slopmachine/core": "*",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/vite": "^4.1.18",
+    "@types/marked": "^5.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.563.0",
+    "marked": "^17.0.4",
     "shiki": "^3.21.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7"

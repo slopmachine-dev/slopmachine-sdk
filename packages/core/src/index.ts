@@ -190,14 +190,69 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
   if (resultId) {
     params.set("resultId", resultId);
   } else {
-    // Only append duration if resultId is NOT provided
-    const clampedDuration = Math.max(4, Math.min(8, duration));
-    params.set("duration", String(clampedDuration));
-  }
-  if (quality && quality !== "fast") {
-    params.set("quality", quality);
-  } else if (quality === "fast") {
     params.set("quality", "fast");
+  }
+
+  if (Object.keys(variables).length > 0) {
+    params.set("variables", JSON.stringify(variables));
+  }
+
+  return `${baseUrl}?${params.toString()}`;
+}
+
+export interface SlopTextOptions {
+  /**
+   * The unique identifier of your Slop Machine bucket.
+   */
+  bucketId: string;
+  /**
+   * The specific version of the prompt/settings to use.
+   * If omitted, the latest version will be used.
+   */
+  version?: number;
+  /**
+   * Result ID to retrieve a specific previously generated text
+   * instead of generating a new one.
+   */
+  resultId?: string;
+  /**
+   * The AI model to use for generation.
+   * Overrides the default model specified in the bucket settings.
+   */
+  model?: string;
+  /**
+   * Dynamic variables to interpolate into the prompt.
+   * E.g., if prompt is "A story about a {color} dog", pass { color: "brown" }.
+   */
+  variables?: Record<string, string | number | undefined | null>;
+  /**
+   * The base URL for the Slop Machine API.
+   * Defaults to the production URL. Useful for testing against local deployments.
+   */
+  baseUrl?: string;
+}
+
+export function buildTextUrl(options: SlopTextOptions): string {
+  const {
+    bucketId,
+    version,
+    resultId,
+    model,
+    variables = {},
+    baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderText",
+  } = options;
+
+  const params = new URLSearchParams();
+  params.set("bucketId", bucketId);
+
+  if (model) {
+    params.set("model", model);
+  }
+  if (version) {
+    params.set("version", String(version));
+  }
+  if (resultId) {
+    params.set("resultId", resultId);
   }
 
   if (Object.keys(variables).length > 0) {
