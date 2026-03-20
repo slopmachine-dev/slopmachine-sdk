@@ -202,25 +202,21 @@ function App() {
   const codeTheme = generateCodeTheme(theme, resolvedTheme);
   const codeVideoTheme = generateCodeTheme(videoTheme, resolvedTheme);
 
-  const isLocationLoading =
-    location === "Auto" &&
-    (detectedLocation === "Detecting..." || !detectedLocation);
-  const isWeatherLoading =
-    weather === "Auto" &&
-    (detectedWeather === "Detecting..." ||
-      detectedWeather === "Waiting for location..." ||
-      !detectedWeather);
-  const isLoading = isLocationLoading || isWeatherLoading;
+  const isLoading =
+    effectiveLocation === "Detecting..." ||
+    effectiveLocation === "Waiting for location..." ||
+    !effectiveLocation ||
+    effectiveWeather === "Detecting..." ||
+    effectiveWeather === "Waiting for location..." ||
+    !effectiveWeather;
 
-  const isTextLocationLoading =
-    textLocation === "Auto" &&
-    (textDetectedLocation === "Detecting..." || !textDetectedLocation);
-  const isTextWeatherLoading =
-    textWeather === "Auto" &&
-    (textDetectedWeather === "Detecting..." ||
-      textDetectedWeather === "Waiting for location..." ||
-      !textDetectedWeather);
-  const isTextLoading = isTextLocationLoading || isTextWeatherLoading;
+  const isTextLoading =
+    textEffectiveLocation === "Detecting..." ||
+    textEffectiveLocation === "Waiting for location..." ||
+    !textEffectiveLocation ||
+    textEffectiveWeather === "Detecting..." ||
+    textEffectiveWeather === "Waiting for location..." ||
+    !textEffectiveWeather;
 
   const effectiveVersion = version === "Auto" ? "2" : version;
 

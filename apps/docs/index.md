@@ -51,10 +51,11 @@ onMounted(() => {
   const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light'
   
   fetchLocation()
-    .then(data => fetchWeather(data.lat, data.lon))
-    .then(data => {
-      const location = data.locName || 'London'
-      const weather = data.weatherDesc || 'Rainy'
+    .then(locData => {
+      const location = locData.locName || 'London'
+      return fetchWeather(locData.lat, locData.lon).then(weatherDesc => ({ location, weather: weatherDesc || 'Rainy' }))
+    })
+    .then(({ location, weather }) => {
 
       // Procedural Example
       preloadImage({

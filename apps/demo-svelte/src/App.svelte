@@ -201,26 +201,22 @@
   );
 
   let isLocationLoading = $derived(
-    location === "Auto" &&
-      (detectedLocation === "Detecting..." || !detectedLocation),
+    effectiveLocation === "Detecting..." || !effectiveLocation,
   );
   let isWeatherLoading = $derived(
-    weather === "Auto" &&
-      (detectedWeather === "Detecting..." ||
-        detectedWeather === "Waiting for location..." ||
-        !detectedWeather),
+    effectiveWeather === "Detecting..." ||
+      effectiveWeather === "Waiting for location..." ||
+      !effectiveWeather,
   );
   let isLoading = $derived(isLocationLoading || isWeatherLoading);
 
   let isTextLocationLoading = $derived(
-    textLocation === "Auto" &&
-      (textDetectedLocation === "Detecting..." || !textDetectedLocation),
+    textEffectiveLocation === "Detecting..." || !textEffectiveLocation,
   );
   let isTextWeatherLoading = $derived(
-    textWeather === "Auto" &&
-      (textDetectedWeather === "Detecting..." ||
-        textDetectedWeather === "Waiting for location..." ||
-        !textDetectedWeather),
+    textEffectiveWeather === "Detecting..." ||
+      textEffectiveWeather === "Waiting for location..." ||
+      !textEffectiveWeather,
   );
   let isTextLoading = $derived(isTextLocationLoading || isTextWeatherLoading);
 
