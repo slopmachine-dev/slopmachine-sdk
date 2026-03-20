@@ -35,7 +35,7 @@ features:
 <script setup>
 import { onMounted } from 'vue'
 import { preloadImage, preloadVideo, preloadText } from '../../packages/core/src/index.ts'
-import { fetchLocation, fetchWeather } from '../../packages/demo-shared/src/utils.ts'
+import { fetchLocation, fetchWeather } from '../../packages/demo-shared/src/api.ts'
 
 onMounted(() => {
   // Simple Example
