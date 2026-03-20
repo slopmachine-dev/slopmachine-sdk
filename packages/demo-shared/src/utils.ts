@@ -16,15 +16,7 @@ export const generateCodeLocation = (
   effectiveLocation: string,
 ) => {
   if (location === "Auto") {
-    if (
-      !detectedLocation ||
-      detectedLocation === "Detecting..." ||
-      detectedLocation === "Waiting for location..."
-    ) {
-      return `getLocation(), // ${detectedLocation}`;
-    } else {
-      return `"${effectiveLocation}", // resolved from Auto`;
-    }
+    return `getLocation(), // ${detectedLocation}`;
   }
   return `"${effectiveLocation}",`;
 };
@@ -35,15 +27,7 @@ export const generateCodeWeather = (
   effectiveWeather: string,
 ) => {
   if (weather === "Auto") {
-    if (
-      !detectedWeather ||
-      detectedWeather === "Detecting..." ||
-      detectedWeather === "Waiting for location..."
-    ) {
-      return `getWeather(getLocation()), // ${detectedWeather}`;
-    } else {
-      return `"${effectiveWeather}", // resolved from Auto`;
-    }
+    return `getWeather(getLocation()), // ${detectedWeather}`;
   }
   return `"${effectiveWeather}",`;
 };
