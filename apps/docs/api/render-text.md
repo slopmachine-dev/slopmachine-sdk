@@ -38,6 +38,23 @@ const textUrl = buildTextUrl({
 // const markdown = await response.text();
 ```
 
+### Preloading Text
+
+If you know you will need a text result soon, you can preload it into the browser's cache using the `preloadText` function.
+
+```typescript
+import { preloadText } from "@slopmachine/core";
+
+// Initiates the request to load the text and returns a promise
+await preloadText({
+  bucketId: "your-bucket-id",
+  variables: {
+    theme: "dark",
+    username: "alice",
+  },
+});
+```
+
 ### Manual URL Construction
 
 If you are not using JavaScript or prefer to build the URL yourself, you can append the parameters directly to the base URL.
@@ -50,14 +67,14 @@ https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderText?bucketId=you
 
 ## Query Parameters
 
-| Parameter     | Type     | Required | Default    | Description                                                                                                                                                                                                            |
-| :------------ | :------- | :------: | :--------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bucketId`    | `string` | **Yes**  |            | The unique identifier of the Bucket you are generating text from.                                                                                                                                                      |
-| `prompt`      | `string` |    No    | _Bucket_   | The base prompt for generation. If omitted, the function falls back to the prompt defined in the target Bucket Version.                                                                                                |
-| `variables`   | `string` |    No    | `{}`       | A URL-encoded JSON string containing variables to inject into your prompt templates. Example: `{"name": "Alice"}`. Extraneous or unused variables are automatically stripped out to prevent unnecessary cache busting. |
-| `model`       | `string` |    No    | `"gemini"` | Overrides the AI model used for generation.                                                                                                                                                                            |
-| `version`     | `number` |    No    | _Current_  | The specific version number of the Bucket to target. Defaults to the active version.                                                                                                                                   |
-| `resultId`    | `string` |    No    |            | If provided, directly returns a specific, previously generated result by its ID.                                                                                                                                       |
+| Parameter   | Type     | Required | Default    | Description                                                                                                                                                                                                            |
+| :---------- | :------- | :------: | :--------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bucketId`  | `string` | **Yes**  |            | The unique identifier of the Bucket you are generating text from.                                                                                                                                                      |
+| `prompt`    | `string` |    No    | _Bucket_   | The base prompt for generation. If omitted, the function falls back to the prompt defined in the target Bucket Version.                                                                                                |
+| `variables` | `string` |    No    | `{}`       | A URL-encoded JSON string containing variables to inject into your prompt templates. Example: `{"name": "Alice"}`. Extraneous or unused variables are automatically stripped out to prevent unnecessary cache busting. |
+| `model`     | `string` |    No    | `"gemini"` | Overrides the AI model used for generation.                                                                                                                                                                            |
+| `version`   | `number` |    No    | _Current_  | The specific version number of the Bucket to target. Defaults to the active version.                                                                                                                                   |
+| `resultId`  | `string` |    No    |            | If provided, directly returns a specific, previously generated result by its ID.                                                                                                                                       |
 
 ## How It Works
 

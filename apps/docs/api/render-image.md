@@ -38,6 +38,23 @@ const imageUrl = buildImageUrl({
 // <img src={imageUrl} alt="Generated image" />
 ```
 
+### Preloading Images
+
+If you know you will need an image soon, you can preload it into the browser's cache using the `preloadImage` function.
+
+```typescript
+import { preloadImage } from "@slopmachine/core";
+
+// Initiates the request to load the image and returns a promise
+await preloadImage({
+  bucketId: "your-bucket-id",
+  variables: {
+    theme: "dark",
+    username: "alice",
+  },
+});
+```
+
 ### Manual URL Construction
 
 If you are not using JavaScript or prefer to build the URL yourself, you can append the parameters directly to the base URL.

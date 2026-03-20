@@ -57,6 +57,17 @@ function Avatar() {
 }
 ```
 
+## Preloading
+
+You can import and use `preloadImage` from `@slopmachine/react` to cache the asset before rendering the component.
+
+```tsx
+import { preloadImage } from "@slopmachine/react";
+
+// Call this early in your component lifecycle or route loader
+preloadImage({ bucketId: "my-unique-bucket-id" });
+```
+
 ## Props Reference
 
 The `SlopImage` component inherits from `SlopImageOptions`, adding a `loader` property and standard HTML image attributes.

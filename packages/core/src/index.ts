@@ -70,6 +70,12 @@ export function interpolatePrompt(
   return text;
 }
 
+/**
+ * Builds a URL to render or retrieve an image from Slop Machine.
+ *
+ * @param options - Configuration options for the image generation.
+ * @returns A string containing the fully constructed URL.
+ */
 export function buildImageUrl(options: SlopImageOptions): string {
   const {
     bucketId,
@@ -109,6 +115,27 @@ export function buildImageUrl(options: SlopImageOptions): string {
   }
 
   return `${baseUrl}?${params.toString()}`;
+}
+
+/**
+ * Preloads an image from Slop Machine into the browser's cache.
+ * Useful for ensuring images are ready before displaying them.
+ *
+ * @param options - Configuration options for the image generation.
+ * @returns A promise that resolves when the image has been loaded.
+ */
+export function preloadImage(options: SlopImageOptions): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined") {
+      resolve();
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = (err) => reject(err);
+    img.src = buildImageUrl(options);
+  });
 }
 
 export type VideoAspectRatio = "9:16" | "16:9";
@@ -161,6 +188,12 @@ export interface SlopVideoOptions {
   baseUrl?: string;
 }
 
+/**
+ * Builds a URL to render or retrieve a video from Slop Machine.
+ *
+ * @param options - Configuration options for the video generation.
+ * @returns A string containing the fully constructed URL.
+ */
 export function buildVideoUrl(options: SlopVideoOptions): string {
   const {
     bucketId,
@@ -200,6 +233,28 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
   return `${baseUrl}?${params.toString()}`;
 }
 
+/**
+ * Preloads a video from Slop Machine into the browser's cache.
+ * Useful for ensuring videos are ready before displaying them.
+ *
+ * @param options - Configuration options for the video generation.
+ * @returns A promise that resolves when the video preload request has been initiated.
+ */
+export function preloadVideo(options: SlopVideoOptions): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined") {
+      resolve();
+      return;
+    }
+
+    // We can just fetch the URL to preload it into the browser's cache.
+    // We use no-cors to avoid CORS errors for simple preloads
+    fetch(buildVideoUrl(options), { mode: "no-cors" })
+      .then(() => resolve())
+      .catch((err) => reject(err));
+  });
+}
+
 export interface SlopTextOptions {
   /**
    * The unique identifier of your Slop Machine bucket.
@@ -232,6 +287,12 @@ export interface SlopTextOptions {
   baseUrl?: string;
 }
 
+/**
+ * Builds a URL to render or retrieve text from Slop Machine.
+ *
+ * @param options - Configuration options for the text generation.
+ * @returns A string containing the fully constructed URL.
+ */
 export function buildTextUrl(options: SlopTextOptions): string {
   const {
     bucketId,
@@ -260,4 +321,26 @@ export function buildTextUrl(options: SlopTextOptions): string {
   }
 
   return `${baseUrl}?${params.toString()}`;
+}
+
+/**
+ * Preloads text from Slop Machine into the browser's cache.
+ * Useful for ensuring text is ready before displaying it.
+ *
+ * @param options - Configuration options for the text generation.
+ * @returns A promise that resolves when the text preload request has been initiated.
+ */
+export function preloadText(options: SlopTextOptions): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined") {
+      resolve();
+      return;
+    }
+
+    // Fetch the URL to preload it into the browser's cache.
+    // We use no-cors to avoid CORS errors for simple preloads
+    fetch(buildTextUrl(options), { mode: "no-cors" })
+      .then(() => resolve())
+      .catch((err) => reject(err));
+  });
 }

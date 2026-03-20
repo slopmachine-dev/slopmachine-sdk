@@ -54,6 +54,19 @@ You can override variables, specify an aspect ratio, pick a model, and even over
 </SlopImage>
 ```
 
+## Preloading
+
+You can import and use `preloadImage` from `@slopmachine/svelte` to cache the asset before rendering the component.
+
+```svelte
+<script>
+  import { preloadImage } from "@slopmachine/svelte";
+
+  // Call this early in your component lifecycle or route load function
+  preloadImage({ bucketId: "my-unique-bucket-id" });
+</script>
+```
+
 ## Props Reference
 
 The `SlopImage` component inherits from `SlopImageOptions`. It also implements Svelte-specific properties.

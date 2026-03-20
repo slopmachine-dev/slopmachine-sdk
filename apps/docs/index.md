@@ -32,6 +32,70 @@ features:
       height: 100px
 ---
 
+<script setup>
+import { onMounted } from 'vue'
+import { preloadImage, preloadVideo, preloadText } from '../../packages/core/src/index.ts'
+import { fetchLocation, fetchWeather } from '../../packages/demo-shared/src/utils.ts'
+
+onMounted(() => {
+  // Simple Example
+  preloadImage({ bucketId: 'ERoiCqBgrKqwTjhxcHJw' })
+
+  // Controlled Example
+  preloadImage({
+    bucketId: 'fFzg3gpfI03VdjTekcQd',
+    variables: { textcolor: 'black', bgcolor: 'white', slopcolor: 'pink' }
+  })
+
+  // Dynamic Preloads
+  const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light'
+  
+  fetchLocation()
+    .then(data => fetchWeather(data.lat, data.lon))
+    .then(data => {
+      const location = data.locName || 'London'
+      const weather = data.weatherDesc || 'Rainy'
+
+      // Procedural Example
+      preloadImage({
+        bucketId: '0Risb3L5eS76tidF3ug9',
+        variables: { location, weather, theme }
+      })
+
+      // Video Example
+      preloadVideo({
+        bucketId: 'i7ydY0005DyuXyUgj7tl',
+        variables: { theme }
+      })
+
+      // Text Example
+      preloadText({
+        bucketId: 'A4arl0ziUSIbrUBFsQSO',
+        variables: { location, weather }
+      })
+    })
+    .catch(() => {
+      // Procedural Example Fallback
+      preloadImage({
+        bucketId: '0Risb3L5eS76tidF3ug9',
+        variables: { location: 'London', weather: 'Rainy', theme }
+      })
+
+      // Video Example Fallback
+      preloadVideo({
+        bucketId: 'i7ydY0005DyuXyUgj7tl',
+        variables: { theme }
+      })
+
+      // Text Example Fallback
+      preloadText({
+        bucketId: 'A4arl0ziUSIbrUBFsQSO',
+        variables: { location: 'London', weather: 'Rainy' }
+      })
+    })
+})
+</script>
+
 <style>
 html.dark .light-img { display: none; }
 html:not(.dark) .dark-img { display: none; }

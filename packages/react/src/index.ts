@@ -8,3 +8,5 @@ export type {
   SlopImageOptions,
   SlopVideoOptions,
 } from "@slopmachine/core";
+
+export { preloadImage } from "@slopmachine/core";

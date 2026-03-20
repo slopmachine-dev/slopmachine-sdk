@@ -56,6 +56,19 @@ You can override variables, specify an aspect ratio, pick a model, and even over
 </SlopVideo>
 ```
 
+## Preloading
+
+You can import and use `preloadVideo` from `@slopmachine/svelte` to cache the asset before rendering the component.
+
+```svelte
+<script>
+  import { preloadVideo } from "@slopmachine/svelte";
+
+  // Call this early in your component lifecycle or route load function
+  preloadVideo({ bucketId: "my-unique-video-bucket" });
+</script>
+```
+
 ## Props Reference
 
 The `SlopVideo` component inherits from `SlopVideoOptions`. It also implements Svelte-specific properties.

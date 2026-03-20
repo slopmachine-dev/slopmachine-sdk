@@ -53,6 +53,19 @@ You can override variables, pick a model, and even override the default loading 
 </SlopText>
 ```
 
+## Preloading
+
+You can import and use `preloadText` from `@slopmachine/svelte` to cache the asset before rendering the component.
+
+```svelte
+<script>
+  import { preloadText } from "@slopmachine/svelte";
+
+  // Call this early in your component lifecycle or route load function
+  preloadText({ bucketId: "my-unique-bucket-id" });
+</script>
+```
+
 ## Props Reference
 
 ### `bucketId`

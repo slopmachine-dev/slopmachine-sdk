@@ -56,6 +56,17 @@ function BlogPost() {
 }
 ```
 
+## Preloading
+
+You can import and use `preloadText` from `@slopmachine/react` to cache the asset before rendering the component.
+
+```tsx
+import { preloadText } from "@slopmachine/react";
+
+// Call this early in your component lifecycle or route loader
+preloadText({ bucketId: "my-unique-bucket-id" });
+```
+
 ## Props Reference
 
 The `SlopText` component takes parameters to build the URL and fetch the Markdown text, adding a `loader` property and taking standard HTML `div` attributes for the wrapper.

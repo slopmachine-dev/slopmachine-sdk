@@ -57,6 +57,17 @@ function PromoVideo() {
 }
 ```
 
+## Preloading
+
+You can import and use `preloadVideo` from `@slopmachine/react` to cache the asset before rendering the component.
+
+```tsx
+import { preloadVideo } from "@slopmachine/react";
+
+// Call this early in your component lifecycle or route loader
+preloadVideo({ bucketId: "my-unique-video-bucket" });
+```
+
 ## Props Reference
 
 The `SlopVideo` component inherits from `SlopVideoOptions`, adding a `loader` property and standard HTML video attributes.

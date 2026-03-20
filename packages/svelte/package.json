@@ -1,6 +1,6 @@
 {
   "name": "@slopmachine/svelte",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "llms": "https://slopmachine-dev.github.io/slopmachine-sdk/llms.txt",
   "llmsFull": "https://slopmachine-dev.github.io/slopmachine-sdk/llms-full.txt",
   "description": "The official Svelte SDK for Slop Machine",

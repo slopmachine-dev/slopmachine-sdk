@@ -38,6 +38,24 @@ const videoUrl = buildVideoUrl({
 // <video src={videoUrl} controls autoPlay loop />
 ```
 
+### Preloading Videos
+
+If you know you will need a video soon, you can preload it into the browser's cache using the `preloadVideo` function.
+
+```typescript
+import { preloadVideo } from "@slopmachine/core";
+
+// Initiates the request to load the video and returns a promise
+await preloadVideo({
+  bucketId: "your-bucket-id",
+  variables: {
+    theme: "dark",
+    subject: "a soaring eagle",
+  },
+  aspectRatio: "16:9",
+});
+```
+
 ### Manual URL Construction
 
 If you are not using JavaScript or prefer to build the URL yourself, you can append the parameters directly to the base URL.
