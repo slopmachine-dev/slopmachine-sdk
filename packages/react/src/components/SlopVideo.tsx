@@ -47,7 +47,7 @@ export interface SlopVideoProps
  * />
  * ```
  *
- * @version 0.1.19
+ * @version 0.1.20
  */
 export const SlopVideo: React.FC<SlopVideoProps> = ({
   bucketId,
@@ -55,7 +55,6 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
   aspectRatio = "16:9",
   version,
   resultId,
-  model,
   quality = "fast",
   variables = {},
   duration,
@@ -78,7 +77,6 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
         variables,
         duration,
         baseUrl,
-        model,
         quality,
       }),
     [
@@ -89,7 +87,6 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
       variables,
       duration,
       baseUrl,
-      model,
       quality,
     ],
   );

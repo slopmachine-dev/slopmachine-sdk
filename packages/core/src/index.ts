@@ -31,11 +31,6 @@ export interface SlopImageOptions {
    */
   aspectRatio?: ImageAspectRatio;
   /**
-   * The AI model to use for generation.
-   * Overrides the default model specified in the bucket settings.
-   */
-  model?: "gemini" | "gemini-flash" | "gemini-pro" | "imagen";
-  /**
    * Dynamic variables to interpolate into the prompt.
    * E.g., if prompt is "A photo of a {color} dog", pass { color: "brown" }.
    */
@@ -82,7 +77,6 @@ export function buildImageUrl(options: SlopImageOptions): string {
     version,
     resultId,
     aspectRatio = "1:1",
-    model,
     quality = "fast",
     variables = {},
     baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage",
@@ -91,27 +85,24 @@ export function buildImageUrl(options: SlopImageOptions): string {
   const params = new URLSearchParams();
   params.set("bucketId", bucketId);
 
-  if (aspectRatio) {
-    params.set("aspectRatio", aspectRatio);
-  }
+  if (!resultId) {
+    if (aspectRatio) {
+      params.set("aspectRatio", aspectRatio);
+    }
+    if (version) {
+      params.set("version", String(version));
+    }
+    if (quality && quality !== "fast") {
+      params.set("quality", quality);
+    } else if (quality === "fast") {
+      params.set("quality", "fast");
+    }
 
-  if (model) {
-    params.set("model", model);
-  }
-  if (version) {
-    params.set("version", String(version));
-  }
-  if (resultId) {
+    if (Object.keys(variables).length > 0) {
+      params.set("variables", JSON.stringify(variables));
+    }
+  } else {
     params.set("resultId", resultId);
-  }
-  if (quality && quality !== "fast") {
-    params.set("quality", quality);
-  } else if (quality === "fast") {
-    params.set("quality", "fast");
-  }
-
-  if (Object.keys(variables).length > 0) {
-    params.set("variables", JSON.stringify(variables));
   }
 
   return `${baseUrl}?${params.toString()}`;
@@ -161,11 +152,6 @@ export interface SlopVideoOptions {
    */
   aspectRatio?: VideoAspectRatio;
   /**
-   * The AI model to use for generation.
-   * Overrides the default model specified in the bucket settings.
-   */
-  model?: string;
-  /**
    * Dynamic variables to interpolate into the prompt.
    * E.g., if prompt is "A video of a {color} dog", pass { color: "brown" }.
    */
@@ -200,7 +186,6 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
     version,
     resultId,
     aspectRatio = "16:9",
-    model,
     quality = "fast",
     variables = {},
     duration = 4,
@@ -210,24 +195,25 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
   const params = new URLSearchParams();
   params.set("bucketId", bucketId);
 
-  if (aspectRatio) {
-    params.set("aspectRatio", aspectRatio);
-  }
+  if (!resultId) {
+    if (aspectRatio) {
+      params.set("aspectRatio", aspectRatio);
+    }
+    if (version) {
+      params.set("version", String(version));
+    }
+    if (duration) {
+      params.set("duration", String(duration));
+    }
+    if (quality) {
+      params.set("quality", quality);
+    }
 
-  if (model) {
-    params.set("model", model);
-  }
-  if (version) {
-    params.set("version", String(version));
-  }
-  if (resultId) {
-    params.set("resultId", resultId);
+    if (Object.keys(variables).length > 0) {
+      params.set("variables", JSON.stringify(variables));
+    }
   } else {
-    params.set("quality", "fast");
-  }
-
-  if (Object.keys(variables).length > 0) {
-    params.set("variables", JSON.stringify(variables));
+    params.set("resultId", resultId);
   }
 
   return `${baseUrl}?${params.toString()}`;
@@ -271,11 +257,6 @@ export interface SlopTextOptions {
    */
   resultId?: string;
   /**
-   * The AI model to use for generation.
-   * Overrides the default model specified in the bucket settings.
-   */
-  model?: string;
-  /**
    * Dynamic variables to interpolate into the prompt.
    * E.g., if prompt is "A story about a {color} dog", pass { color: "brown" }.
    */
@@ -298,7 +279,6 @@ export function buildTextUrl(options: SlopTextOptions): string {
     bucketId,
     version,
     resultId,
-    model,
     variables = {},
     baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderText",
   } = options;
@@ -306,18 +286,19 @@ export function buildTextUrl(options: SlopTextOptions): string {
   const params = new URLSearchParams();
   params.set("bucketId", bucketId);
 
-  if (model) {
-    params.set("model", model);
-  }
-  if (version) {
-    params.set("version", String(version));
-  }
-  if (resultId) {
-    params.set("resultId", resultId);
-  }
+  if (!resultId) {
+    if (version) {
+      params.set("version", String(version));
+    }
+    if (resultId) {
+      params.set("resultId", resultId);
+    }
 
-  if (Object.keys(variables).length > 0) {
-    params.set("variables", JSON.stringify(variables));
+    if (Object.keys(variables).length > 0) {
+      params.set("variables", JSON.stringify(variables));
+    }
+  } else {
+    params.set("resultId", resultId);
   }
 
   return `${baseUrl}?${params.toString()}`;

@@ -18,7 +18,7 @@
   />
   ```
 
-  @version 0.1.19
+  @version 0.1.20
 -->
 <script lang="ts">
   import {
@@ -82,7 +82,6 @@
       variables,
       duration,
       baseUrl,
-      model,
       quality,
     }),
   );

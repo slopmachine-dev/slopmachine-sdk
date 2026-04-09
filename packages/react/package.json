@@ -1,6 +1,6 @@
 {
   "name": "@slopmachine/react",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "llms": "https://slopmachine-dev.github.io/slopmachine-sdk/llms.txt",
   "llmsFull": "https://slopmachine-dev.github.io/slopmachine-sdk/llms-full.txt",
   "description": "The official React SDK for Slop Machine",
@@ -47,7 +47,7 @@
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.4",
-    "@slopmachine/core": "^0.1.16",
+    "@slopmachine/core": "^0.1.20",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/vite": "^4.1.18",
     "@types/marked": "^5.0.2",

@@ -15,7 +15,7 @@
   />
   ```
 
-  @version 0.1.19
+  @version 0.1.20
 -->
 <script lang="ts">
   import {
@@ -57,7 +57,6 @@
     aspectRatio = "1:1",
     version,
     resultId,
-    model,
     quality = "fast",
     variables = {},
     baseUrl = undefined,
@@ -78,7 +77,6 @@
       resultId,
       variables,
       baseUrl,
-      model,
       quality,
     }),
   );

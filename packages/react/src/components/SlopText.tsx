@@ -32,7 +32,7 @@ export interface SlopTextProps
  * />
  * ```
  *
- * @version 0.1.19
+ * @version 0.1.20
  */
 export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
   (
@@ -40,7 +40,6 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
       bucketId,
       version,
       resultId,
-      model,
       variables,
       baseUrl,
       fallback,
@@ -65,7 +64,6 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
             bucketId,
             version,
             resultId,
-            model,
             variables,
             baseUrl,
           });
@@ -97,14 +95,7 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
       return () => {
         isMounted = false;
       };
-    }, [
-      bucketId,
-      version,
-      resultId,
-      model,
-      JSON.stringify(variables),
-      baseUrl,
-    ]);
+    }, [bucketId, version, resultId, JSON.stringify(variables), baseUrl]);
 
     if (error && errorFallback) {
       return <>{errorFallback}</>;

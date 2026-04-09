@@ -23,7 +23,7 @@
    * </SlopText>
    * ```
    *
-   * @version 0.1.19
+   * @version 0.1.20
    */
   interface Props {
     // SlopTextOptions
@@ -70,7 +70,6 @@
           bucketId,
           version,
           resultId,
-          model,
           variables,
           baseUrl,
         });

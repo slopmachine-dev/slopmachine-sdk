@@ -53,7 +53,7 @@ export interface SlopImageProps
  * />
  * ```
  *
- * @version 0.1.19
+ * @version 0.1.20
  */
 export const SlopImage: React.FC<SlopImageProps> = ({
   bucketId,
@@ -61,7 +61,6 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   aspectRatio = "1:1",
   version,
   resultId,
-  model,
   quality = "fast",
   variables = {},
   baseUrl,
@@ -81,19 +80,9 @@ export const SlopImage: React.FC<SlopImageProps> = ({
         resultId,
         variables,
         baseUrl,
-        model,
         quality,
       }),
-    [
-      bucketId,
-      aspectRatio,
-      version,
-      resultId,
-      variables,
-      baseUrl,
-      model,
-      quality,
-    ],
+    [bucketId, aspectRatio, version, resultId, variables, baseUrl, quality],
   );
 
   const [src, setSrc] = useState(rawSrc);
