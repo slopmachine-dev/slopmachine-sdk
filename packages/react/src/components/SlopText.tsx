@@ -32,7 +32,7 @@ export interface SlopTextProps
  * />
  * ```
  *
- * @version 0.1.18
+ * @version 0.1.19
  */
 export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
   (
@@ -133,8 +133,6 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
               overflow: "hidden",
               width: "100%",
               minHeight: "100px",
-              backgroundColor: "var(--muted, #f3f4f6)",
-              borderRadius: "0.375rem",
             }}
           >
             {/* Loading overlay */}

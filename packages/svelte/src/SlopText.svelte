@@ -23,7 +23,7 @@
    * </SlopText>
    * ```
    *
-   * @version 0.1.18
+   * @version 0.1.19
    */
   interface Props {
     // SlopTextOptions
@@ -150,8 +150,6 @@
   .slop-wrapper {
     position: relative;
     overflow: hidden;
-    background-color: var(--muted, #f3f4f6);
-    border-radius: 0.375rem;
     width: 100%;
     min-height: 100px;
   }

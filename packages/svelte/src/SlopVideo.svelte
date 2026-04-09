@@ -18,7 +18,7 @@
   />
   ```
 
-  @version 0.1.18
+  @version 0.1.19
 -->
 <script lang="ts">
   import {
@@ -204,7 +204,6 @@
   .slop-wrapper {
     position: relative;
     overflow: hidden;
-    background-color: var(--muted, #f3f4f6);
     width: 100%;
     height: 100%;
   }

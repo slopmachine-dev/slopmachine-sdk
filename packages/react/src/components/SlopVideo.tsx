@@ -47,7 +47,7 @@ export interface SlopVideoProps
  * />
  * ```
  *
- * @version 0.1.18
+ * @version 0.1.19
  */
 export const SlopVideo: React.FC<SlopVideoProps> = ({
   bucketId,
@@ -159,7 +159,6 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
           className="slop-wrapper relative overflow-hidden w-full h-full"
           style={{
             aspectRatio: String(aspectRatio).replace(":", "/"),
-            backgroundColor: "var(--muted, #f3f4f6)",
             position: "relative",
             overflow: "hidden",
             width: "100%",
