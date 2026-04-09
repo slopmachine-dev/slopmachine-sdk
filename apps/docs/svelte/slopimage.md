@@ -111,6 +111,16 @@ Override the default Slop Machine API URL if you are using a self-hosted or prox
 **Type:** `string` (Optional)
 Sets the class string on the outer wrapper element.
 
+### `objectFit`
+
+**Type:** `"fill" | "contain" | "cover" | "none" | "scale-down"` (Optional, Default: `"cover"`)
+How the image should be resized to fit its container. Maps directly to the CSS `object-fit` property.
+
+### `imageClass`
+
+**Type:** `string` (Optional)
+Additional CSS classes to apply directly to the inner `<img>` element. Useful when you need to target the image itself rather than the wrapper.
+
 ### `loader` Snippet
 
 **Type:** Svelte `Snippet` (Optional)
@@ -118,4 +128,4 @@ Replaces the default spinner and shimmer effect. Pass a snippet to render custom
 
 ### HTML Props
 
-You can pass standard attributes like `alt`, `loading`, etc. The component applies the `class` property to the outer wrapper `div`, while spreading `...restProps` onto the underlying `<img>` tag where applicable.
+You can pass standard attributes like `alt`, `loading`, etc. The component applies the `class` property to the outer wrapper `div`, while spreading `...restProps` onto the underlying `<img>` tag where applicable. Use `imageClass` if you need to pass classes directly to the inner image element.

@@ -112,6 +112,16 @@ Override the default Slop Machine API URL if you are using a self-hosted or prox
 **Type:** `React.ReactNode` (Optional)
 Replaces the default spinner and shimmer effect. Render a custom skeleton or text while the image is loading.
 
+### `objectFit`
+
+**Type:** `React.CSSProperties["objectFit"]` (Optional, Default: `"cover"`)
+How the image should be resized to fit its container. Maps directly to the CSS `object-fit` property.
+
+### `imageClassName`
+
+**Type:** `string` (Optional)
+Additional CSS classes to apply directly to the inner `<img>` element. Useful when you need to target the image itself rather than the wrapper.
+
 ### HTML `<img>` Props
 
-You can pass standard attributes like `className`, `style`, `onLoad`, `onError`, `loading="lazy"`, etc. The `className` and `style` props will be applied to the outer wrapper `div`, while most event handlers and `img`-specific attributes are spread onto the underlying `<img>` element.
+You can pass standard attributes like `className`, `style`, `onLoad`, `onError`, `loading="lazy"`, etc. The `className` and `style` props will be applied to the outer wrapper `div`, while most event handlers and `img`-specific attributes are spread onto the underlying `<img>` element. Use `imageClassName` if you need to pass classes directly to the inner image element.

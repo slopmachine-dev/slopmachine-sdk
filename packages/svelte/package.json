@@ -1,6 +1,6 @@
 {
   "name": "@slopmachine/svelte",
-  "version": "0.1.16",
+  "version": "0.1.18",
   "llms": "https://slopmachine-dev.github.io/slopmachine-sdk/llms.txt",
   "llmsFull": "https://slopmachine-dev.github.io/slopmachine-sdk/llms-full.txt",
   "description": "The official Svelte SDK for Slop Machine",
@@ -19,7 +19,7 @@
     "url": "git+https://github.com/slopmachine-dev/slopmachine-sdk.git"
   },
   "dependencies": {
-    "@slopmachine/core": "*",
+    "@slopmachine/core": "^0.1.16",
     "@types/marked": "^5.0.2",
     "marked": "^17.0.4"
   },

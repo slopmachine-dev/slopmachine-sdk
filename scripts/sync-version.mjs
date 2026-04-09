@@ -5,6 +5,10 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 
+const corePkgPath = path.join(root, "packages/core/package.json");
+const corePkgJson = JSON.parse(fs.readFileSync(corePkgPath, "utf8"));
+const coreVersion = corePkgJson.version;
+
 const targets = [
   {
     package: "packages/react",
@@ -30,6 +34,22 @@ for (const target of targets) {
 
   const pkgJson = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
   const version = pkgJson.version;
+
+  let pkgUpdated = false;
+  if (pkgJson.dependencies && pkgJson.dependencies["@slopmachine/core"]) {
+    const newDependencyVersion = `^${coreVersion}`;
+    if (pkgJson.dependencies["@slopmachine/core"] !== newDependencyVersion) {
+      pkgJson.dependencies["@slopmachine/core"] = newDependencyVersion;
+      pkgUpdated = true;
+    }
+  }
+
+  if (pkgUpdated) {
+    fs.writeFileSync(pkgPath, JSON.stringify(pkgJson, null, 2) + "\n", "utf8");
+    console.log(
+      `Updated @slopmachine/core dependency in ${target.package} to ^${coreVersion}`,
+    );
+  }
 
   for (const file of target.files) {
     const filePath = path.join(root, target.package, file);

@@ -15,7 +15,7 @@
   />
   ```
 
-  @version 0.1.16
+  @version 0.1.18
 -->
 <script lang="ts">
   import {
@@ -42,6 +42,14 @@
      * If not provided, a default spinner and shimmer effect will be shown.
      */
     loader?: Snippet;
+    /**
+     * How the image should be resized to fit its container. Defaults to "cover".
+     */
+    objectFit?: "fill" | "contain" | "cover" | "none" | "scale-down";
+    /**
+     * Additional CSS classes to apply directly to the `<img />` element.
+     */
+    imageClass?: string;
   }
 
   let {
@@ -54,6 +62,8 @@
     variables = {},
     baseUrl = undefined,
     class: className = "",
+    objectFit = "cover",
+    imageClass = "",
     loader,
     ...restProps
   }: SlopImageProps = $props();
@@ -176,9 +186,10 @@
     <img
       {src}
       {alt}
+      style="object-fit: {objectFit};"
       onload={handleLoad}
       onerror={handleError}
-      class:loaded={!isLoading}
+      class="slop-image {imageClass} {isLoading ? '' : 'loaded'}"
       {...restProps}
     />
   </div>
@@ -252,15 +263,14 @@
     animation: slop-shimmer 2s ease-in-out infinite;
   }
 
-  img {
+  .slop-image {
     height: 100%;
     width: 100%;
-    object-fit: cover;
     transition: opacity 500ms;
     opacity: 0;
   }
 
-  img.loaded {
+  .slop-image.loaded {
     opacity: 1;
   }
 

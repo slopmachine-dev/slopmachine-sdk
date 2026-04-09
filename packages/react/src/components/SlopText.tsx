@@ -32,7 +32,7 @@ export interface SlopTextProps
  * />
  * ```
  *
- * @version 0.1.16
+ * @version 0.1.18
  */
 export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
   (

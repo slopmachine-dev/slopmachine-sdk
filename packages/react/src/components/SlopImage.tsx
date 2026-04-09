@@ -26,6 +26,14 @@ export interface SlopImageProps
    * If not provided, a default spinner and shimmer effect will be shown.
    */
   loader?: React.ReactNode;
+  /**
+   * How the image should be resized to fit its container. Defaults to "cover".
+   */
+  objectFit?: React.CSSProperties["objectFit"];
+  /**
+   * Additional CSS classes to apply directly to the `<img />` element.
+   */
+  imageClassName?: string;
 }
 
 /**
@@ -41,10 +49,11 @@ export interface SlopImageProps
  *   resultId="some-result"
  *   aspectRatio="16:9"
  *   className="rounded-lg"
+ *   objectFit="cover"
  * />
  * ```
  *
- * @version 0.1.16
+ * @version 0.1.18
  */
 export const SlopImage: React.FC<SlopImageProps> = ({
   bucketId,
@@ -57,6 +66,9 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   variables = {},
   baseUrl,
   loader,
+  objectFit = "cover",
+  imageClassName,
+  style,
   ...props
 }) => {
   // Construct API URL
@@ -148,7 +160,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
           }
         }
       `}</style>
-      <div className={className} style={props.style}>
+      <div className={className} style={style}>
         <div
           className="slop-wrapper relative overflow-hidden w-full h-full"
           style={{
@@ -288,13 +300,14 @@ export const SlopImage: React.FC<SlopImageProps> = ({
             onLoad={() => setIsLoading(false)}
             onError={() => setIsLoading(false)}
             className={cn(
-              "h-full w-full object-cover transition-opacity duration-500",
+              "h-full w-full transition-opacity duration-500",
               isLoading ? "opacity-0" : "opacity-100",
+              imageClassName,
             )}
             style={{
               height: "100%",
               width: "100%",
-              objectFit: "cover",
+              objectFit,
               transition: "opacity 500ms",
               opacity: isLoading ? 0 : 1,
             }}
