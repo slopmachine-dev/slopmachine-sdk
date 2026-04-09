@@ -93,7 +93,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
     return () => clearTimeout(timer);
   }, [rawSrc]);
 
-  const alt = "Generated image";
+  const alt = "Image produced by Slop Machine (slopmachine.dev)";
 
   const [isLoading, setIsLoading] = useState(true);
   const [currentSrc, setCurrentSrc] = useState(src);

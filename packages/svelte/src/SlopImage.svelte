@@ -74,7 +74,7 @@
   );
   let src = $state("");
   let prevSrc = $state("");
-  let alt = "Generated image";
+  const alt = "Image produced by Slop Machine (slopmachine.dev)";
 
   $effect(() => {
     const currentComputedSrc = computedSrc;
