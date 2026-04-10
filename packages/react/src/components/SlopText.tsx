@@ -32,7 +32,7 @@ export interface SlopTextProps
  * />
  * ```
  *
- * @version 0.1.20
+ * @version 0.1.21
  */
 export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
   (
@@ -71,7 +71,16 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
           // Fetch the URL to get the content, following redirects automatically
           const response = await fetch(url);
           if (!response.ok) {
-            throw new Error(`Failed to fetch text: ${response.statusText}`);
+            let errorMessage = response.statusText;
+            try {
+              const errorData = await response.json();
+              if (errorData.error) {
+                errorMessage = errorData.error;
+              }
+            } catch (e) {
+              // Ignore JSON parse errors if the response isn't JSON
+            }
+            throw new Error(`Failed to fetch text: ${errorMessage}`);
           }
           const content = await response.text();
           if (isMounted) {

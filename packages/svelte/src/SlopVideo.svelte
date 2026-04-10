@@ -18,7 +18,7 @@
   />
   ```
 
-  @version 0.1.20
+  @version 0.1.21
 -->
 <script lang="ts">
   import {
@@ -112,17 +112,21 @@
       fetch(src, { method: "HEAD", signal: abortController.signal })
         .then(async (res) => {
           if (!res.ok) {
+            let errorMessage = res.statusText;
             try {
               const errRes = await fetch(src, {
                 signal: abortController.signal,
               });
-              const errJson = await errRes.json();
-              console.error("SlopVideo error:", res.status, errJson.error);
+              const errorData = await errRes.json();
+              if (errorData.error) {
+                errorMessage = errorData.error;
+              }
             } catch (e: any) {
               if (e.name !== "AbortError") {
                 // Failed to fetch or parse error details
               }
             }
+            console.error("SlopVideo error:", res.status, errorMessage);
             isLoading = false;
           }
         })

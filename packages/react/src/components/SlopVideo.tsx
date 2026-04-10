@@ -47,7 +47,7 @@ export interface SlopVideoProps
  * />
  * ```
  *
- * @version 0.1.20
+ * @version 0.1.21
  */
 export const SlopVideo: React.FC<SlopVideoProps> = ({
   bucketId,
@@ -115,13 +115,17 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
     fetch(src, { method: "HEAD" })
       .then(async (res) => {
         if (!res.ok) {
+          let errorMessage = res.statusText;
           try {
             const errRes = await fetch(src);
-            const errJson = await errRes.json();
-            console.error("SlopVideo error:", res.status, errJson.error);
+            const errorData = await errRes.json();
+            if (errorData.error) {
+              errorMessage = errorData.error;
+            }
           } catch (e) {
             // Failed to fetch or parse error details
           }
+          console.error("SlopVideo error:", res.status, errorMessage);
           setIsLoading(false);
         }
       })
