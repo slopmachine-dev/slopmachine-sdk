@@ -15,7 +15,7 @@
   />
   ```
 
-  @version 0.1.21
+  @version 0.1.22
 -->
 <script lang="ts">
   import {
@@ -113,7 +113,8 @@
               const errRes = await fetch(src, {
                 signal: abortController.signal,
               });
-              const errorData = await errRes.json();
+              const errorText = await errRes.text();
+              const errorData = JSON.parse(errorText);
               if (errorData.error) {
                 errorMessage = errorData.error;
               }

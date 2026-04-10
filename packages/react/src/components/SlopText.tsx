@@ -32,7 +32,7 @@ export interface SlopTextProps
  * />
  * ```
  *
- * @version 0.1.21
+ * @version 0.1.22
  */
 export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
   (
@@ -73,7 +73,8 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
           if (!response.ok) {
             let errorMessage = response.statusText;
             try {
-              const errorData = await response.json();
+              const errorText = await response.text();
+              const errorData = JSON.parse(errorText);
               if (errorData.error) {
                 errorMessage = errorData.error;
               }
@@ -88,9 +89,10 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
           }
         } catch (err) {
           if (isMounted) {
-            setError(
-              err instanceof Error ? err : new Error("Failed to generate text"),
-            );
+            const finalError =
+              err instanceof Error ? err : new Error("Failed to generate text");
+            console.error(finalError);
+            setError(finalError);
           }
         } finally {
           if (isMounted) {

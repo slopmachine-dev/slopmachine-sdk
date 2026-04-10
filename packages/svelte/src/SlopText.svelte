@@ -23,7 +23,7 @@
    * </SlopText>
    * ```
    *
-   * @version 0.1.21
+   * @version 0.1.22
    */
   interface Props {
     // SlopTextOptions
@@ -78,7 +78,8 @@
         if (!response.ok) {
           let errorMessage = response.statusText;
           try {
-            const errorData = await response.json();
+            const errorText = await response.text();
+            const errorData = JSON.parse(errorText);
             if (errorData.error) {
               errorMessage = errorData.error;
             }
@@ -93,8 +94,10 @@
         }
       } catch (err) {
         if (isMounted) {
-          error =
+          const finalError =
             err instanceof Error ? err : new Error("Failed to generate text");
+          console.error(finalError);
+          error = finalError;
         }
       } finally {
         if (isMounted) {

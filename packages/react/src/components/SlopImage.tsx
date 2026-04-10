@@ -53,7 +53,7 @@ export interface SlopImageProps
  * />
  * ```
  *
- * @version 0.1.21
+ * @version 0.1.22
  */
 export const SlopImage: React.FC<SlopImageProps> = ({
   bucketId,
@@ -113,7 +113,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
           let errorMessage = res.statusText;
           try {
             const errRes = await fetch(src);
-            const errorData = await errRes.json();
+            const errorText = await errRes.text();
+            const errorData = JSON.parse(errorText);
             if (errorData.error) {
               errorMessage = errorData.error;
             }
