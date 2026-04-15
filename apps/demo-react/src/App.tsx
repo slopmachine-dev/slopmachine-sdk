@@ -15,18 +15,13 @@ import { ExampleComponent } from "./components/example-component";
 import {
   fetchLocation,
   fetchWeather,
-  managedWithControlsExamplePrompt,
   versionOptions,
   resultOptionsV1,
   resultOptionsV2,
   managedExampleBucketId,
   simpleVersionedExampleBucketId,
-  simpleVersionedExamplePromptV1,
-  simpleVersionedExamplePromptV2,
   proceduralExampleBucketId,
-  proceduralExamplePrompt,
   videoExampleBucketId,
-  videoExamplePrompt,
   DEFAULT_STATE,
   DROPDOWN_OPTIONS,
   generateCodeLocation,
@@ -34,8 +29,12 @@ import {
   generateSimpleCode,
   generateCodeTheme,
   titleCase,
-  textExamplePrompt,
   textExampleBucketId,
+  simpleVersionedExampleShareId,
+  managedExampleShareId,
+  proceduralExampleShareId,
+  videoExampleShareId,
+  textExampleShareId,
 } from "@slopmachine/demo-shared";
 
 function App() {
@@ -239,8 +238,6 @@ function App() {
     version,
     result,
     simpleVersionedExampleBucketId,
-    simpleVersionedExamplePromptV1,
-    simpleVersionedExamplePromptV2,
   );
 
   return (
@@ -264,13 +261,13 @@ function App() {
           <p className="text-foreground/50">
             Grab the latest approved image from a{" "}
             <a
-              href="http://slopmachine.dev"
+              href={`http://slopmachine.dev/share/${simpleVersionedExampleShareId}`}
               className="text-primary text-underline font-bold"
               target="_blank"
             >
-              Slop Machine
-            </a>{" "}
-            bucket.
+              Slop Machine bucket
+            </a>
+            .
           </p>
           <ExampleComponent
             code={simpleCode}
@@ -284,10 +281,12 @@ function App() {
             controls={
               <>
                 <div className="space-y-2">
-                  <Label>Bucket</Label>
-                  <p className="bg-background p-2 rounded-sm">
-                    {simpleVersionedExampleBucketId}
-                  </p>
+                  <Label>Bucket {simpleVersionedExampleBucketId}</Label>
+                  <iframe
+                    src={`https://slopmachine.dev/embed/${simpleVersionedExampleShareId}?showTitle=false&showResults=false`}
+                    width="100%"
+                    height="120"
+                  ></iframe>
                 </div>
                 <div className="space-y-2">
                   <Label>Version</Label>
@@ -345,17 +344,17 @@ function App() {
           <p className="text-foreground/50">
             Generate an image based on a{" "}
             <a
-              href="http://slopmachine.dev"
+              href={`http://slopmachine.dev/share/${managedExampleShareId}`}
               className="text-primary text-underline font-bold"
               target="_blank"
             >
-              Slop Machine
-            </a>{" "}
-            bucket, with specific changes allowed at runtime.
+              Slop Machine bucket
+            </a>
+            , with specific changes allowed at runtime.
           </p>
           <ExampleComponent
             code={`<SlopImage
-  bucket="${managedExampleBucketId}" // ${managedWithControlsExamplePrompt}
+  bucket="${managedExampleBucketId}"
   variables={{
     textcolor: "${textColor}",
     bgcolor: "${bgColor}",
@@ -370,17 +369,19 @@ function App() {
                   bgcolor: bgColor,
                   slopcolor: slopColor,
                 }}
-                model="gemini-pro"
+                quality="high"
                 className="w-full h-full object-cover transition-opacity duration-500 aspect-square"
               />
             }
             controls={
               <>
                 <div className="space-y-2">
-                  <Label>Bucket</Label>
-                  <p className="bg-background p-2 rounded-sm">
-                    {managedExampleBucketId}
-                  </p>
+                  <Label>Bucket {managedExampleBucketId}</Label>
+                  <iframe
+                    src={`https://slopmachine.dev/embed/${managedExampleShareId}?showTitle=false&showResults=false`}
+                    width="100%"
+                    height="120"
+                  ></iframe>
                 </div>
 
                 <div className="space-y-2">
@@ -446,18 +447,18 @@ function App() {
           <p className="text-foreground/50">
             Generate an image based on a{" "}
             <a
-              href="http://slopmachine.dev"
+              href={`http://slopmachine.dev/share/${proceduralExampleShareId}`}
               className="text-primary text-underline font-bold"
               target="_blank"
             >
-              Slop Machine
-            </a>{" "}
-            bucket, based on the current date and personalized to the user's
-            location and weather.
+              Slop Machine bucket
+            </a>
+            , based on the current date and personalized to the user's location
+            and weather.
           </p>
           <ExampleComponent
             code={`<SlopImage
-  bucketId="${proceduralExampleBucketId}" // "${proceduralExamplePrompt}"
+  bucketId="${proceduralExampleBucketId}"
   variables={{
     location: ${codeLocation}
     weather: ${codeWeather}
@@ -474,7 +475,7 @@ function App() {
               ) : (
                 <SlopImage
                   bucketId={proceduralExampleBucketId}
-                  model="gemini-flash"
+                  quality="high"
                   variables={{
                     location: effectiveLocation,
                     weather: effectiveWeather,
@@ -487,10 +488,12 @@ function App() {
             controls={
               <>
                 <div className="space-y-2">
-                  <Label>Bucket</Label>
-                  <p className="bg-background p-2 rounded-sm">
-                    {proceduralExampleBucketId}
-                  </p>
+                  <Label>Bucket {proceduralExampleBucketId}</Label>
+                  <iframe
+                    src={`https://slopmachine.dev/embed/${proceduralExampleShareId}?showTitle=false&showResults=false`}
+                    width="100%"
+                    height="120"
+                  ></iframe>
                 </div>
 
                 <div className="space-y-2">
@@ -560,17 +563,17 @@ function App() {
           <p className="text-foreground/50">
             Generate a video based on a{" "}
             <a
-              href="http://slopmachine.dev"
+              href={`http://slopmachine.dev/share/${videoExampleShareId}`}
               className="text-primary text-underline font-bold"
               target="_blank"
             >
-              Slop Machine
-            </a>{" "}
-            bucket, passing variables to configure the output.
+              Slop Machine bucket
+            </a>
+            , passing variables to configure the output.
           </p>
           <ExampleComponent
             code={`<SlopText
-  bucketId="${videoExampleBucketId}"  // "${videoExamplePrompt}"
+  bucketId="${videoExampleBucketId}"
   variables={{
     theme: ${codeVideoTheme}
   }}
@@ -587,10 +590,12 @@ function App() {
             controls={
               <>
                 <div className="space-y-2">
-                  <Label>Bucket</Label>
-                  <p className="bg-background p-2 rounded-sm">
-                    {videoExampleBucketId}
-                  </p>
+                  <Label>Bucket {videoExampleBucketId}</Label>
+                  <iframe
+                    src={`https://slopmachine.dev/embed/${videoExampleShareId}?showTitle=false&showResults=false`}
+                    width="100%"
+                    height="120"
+                  ></iframe>
                 </div>
 
                 <div className="space-y-2">
@@ -621,17 +626,17 @@ function App() {
           <p className="text-foreground/50">
             Generate text based on a{" "}
             <a
-              href="http://slopmachine.dev"
+              href={`http://slopmachine.dev/share/${textExampleShareId}`}
               className="text-primary text-underline font-bold"
               target="_blank"
             >
-              Slop Machine
-            </a>{" "}
-            bucket, passing variables to configure the output.
+              Slop Machine bucket
+            </a>
+            , passing variables to configure the output.
           </p>
           <ExampleComponent
             code={`<SlopText
-  bucketId="${textExampleBucketId}"  // "${textExamplePrompt}"
+  bucketId="${textExampleBucketId}"
   variables={{
     location: ${textCodeLocation}
     weather: ${textCodeWeather}
@@ -658,10 +663,12 @@ function App() {
             controls={
               <>
                 <div className="space-y-2">
-                  <Label>Bucket</Label>
-                  <p className="bg-background p-2 rounded-sm">
-                    {textExampleBucketId}
-                  </p>
+                  <Label>Bucket {textExampleBucketId}</Label>
+                  <iframe
+                    src={`https://slopmachine.dev/embed/${textExampleShareId}?showTitle=false&showResults=false`}
+                    width="100%"
+                    height="120"
+                  ></iframe>
                 </div>
 
                 <div className="space-y-2">

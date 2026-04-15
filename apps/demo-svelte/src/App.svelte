@@ -6,27 +6,26 @@
   import {
     fetchLocation,
     fetchWeather,
-    managedWithControlsExamplePrompt,
     versionOptions,
     resultOptionsV1,
     resultOptionsV2,
     managedExampleBucketId,
     simpleVersionedExampleBucketId,
-    simpleVersionedExamplePromptV1,
-    simpleVersionedExamplePromptV2,
     DEFAULT_STATE,
     DROPDOWN_OPTIONS,
     generateCodeLocation,
     generateCodeWeather,
     generateSimpleCode,
     proceduralExampleBucketId,
-    proceduralExamplePrompt,
     videoExampleBucketId,
-    videoExamplePrompt,
     generateCodeTheme,
     titleCase,
     textExampleBucketId,
-    textExamplePrompt,
+    simpleVersionedExampleShareId,
+    managedExampleShareId,
+    proceduralExampleShareId,
+    videoExampleShareId,
+    textExampleShareId,
   } from "@slopmachine/demo-shared";
 
   import { mode, ModeWatcher } from "mode-watcher";
@@ -245,8 +244,6 @@
       version,
       result,
       simpleVersionedExampleBucketId,
-      simpleVersionedExamplePromptV1,
-      simpleVersionedExamplePromptV2,
     ),
   );
 </script>
@@ -271,7 +268,7 @@
     <p class="text-foreground/50">
       Grab the latest approved image from a
       <a
-        href="http://slopmachine.dev"
+        href="http://slopmachine.dev/share/{simpleVersionedExampleShareId}"
         class="text-primary text-underline font-bold"
         target="_blank"
       >
@@ -289,10 +286,13 @@
       {/snippet}
       {#snippet controls()}
         <div class="space-y-2">
-          <Label>Bucket</Label>
-          <p class="bg-background p-2 rounded-sm">
-            {simpleVersionedExampleBucketId}
-          </p>
+          <Label>Bucket {simpleVersionedExampleBucketId}</Label>
+          <iframe
+            src="https://slopmachine.dev/embed/{simpleVersionedExampleShareId}?showTitle=false&showResults=false"
+            width="100%"
+            height="120"
+            title="Bucket embed"
+          ></iframe>
         </div>
         <div class="space-y-2">
           <Label>Version</Label>
@@ -341,7 +341,7 @@
     <p class="text-foreground/50">
       Generate an image based on a
       <a
-        href="http://slopmachine.dev"
+        href="http://slopmachine.dev/share/{managedExampleShareId}"
         class="text-primary text-underline font-bold"
         target="_blank"
       >
@@ -351,7 +351,7 @@
     </p>
     <ExampleComponent
       code={`<SlopImage
-  bucket="${managedExampleBucketId}" // ${managedWithControlsExamplePrompt}
+  bucket="${managedExampleBucketId}"
   variables={{
     textcolor: "${textColor}",
     bgcolor: "${bgColor}",
@@ -367,14 +367,19 @@
             bgcolor: bgColor,
             slopcolor: slopColor,
           }}
-          model="gemini-pro"
+          quality="high"
           class="w-full h-full object-cover transition-opacity duration-500 aspect-square"
         />
       {/snippet}
       {#snippet controls()}
         <div class="space-y-2">
-          <Label>Bucket</Label>
-          <p class="bg-background p-2 rounded-sm">{managedExampleBucketId}</p>
+          <Label>Bucket {managedExampleBucketId}</Label>
+          <iframe
+            src="https://slopmachine.dev/embed/{managedExampleShareId}?showTitle=false&showResults=false"
+            width="100%"
+            height="120"
+            title="Bucket embed"
+          ></iframe>
         </div>
 
         <div class="space-y-2">
@@ -427,7 +432,7 @@
     <p class="text-foreground/50">
       Generate an image based on a
       <a
-        href="http://slopmachine.dev"
+        href="http://slopmachine.dev/share/{proceduralExampleShareId}"
         class="text-primary text-underline font-bold"
         target="_blank"
       >
@@ -438,7 +443,7 @@
     </p>
     <ExampleComponent
       code={`<SlopImage
-  bucketId="${proceduralExampleBucketId}" // "${proceduralExamplePrompt}"
+  bucketId="${proceduralExampleBucketId}"
   variables={{
     location: ${codeLocation}
     weather: ${codeWeather}
@@ -458,7 +463,7 @@
         {:else}
           <SlopImage
             bucketId={proceduralExampleBucketId}
-            model="gemini-flash"
+            quality="high"
             variables={{
               location: effectiveLocation,
               weather: effectiveWeather,
@@ -471,10 +476,13 @@
 
       {#snippet controls()}
         <div class="space-y-2">
-          <Label>Bucket</Label>
-          <p class="bg-background p-2 rounded-sm">
-            {proceduralExampleBucketId}
-          </p>
+          <Label>Bucket {proceduralExampleBucketId}</Label>
+          <iframe
+            src="https://slopmachine.dev/embed/{proceduralExampleShareId}?showTitle=false&showResults=false"
+            width="100%"
+            height="120"
+            title="Bucket embed"
+          ></iframe>
         </div>
 
         <div class="space-y-2">
@@ -533,7 +541,7 @@
     <p class="text-foreground/50">
       Generate a video based on a
       <a
-        href="http://slopmachine.dev"
+        href="http://slopmachine.dev/share/{videoExampleShareId}"
         class="text-primary text-underline font-bold"
         target="_blank"
       >
@@ -543,7 +551,7 @@
     </p>
     <ExampleComponent
       code={`<SlopVideo
-  bucketId="${videoExampleBucketId}"  // "${videoExamplePrompt}"
+  bucketId="${videoExampleBucketId}"
   variables={{
     theme: ${codeVideoTheme}
   }}
@@ -559,8 +567,13 @@
 
       {#snippet controls()}
         <div class="space-y-2">
-          <Label>Bucket</Label>
-          <p class="bg-background p-2 rounded-sm">{videoExampleBucketId}</p>
+          <Label>Bucket {videoExampleBucketId}</Label>
+          <iframe
+            src="https://slopmachine.dev/embed/{videoExampleShareId}?showTitle=false&showResults=false"
+            width="100%"
+            height="120"
+            title="Bucket embed"
+          ></iframe>
         </div>
 
         <div class="space-y-2">
@@ -585,7 +598,7 @@
     <p class="text-foreground/50">
       Generate text based on a
       <a
-        href="http://slopmachine.dev"
+        href="http://slopmachine.dev/share/{textExampleShareId}"
         class="text-primary text-underline font-bold"
         target="_blank"
       >
@@ -595,7 +608,7 @@
     </p>
     <ExampleComponent
       code={`<SlopText
-  bucketId="${textExampleBucketId}"  // "${textExamplePrompt}"
+  bucketId="${textExampleBucketId}"
   variables={{
     location: ${textCodeLocation}
     weather: ${textCodeWeather}
@@ -623,10 +636,13 @@
 
       {#snippet controls()}
         <div class="space-y-2">
-          <Label>Bucket</Label>
-          <p class="bg-background p-2 rounded-sm">
-            {textExampleBucketId}
-          </p>
+          <Label>Bucket {textExampleBucketId}</Label>
+          <iframe
+            src="https://slopmachine.dev/embed/{textExampleShareId}?showTitle=false&showResults=false"
+            width="100%"
+            height="120"
+            title="Bucket embed"
+          ></iframe>
         </div>
 
         <div class="space-y-2">

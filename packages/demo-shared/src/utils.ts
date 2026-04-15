@@ -51,32 +51,14 @@ export const generateSimpleCode = (
   version: string,
   result: string,
   bucketId: string,
-  promptV1: string,
-  promptV2: string,
 ) => {
   if (hasProps) {
-    let code = `<SlopImage\n  bucketId="${bucketId}" // ${
-      version === "v1" ? promptV1 : promptV2
-    }`;
+    let code = `<SlopImage\n  bucketId="${bucketId}"`;
     if (hasVersion) code += `\n  version="${version}"`;
     if (hasResult) code += `\n  resultId="${result}"`;
     code += `\n/>`;
     return code;
   } else {
-    return `<SlopImage\n  bucketId="${bucketId}" // ${promptV2} \n/>`;
+    return `<SlopImage bucketId="${bucketId}" />`;
   }
 };
-
-// export const getManagedSrc = (effectiveVersion: string, result: string) => {
-//   if (effectiveVersion === "v1") {
-//     if (result === "r1") return v1r1src;
-//     return v1r2src; // Auto, r2, or fallback
-//   }
-//   // v2
-//   if (result === "r1") return v2r1src;
-//   if (result === "r2") return v2r2src;
-//   if (result === "r3") return v2r3src;
-//   if (result === "r4") return v2r4src;
-//   if (result === "r5") return v2r5src;
-//   return v2r5src; // Auto or fallback
-// };
