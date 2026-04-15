@@ -272,9 +272,9 @@
         class="text-primary text-underline font-bold"
         target="_blank"
       >
-        Slop Machine
+        Slop Machine bucket
       </a>
-      bucket.
+      .
     </p>
     <ExampleComponent code={simpleCode}>
       {#snippet output()}
@@ -345,9 +345,9 @@
         class="text-primary text-underline font-bold"
         target="_blank"
       >
-        Slop Machine
+        Slop Machine bucket
       </a>
-      bucket, with specific changes allowed at runtime.
+      , with specific changes allowed at runtime.
     </p>
     <ExampleComponent
       code={`<SlopImage
@@ -436,10 +436,9 @@
         class="text-primary text-underline font-bold"
         target="_blank"
       >
-        Slop Machine
+        Slop Machine bucket
       </a>
-      bucket, based on the current date and personalized to the user's location and
-      weather.
+      , based on the current date and personalized to the user's location and weather.
     </p>
     <ExampleComponent
       code={`<SlopImage
@@ -545,9 +544,9 @@
         class="text-primary text-underline font-bold"
         target="_blank"
       >
-        Slop Machine
+        Slop Machine bucket
       </a>
-      bucket, passing variables to configure the output.
+      , passing variables to configure the output.
     </p>
     <ExampleComponent
       code={`<SlopVideo
@@ -602,9 +601,9 @@
         class="text-primary text-underline font-bold"
         target="_blank"
       >
-        Slop Machine
+        Slop Machine bucket
       </a>
-      bucket, passing variables to configure the output.
+      , passing variables to configure the output.
     </p>
     <ExampleComponent
       code={`<SlopText
