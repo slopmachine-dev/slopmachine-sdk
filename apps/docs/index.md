@@ -104,7 +104,7 @@ html:not(.dark) .dark-img { display: none; }
 
 <div style="display: flex; justify-content: center; width: 100%; padding: 2rem 0;">
   <!-- Light mode image -->
-  <img class="light-img" src="https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage?bucketId=0Risb3L5eS76tidF3ug9&resultId=C7rAqS6PkHL70lyHLVtV" alt="Slop Machine infographic" style="width: 100%; border: 3px solid #000; box-shadow: 6px 6px 0 #000; border-radius: 0.5rem;" />
+  <img class="light-img" src="https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage?bucketId=0Risb3L5eS76tidF3ug9&resultId=dfdxR18TytgLv22onnhE" alt="Slop Machine infographic" style="width: 100%; border: 3px solid #000; box-shadow: 6px 6px 0 #000; border-radius: 0.5rem;" />
   <!-- Dark mode image -->
-  <img class="dark-img" src="https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage?bucketId=0Risb3L5eS76tidF3ug9&resultId=1e5mhTxy3BOsaSzV8YSU" alt="Slop Machine infographic" style="width: 100%; border: 3px solid #fff; box-shadow: 6px 6px 0 #fff; border-radius: 0.5rem;" />
+  <img class="dark-img" src="https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage?bucketId=0Risb3L5eS76tidF3ug9&resultId=db8C2y2VuwAVejgUyQ0f" alt="Slop Machine infographic" style="width: 100%; border: 3px solid #fff; box-shadow: 6px 6px 0 #fff; border-radius: 0.5rem;" />
 </div>
