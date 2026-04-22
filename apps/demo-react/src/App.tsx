@@ -342,7 +342,7 @@ function App() {
         <div className="space-y-2">
           <h2 className="font-subheading">Controlled Example</h2>
           <p className="text-foreground/50">
-            Generate an image based on a{" "}
+            Update an existing image in a{" "}
             <a
               href={`http://slopmachine.dev/share/${managedExampleShareId}`}
               className="text-primary text-underline font-bold"

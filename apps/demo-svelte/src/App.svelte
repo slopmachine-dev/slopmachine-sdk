@@ -270,11 +270,8 @@
       <a
         href="http://slopmachine.dev/share/{simpleVersionedExampleShareId}"
         class="text-primary text-underline font-bold"
-        target="_blank"
-      >
-        Slop Machine bucket
-      </a>
-      .
+        target="_blank">Slop Machine bucket</a
+      >.
     </p>
     <ExampleComponent code={simpleCode}>
       {#snippet output()}
@@ -339,15 +336,12 @@
   <div class="space-y-2">
     <h2 class="font-subheading">Controlled Example</h2>
     <p class="text-foreground/50">
-      Generate an image based on a
+      Update an existing image in a
       <a
         href="http://slopmachine.dev/share/{managedExampleShareId}"
         class="text-primary text-underline font-bold"
-        target="_blank"
-      >
-        Slop Machine bucket
-      </a>
-      , with specific changes allowed at runtime.
+        target="_blank">Slop Machine bucket</a
+      >, with specific changes allowed at runtime.
     </p>
     <ExampleComponent
       code={`<SlopImage
@@ -434,11 +428,9 @@
       <a
         href="http://slopmachine.dev/share/{proceduralExampleShareId}"
         class="text-primary text-underline font-bold"
-        target="_blank"
-      >
-        Slop Machine bucket
-      </a>
-      , based on the current date and personalized to the user's location and weather.
+        target="_blank">Slop Machine bucket</a
+      >, based on the current date and personalized to the user's location and
+      weather.
     </p>
     <ExampleComponent
       code={`<SlopImage
@@ -542,11 +534,8 @@
       <a
         href="http://slopmachine.dev/share/{videoExampleShareId}"
         class="text-primary text-underline font-bold"
-        target="_blank"
-      >
-        Slop Machine bucket
-      </a>
-      , passing variables to configure the output.
+        target="_blank">Slop Machine bucket</a
+      >, passing variables to configure the output.
     </p>
     <ExampleComponent
       code={`<SlopVideo
@@ -599,11 +588,8 @@
       <a
         href="http://slopmachine.dev/share/{textExampleShareId}"
         class="text-primary text-underline font-bold"
-        target="_blank"
-      >
-        Slop Machine bucket
-      </a>
-      , passing variables to configure the output.
+        target="_blank">Slop Machine bucket</a
+      >, passing variables to configure the output.
     </p>
     <ExampleComponent
       code={`<SlopText
