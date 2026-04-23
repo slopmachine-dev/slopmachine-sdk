@@ -380,7 +380,7 @@ function App() {
                   <iframe
                     src={`https://slopmachine.dev/embed/${managedExampleShareId}?showTitle=false&showResults=false`}
                     width="100%"
-                    height="120"
+                    height="140"
                   ></iframe>
                 </div>
 
