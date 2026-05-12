@@ -60,8 +60,14 @@ export default defineConfig({
     nav: [
       { text: "Slop Machine", link: "https://slopmachine.dev" },
       { text: "Getting Started", link: "/getting-started" },
-      { text: "React Demo", link: "/demo-react/" },
-      { text: "Svelte Demo", link: "/demo-svelte/" },
+      {
+        text: "React Demo",
+        link: "https://slopmachine-dev.github.io/slopmachine-sdk/demo-react/",
+      },
+      {
+        text: "Svelte",
+        link: "https://slopmachine-dev.github.io/slopmachine-sdk/demo-svelte/",
+      },
     ],
     sidebar: [
       {
