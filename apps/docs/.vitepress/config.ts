@@ -10,6 +10,7 @@ export default defineConfig({
   description: "Documentation for Slop Machine Developer Tools",
   base: "/slopmachine-sdk/",
   outDir: ".vitepress/dist",
+  appearance: "force-auto",
   themeConfig: {
     nav: [
       { text: "Slop Machine", link: "https://slopmachine.dev" },
