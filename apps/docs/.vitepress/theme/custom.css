@@ -144,7 +144,7 @@ div[class*="language-"] {
 
 /* Images / Assets */
 .vp-doc img {
-  border: var(--border-width) solid var(--border-color) !important;
+  border: 4px solid var(--border-color) !important;
   box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color) !important;
   border-radius: 0.5rem !important;
 }
