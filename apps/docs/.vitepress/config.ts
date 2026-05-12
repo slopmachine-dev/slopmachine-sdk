@@ -59,8 +59,9 @@ export default defineConfig({
     siteTitle: "Slop Machine",
     nav: [
       { text: "Slop Machine", link: "https://slopmachine.dev" },
-      { text: "For Developers", link: "/" },
       { text: "Getting Started", link: "/getting-started" },
+      { text: "React Demo", link: "/demo-react/" },
+      { text: "Svelte Demo", link: "/demo-svelte/" },
     ],
     sidebar: [
       {
