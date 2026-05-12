@@ -3,8 +3,7 @@ description: Slop Machine SDK documentation, features, and demo links.
 layout: home
 
 hero:
-  name: "Slop Machine for Developers"
-  text: "Brand-safe generative assets"
+  name: "Brand-safe generative assets"
   tagline: "100x your mediocrity"
   actions:
     - theme: brand

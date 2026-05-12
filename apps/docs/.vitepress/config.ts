@@ -43,12 +43,13 @@ export default defineConfig({
     // @ts-expect-error type mismatch with vite versions
     plugins: [llmstxt()],
   },
-  title: "Slop Machine",
+  title: "Slop Machine for Developers",
   description: "Documentation for Slop Machine Developer Tools",
   base: "/slopmachine-sdk/",
   outDir: ".vitepress/dist",
   appearance: "force-auto",
   themeConfig: {
+    siteTitle: "Slop Machine",
     nav: [
       { text: "Slop Machine", link: "https://slopmachine.dev" },
       { text: "For Developers", link: "/" },
