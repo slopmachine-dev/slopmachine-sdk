@@ -207,7 +207,7 @@ div[class*="language-"] {
   background: none !important;
   text-transform: uppercase;
   -webkit-text-fill-color: var(--vp-c-text-1) !important;
-  width: 100% !important;
+  width: auto !important;
   text-align: center !important;
 }
 
