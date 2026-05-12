@@ -166,6 +166,11 @@ div[class*="language-"] {
   border-top: var(--border-width) solid var(--border-color) !important;
 }
 
+.social-links::before {
+  content: none !important;
+  display: none !important;
+}
+
 /* Badge */
 .VPBadge {
   border: 2px solid var(--border-color) !important;
