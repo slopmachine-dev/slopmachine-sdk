@@ -270,3 +270,28 @@ div[class*="language-"] {
     padding-right: 2rem !important;
   }
 }
+
+/* Navbar Layout: Left-align menu links */
+@media (min-width: 768px) {
+  .VPNavBarTitle {
+    /* Prevent title from expanding to push everything right */
+    flex-shrink: 0 !important;
+    width: auto !important;
+  }
+
+  .VPNavBar .content {
+    flex-grow: 1 !important;
+  }
+
+  .VPNavBar .content-body {
+    display: flex !important;
+    justify-content: flex-start !important;
+  }
+
+  .VPNavBarMenu {
+    flex-grow: 1 !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    margin-left: 2rem !important;
+  }
+}
