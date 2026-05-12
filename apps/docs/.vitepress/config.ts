@@ -2,6 +2,24 @@ import { defineConfig } from "vitepress";
 import llmstxt from "vitepress-plugin-llms";
 
 export default defineConfig({
+  head: [
+    [
+      "link",
+      {
+        rel: "icon",
+        href: "https://slopmachine.dev//favicon-light/favicon.ico",
+        media: "(prefers-color-scheme: light)",
+      },
+    ],
+    [
+      "link",
+      {
+        rel: "icon",
+        href: "https://slopmachine.dev/favicon-dark/favicon.ico",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
+  ],
   vite: {
     // @ts-expect-error type mismatch with vite versions
     plugins: [llmstxt()],
