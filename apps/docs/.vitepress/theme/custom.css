@@ -187,6 +187,7 @@ div[class*="language-"] {
 .VPNavBarTitle .title::after {
   content: "For Developers";
   margin-left: 0.75rem;
+  font-family: var(--vp-font-family-base, system-ui, sans-serif) !important;
   font-size: 0.65rem;
   font-weight: 500;
   line-height: 16px;
