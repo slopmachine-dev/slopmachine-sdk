@@ -25,6 +25,13 @@ export default defineConfig({
     [
       "link",
       {
+        href: "https://fonts.googleapis.com/css2?family=Special+Elite&display=swap",
+        rel: "stylesheet",
+      },
+    ],
+    [
+      "link",
+      {
         rel: "icon",
         href: "https://slopmachine.dev//favicon-light/favicon.ico",
         media: "(prefers-color-scheme: light)",

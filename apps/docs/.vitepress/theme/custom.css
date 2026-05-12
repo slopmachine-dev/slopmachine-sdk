@@ -205,5 +205,45 @@ div[class*="language-"] {
   font-family: "Rubik Dirt", cursive !important;
   color: var(--vp-c-text-1) !important;
   background: none !important;
+  text-transform: uppercase;
   -webkit-text-fill-color: var(--vp-c-text-1) !important;
+}
+
+/* Hero Tagline Font */
+.VPHero .tagline {
+  font-family: "Special Elite", cursive !important;
+}
+
+/* Center Hero Section */
+.VPHero {
+  text-align: center !important;
+}
+
+.VPHero .container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.VPHero .main {
+  order: 1 !important;
+  margin: 0 auto !important;
+  max-width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.VPHero .text {
+  text-align: center !important;
+  margin: 0 auto !important;
+}
+
+.VPHero .actions {
+  justify-content: center !important;
+}
+
+.VPHero .image {
+  display: none !important;
 }
