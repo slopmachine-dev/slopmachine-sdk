@@ -200,6 +200,10 @@ div[class*="language-"] {
   position: relative;
 }
 
+.VPNavBarSearch {
+  display: none !important;
+}
+
 /* Hero Title Font */
 
 .VPHero .heading {
