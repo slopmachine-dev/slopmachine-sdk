@@ -204,6 +204,7 @@ div[class*="language-"] {
 
 .VPHero .heading {
   width: 100% !important;
+  display: block !important;
 }
 
 .VPHero .name {
