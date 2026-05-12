@@ -144,14 +144,14 @@ div[class*="language-"] {
 
 /* Images / Assets */
 .vp-doc img {
-  border: 4px solid var(--border-color) !important;
+  border: var(--border-width) solid var(--border-color) !important;
   box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color) !important;
   border-radius: 0.5rem !important;
 }
 
 /* Sidebar and Header separators */
 .VPNavBar {
-  border-bottom: var(--border-width) solid var(--border-color) !important;
+  border-bottom: 4px solid var(--border-color) !important;
 }
 
 .VPSidebar {
@@ -246,4 +246,27 @@ div[class*="language-"] {
 
 .VPHero .image {
   display: none !important;
+}
+
+/* Navbar Width Constraints */
+.VPNavBar .container {
+  max-width: 80rem !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+@media (min-width: 640px) {
+  .VPNavBar .container {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .VPNavBar .container {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
 }
