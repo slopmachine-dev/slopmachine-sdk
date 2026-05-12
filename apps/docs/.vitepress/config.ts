@@ -3,6 +3,25 @@ import llmstxt from "vitepress-plugin-llms";
 
 export default defineConfig({
   head: [
+    ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
+    [
+      "link",
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" },
+    ],
+    [
+      "link",
+      {
+        href: "https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&display=swap",
+        rel: "stylesheet",
+      },
+    ],
+    [
+      "link",
+      {
+        href: "https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap",
+        rel: "stylesheet",
+      },
+    ],
     [
       "link",
       {
@@ -24,7 +43,7 @@ export default defineConfig({
     // @ts-expect-error type mismatch with vite versions
     plugins: [llmstxt()],
   },
-  title: "Slop Machine for Developers",
+  title: "Slop Machine",
   description: "Documentation for Slop Machine Developer Tools",
   base: "/slopmachine-sdk/",
   outDir: ".vitepress/dist",

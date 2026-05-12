@@ -173,3 +173,14 @@ div[class*="language-"] {
   border-radius: 0.25rem !important;
   font-weight: bold;
 }
+
+/* Site Title Font */
+.VPNavBarTitle .title,
+.VPNavBarTitle {
+  font-family: "Rubik Wet Paint", cursive !important;
+}
+
+/* Hero Title Font */
+.VPHero .name {
+  font-family: "Rubik Dirt", cursive !important;
+}
