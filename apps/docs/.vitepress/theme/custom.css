@@ -301,7 +301,7 @@ div[class*="language-"] {
   padding: 0 !important;
 }
 
-.has-sidebar.VPNavBar .content {
+.has-sidebar.VPNavBar .content-body {
   border-bottom: var(--border-width) solid var(--border-color) !important;
 }
 
