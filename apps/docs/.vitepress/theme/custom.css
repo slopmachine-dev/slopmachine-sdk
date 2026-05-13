@@ -301,6 +301,10 @@ div[class*="language-"] {
   padding: 0 !important;
 }
 
+.has-sidebar.VPNavBar .content {
+  border-bottom: var(--border-width) solid var(--border-color) !important;
+}
+
 .has-sidebar.VPNavBar .divider {
   display: none !important;
 }
