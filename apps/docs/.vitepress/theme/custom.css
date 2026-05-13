@@ -353,5 +353,6 @@ div[class*="language-"] {
     display: flex !important;
     justify-content: flex-start !important;
     margin-left: 2rem !important;
+    margin-right: 2rem !important;
   }
 }
