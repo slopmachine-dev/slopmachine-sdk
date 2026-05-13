@@ -189,7 +189,7 @@ div[class*="language-"] {
   color: var(--vp-c-brand-1);
 }
 
-:not(.has-sidebar) .VPNavBarTitle .title::after {
+.VPNavBarTitle .title::after {
   content: "For Developers";
   margin-left: 0.75rem;
   font-family: var(--vp-font-family-base, system-ui, sans-serif) !important;
@@ -205,7 +205,11 @@ div[class*="language-"] {
   position: relative;
 }
 
-.VPNavBarTitle .has-sidebar .title {
+.has-sidebar .VPNavBarTitle .title::after {
+  display: none !important;
+}
+
+.has-sidebar .VPNavBarTitle .title {
   max-width: var(--vp-sidebar-width);
   border: none !important;
 }
