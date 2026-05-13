@@ -189,7 +189,7 @@ div[class*="language-"] {
   color: var(--vp-c-brand-1);
 }
 
-.VPNavBarTitle :not(.has-sidebar) .title::after {
+:not(.has-sidebar) .VPNavBarTitle .title::after {
   content: "For Developers";
   margin-left: 0.75rem;
   font-family: var(--vp-font-family-base, system-ui, sans-serif) !important;
