@@ -207,6 +207,7 @@ div[class*="language-"] {
 
 .VPNavBarTitle .has-sidebar .title {
   max-width: var(--vp-sidebar-width);
+  border: none !important;
 }
 
 .VPNavBarSearch {
