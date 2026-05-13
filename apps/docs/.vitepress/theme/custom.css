@@ -296,6 +296,7 @@ div[class*="language-"] {
   max-width: 100% !important;
 }
 
+.has-sidebar.VPNavBar .container,
 .has-sidebar.VPNavBar .content {
   padding: 0 !important;
 }
