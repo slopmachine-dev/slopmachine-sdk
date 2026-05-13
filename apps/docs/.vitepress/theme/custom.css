@@ -352,6 +352,10 @@ div[class*="language-"] {
     flex-grow: 1 !important;
     display: flex !important;
     justify-content: flex-start !important;
+  }
+
+  .VPNavBarMenu,
+  .VPNavBarSocialLinks {
     margin-left: 2rem !important;
     margin-right: 2rem !important;
   }
