@@ -65,6 +65,10 @@
   font-weight: 900 !important;
   letter-spacing: -0.025em;
 }
+.vp-doc h2,
+.group + .group {
+  border-top-width: var(--border-width) !important;
+}
 
 /* Neubrutalist global components override */
 
