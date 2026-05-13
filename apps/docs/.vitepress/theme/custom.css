@@ -150,8 +150,12 @@ div[class*="language-"] {
 }
 
 /* Sidebar and Header separators */
-.VPNavBar :not(.has-sidebar) {
+.VPNavBar {
   border-bottom: 4px solid var(--border-color) !important;
+}
+
+.has-sidebar .VPNavBar {
+  border: none !important;
 }
 
 .VPSidebar {
