@@ -216,7 +216,6 @@ div[class*="language-"] {
 .has-sidebar .VPNavBarTitle .title {
   max-width: var(--vp-sidebar-width);
   border: none !important;
-  height: auto !important;
 }
 
 .VPNavBarSearch {
@@ -287,6 +286,11 @@ div[class*="language-"] {
   padding-right: 1rem !important;
 }
 
+.has-sidebar.VPNavMenu .container {
+  margin-left: var(--vp-sidebar-width) !important;
+  margin-right: 0 !important;
+}
+
 @media (min-width: 640px) {
   .VPNavBar .container {
     padding-left: 1.5rem !important;
@@ -316,11 +320,6 @@ div[class*="language-"] {
   .VPNavBar .content-body {
     display: flex !important;
     justify-content: flex-start !important;
-  }
-
-  .has-sidebar .VPNavMenu .container {
-    margin-left: var(--vp-sidebar-width) !important;
-    margin-right: 0 !important;
   }
 
   .VPNavBarMenu {
