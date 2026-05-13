@@ -317,6 +317,10 @@ div[class*="language-"] {
   padding-right: 32px !important;
 }
 
+.outline-marker {
+  width: var(--border-width) !important;
+}
+
 @media (min-width: 640px) {
   .VPNavBar .container {
     padding-left: 1.5rem !important;
