@@ -318,15 +318,15 @@ div[class*="language-"] {
     justify-content: flex-start !important;
   }
 
+  .has-sidebar .VPNavMenu .container {
+    margin-left: var(--vp-sidebar-width) !important;
+    margin-right: 0 !important;
+  }
+
   .VPNavBarMenu {
     flex-grow: 1 !important;
     display: flex !important;
     justify-content: flex-start !important;
     margin-left: 2rem !important;
-  }
-
-  .has-sidebar .container {
-    margin-left: var(--vp-sidebar-width) !important;
-    margin-right: 0 !important;
   }
 }
