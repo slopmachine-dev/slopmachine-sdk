@@ -299,6 +299,8 @@ div[class*="language-"] {
 .VPSidebar {
   max-width: var(--vp-sidebar-width) !important;
   width: var(--vp-sidebar-width) !important;
+  padding-left: 32px !important;
+  padding-right: 32px !important;
 }
 
 @media (min-width: 640px) {
