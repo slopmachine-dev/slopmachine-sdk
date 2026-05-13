@@ -154,7 +154,7 @@ div[class*="language-"] {
   border-bottom: 4px solid var(--border-color) !important;
 }
 
-.has-sidebar .VPNavBar {
+.has-sidebar.VPNavBar {
   border: none !important;
 }
 
