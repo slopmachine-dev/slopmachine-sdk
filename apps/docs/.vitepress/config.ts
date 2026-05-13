@@ -65,7 +65,7 @@ export default defineConfig({
         link: "https://slopmachine-dev.github.io/slopmachine-sdk/demo-react/",
       },
       {
-        text: "Svelte",
+        text: "Svelte Demo",
         link: "https://slopmachine-dev.github.io/slopmachine-sdk/demo-svelte/",
       },
     ],

@@ -205,6 +205,10 @@ div[class*="language-"] {
   position: relative;
 }
 
+.has-sidebar .VPNavBarTitle .title::after {
+  display: none !important;
+}
+
 .VPNavBarSearch {
   display: none !important;
 }
