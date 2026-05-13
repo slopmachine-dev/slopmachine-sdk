@@ -150,7 +150,7 @@ div[class*="language-"] {
 }
 
 /* Sidebar and Header separators */
-.VPNavBar {
+.VPNavBar :not(.has-sidebar) {
   border-bottom: 4px solid var(--border-color) !important;
 }
 
@@ -189,7 +189,7 @@ div[class*="language-"] {
   color: var(--vp-c-brand-1);
 }
 
-.VPNavBarTitle .title::after {
+.VPNavBarTitle :not(.has-sidebar) .title::after {
   content: "For Developers";
   margin-left: 0.75rem;
   font-family: var(--vp-font-family-base, system-ui, sans-serif) !important;
@@ -205,8 +205,8 @@ div[class*="language-"] {
   position: relative;
 }
 
-.has-sidebar .VPNavBarTitle .title::after {
-  display: none !important;
+.VPNavBarTitle .has-sidebar .title {
+  max-width: var(--vp-sidebar-width);
 }
 
 .VPNavBarSearch {
