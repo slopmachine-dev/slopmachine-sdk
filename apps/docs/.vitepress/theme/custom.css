@@ -292,6 +292,10 @@ div[class*="language-"] {
   max-width: 100% !important;
 }
 
+.has-sidebar.VPNavBar .content {
+  padding: 0 !important;
+}
+
 .has-sidebar.VPNavBar .divider {
   display: none !important;
 }
