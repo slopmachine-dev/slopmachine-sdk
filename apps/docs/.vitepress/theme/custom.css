@@ -297,7 +297,7 @@ div[class*="language-"] {
 }
 
 .VPSidebar,
-.has-sidebar.VPNavBar .title {
+.has-sidebar.VPNavBar .title:not(a) {
   max-width: var(--vp-sidebar-width) !important;
   width: var(--vp-sidebar-width) !important;
   padding-left: 32px !important;
