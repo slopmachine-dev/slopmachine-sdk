@@ -32,7 +32,7 @@ export interface SlopTextProps
  * />
  * ```
  *
- * @version 0.1.22
+ * @version 0.1.23
  */
 export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
   (
@@ -69,7 +69,7 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
           });
 
           // Fetch the URL to get the content, following redirects automatically
-          const response = await fetch(url);
+          const response = await fetch(url, { cache: "no-store" });
           if (!response.ok) {
             let errorMessage = response.statusText;
             try {
