@@ -33,11 +33,12 @@ export function ExampleComponent({
       {/* Code */}
       <div className="col-span-2 overflow-hidden rounded-none rounded-b-sm border-2 border-neutral-800">
         <CodeBlock
-          className="rounded-none rounded-b-sm"
+          className="rounded-none rounded-b-sm border-0"
           code={code}
           language="tsx"
           showLineNumbers
-          wrap>
+          wrap
+        >
           <CodeBlockCopyButton />
         </CodeBlock>
       </div>

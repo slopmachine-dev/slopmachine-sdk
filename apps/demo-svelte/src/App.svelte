@@ -3,6 +3,7 @@
   import * as Select from "$lib/components/ui/select";
   import { Label } from "$lib/components/ui/label";
   import ExampleComponent from "./lib/components/ExampleComponent.svelte";
+  import Header from "./lib/components/Header.svelte";
   import {
     fetchLocation,
     fetchWeather,
@@ -249,20 +250,8 @@
 </script>
 
 <ModeWatcher />
+<Header />
 <div class="min-h-screen p-8 font-sans max-w-4xl mx-auto space-y-12">
-  <div class="flex justify-between items-center border-b pb-4">
-    <h1 class="text-4xl font-heading">Slop Machine Svelte SDK Demo</h1>
-    <a
-      href={window.location.pathname.replace(
-        /\/demo-svelte\/?$/,
-        "/demo-react/",
-      )}
-      class="text-sm text-primary"
-    >
-      Switch to React Demo &rarr;
-    </a>
-  </div>
-
   <div class="space-y-2">
     <h2 class="font-subheading">Simple Example</h2>
     <p class="text-foreground/50">

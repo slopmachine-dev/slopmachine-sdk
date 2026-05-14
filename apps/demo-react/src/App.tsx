@@ -37,6 +37,8 @@ import {
   textExampleShareId,
 } from "@slopmachine/demo-shared";
 
+import { Header } from "./components/Header";
+
 function App() {
   const { theme: siteTheme } = useTheme();
   const resolvedTheme =
@@ -242,20 +244,8 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <Header />
       <div className="min-h-screen p-8 font-sans max-w-4xl mx-auto space-y-12">
-        <div className="flex justify-between items-center border-b pb-4">
-          <h1 className="text-4xl font-heading">Slop Machine React SDK Demo</h1>
-          <a
-            href={window.location.pathname.replace(
-              /\/demo-react\/?$/,
-              "/demo-svelte/",
-            )}
-            className="text-sm text-primary"
-          >
-            Switch to Svelte Demo &rarr;
-          </a>
-        </div>
-
         <div className="space-y-2">
           <h2 className="font-subheading">Simple Example</h2>
           <p className="text-foreground/50">

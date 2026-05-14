@@ -1,4 +1,6 @@
 :root {
+  --vp-nav-height: 68px;
+
   /* Core neubrutalist properties */
   --shadow-offset: 6px;
   --shadow-color: oklch(0 0 0); /* Pure black for shadows */
@@ -199,14 +201,14 @@ div[class*="language-"] {
 
 .VPNavBarTitle .title::after {
   content: "For Developers";
-  margin-left: 0.75rem;
+  margin-left: 12px;
   font-family: var(--vp-font-family-base, system-ui, sans-serif) !important;
   font-size: 0.65rem;
   font-weight: 500;
   line-height: 16px;
   background-color: var(--vp-c-brand-2);
   color: var(--vp-c-text-1);
-  padding: 0.2rem 0.5rem;
+  padding: 2px;
   border: 1px solid rgba(0, 0, 0, 0);
   border-radius: 4px;
   vertical-align: middle;
@@ -317,6 +319,18 @@ div[class*="language-"] {
   padding-right: 32px !important;
 }
 
+.VPNavBarMenuLink {
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+  color: var(--vp-c-text-3) !important;
+}
+
+.VPNavBarSocialLink > svg {
+  width: 32px !important;
+  height: 32px !important;
+  color: var(--vp-c-text-3) !important;
+}
+
 .outline-marker {
   width: var(--border-width) !important;
 }
@@ -360,6 +374,12 @@ div[class*="language-"] {
 
   .VPNavBarMenu,
   .VPNavBarSocialLinks {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .has-sidebar .VPNavBarMenu,
+  .has-sidebar .VPNavBarSocialLinks {
     margin-left: 2rem !important;
     margin-right: 2rem !important;
   }
