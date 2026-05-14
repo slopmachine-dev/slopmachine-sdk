@@ -321,11 +321,12 @@ div[class*="language-"] {
 
 .VPNavBarMenuLink {
   padding-left: 24px !important;
-  padding-right: 24px !important;
+  padding-right: 0 !important;
   color: var(--vp-c-text-3) !important;
 }
 
-.VPNavBarSocialLink > svg {
+.VPNavBarSocialLink > svg,
+.VPSocialLink > [class^="vpi-social-"] {
   width: 32px !important;
   height: 32px !important;
   color: var(--vp-c-text-3) !important;
