@@ -27,6 +27,8 @@
     proceduralExampleShareId,
     videoExampleShareId,
     textExampleShareId,
+    getBrowserLanguage,
+    generateCodeLanguage,
   } from "@slopmachine/demo-shared";
 
   import { mode, ModeWatcher } from "mode-watcher";
@@ -39,6 +41,7 @@
 
   let textLocation = $state(DEFAULT_STATE.location);
   let textWeather = $state(DEFAULT_STATE.weather);
+  let textLanguage = $state(DEFAULT_STATE.language);
 
   let result = $state(DEFAULT_STATE.result);
   let version = $state(DEFAULT_STATE.version);
@@ -171,6 +174,11 @@
     textWeather === "Auto" ? textDetectedWeather : textWeather,
   );
 
+  let detectedLanguage = $derived(getBrowserLanguage());
+  let textEffectiveLanguage = $derived(
+    textLanguage === "Auto" ? detectedLanguage : textLanguage,
+  );
+
   let effectiveTheme = $derived(
     theme === "Auto" ? titleCase(mode.current ?? "Light") : theme,
   );
@@ -194,6 +202,9 @@
   );
   let textCodeWeather = $derived(
     generateCodeWeather(textWeather, textDetectedWeather, textEffectiveWeather),
+  );
+  let textCodeLanguage = $derived(
+    generateCodeLanguage(textLanguage, detectedLanguage),
   );
   let codeTheme = $derived(generateCodeTheme(theme, mode.current ?? "light"));
   let codeVideoTheme = $derived(
@@ -586,6 +597,7 @@
   variables={{
     location: ${textCodeLocation}
     weather: ${textCodeWeather}
+    language: ${textCodeLanguage}
   }}
 />`}
     >
@@ -602,6 +614,7 @@
             variables={{
               location: textEffectiveLocation,
               weather: textEffectiveWeather,
+              language: textEffectiveLanguage,
             }}
             class="p-2"
           />
@@ -647,6 +660,21 @@
                 >Auto</Select.Item
               >
               {#each DROPDOWN_OPTIONS.weather as opt}
+                <Select.Item value={opt.value}>{opt.label}</Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        </div>
+
+        <div class="space-y-2">
+          <Label>Language</Label>
+          <Select.Root type="single" bind:value={textLanguage}>
+            <Select.Trigger class="w-full">
+              {textLanguage}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="Auto">Auto</Select.Item>
+              {#each DROPDOWN_OPTIONS.languages as opt}
                 <Select.Item value={opt.value}>{opt.label}</Select.Item>
               {/each}
             </Select.Content>

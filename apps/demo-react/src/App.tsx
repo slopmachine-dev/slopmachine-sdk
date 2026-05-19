@@ -35,6 +35,8 @@ import {
   proceduralExampleShareId,
   videoExampleShareId,
   textExampleShareId,
+  getBrowserLanguage,
+  generateCodeLanguage,
 } from "@slopmachine/demo-shared";
 
 import { Header } from "./components/Header";
@@ -57,6 +59,7 @@ function App() {
 
   const [textLocation, setTextLocation] = useState(DEFAULT_STATE.location);
   const [textWeather, setTextWeather] = useState(DEFAULT_STATE.weather);
+  const [textLanguage, setTextLanguage] = useState(DEFAULT_STATE.language);
 
   const [result, setResult] = useState(DEFAULT_STATE.result);
   const [version, setVersion] = useState(DEFAULT_STATE.version);
@@ -200,6 +203,12 @@ function App() {
     textDetectedWeather,
     textEffectiveWeather,
   );
+
+  const detectedLanguage = getBrowserLanguage();
+  const textEffectiveLanguage =
+    textLanguage === "Auto" ? detectedLanguage : textLanguage;
+  const textCodeLanguage = generateCodeLanguage(textLanguage, detectedLanguage);
+
   const codeTheme = generateCodeTheme(theme, resolvedTheme);
   const codeVideoTheme = generateCodeTheme(videoTheme, resolvedTheme);
 
@@ -630,6 +639,7 @@ function App() {
   variables={{
     location: ${textCodeLocation}
     weather: ${textCodeWeather}
+    language: ${textCodeLanguage}
   }}
 />`}
             output={
@@ -645,6 +655,7 @@ function App() {
                   variables={{
                     location: textEffectiveLocation,
                     weather: textEffectiveWeather,
+                    language: textEffectiveLanguage,
                   }}
                   className="p-2"
                 />
@@ -701,6 +712,25 @@ function App() {
                         Auto
                       </SelectItem>
                       {DROPDOWN_OPTIONS.weather.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Language</Label>
+                  <Select value={textLanguage} onValueChange={setTextLanguage}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select language">
+                        {textLanguage}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Auto">Auto</SelectItem>
+                      {DROPDOWN_OPTIONS.languages.map((opt) => (
                         <SelectItem key={opt.value} value={opt.value}>
                           {opt.label}
                         </SelectItem>

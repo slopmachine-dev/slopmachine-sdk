@@ -41,6 +41,49 @@ export const generateCodeTheme = (
     : `"${theme}",`;
 };
 
+export const getBrowserLanguage = () => {
+  if (typeof navigator !== "undefined" && navigator.language) {
+    const lang = navigator.language.split("-")[0];
+    switch (lang) {
+      case "es":
+        return "Spanish";
+      case "fr":
+        return "French";
+      case "de":
+        return "German";
+      case "ja":
+        return "Japanese";
+      case "zh":
+        return "Chinese";
+      case "hi":
+        return "Hindi";
+      case "ar":
+        return "Arabic";
+      case "pt":
+        return "Portuguese";
+      case "ru":
+        return "Russian";
+      case "it":
+        return "Italian";
+      case "ko":
+        return "Korean";
+      default:
+        return "English";
+    }
+  }
+  return "English";
+};
+
+export const generateCodeLanguage = (
+  language: string,
+  detectedLanguage: string,
+) => {
+  if (language === "Auto") {
+    return `getLanguage(), // ${detectedLanguage}`;
+  }
+  return `"${language}",`;
+};
+
 export const titleCase = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 

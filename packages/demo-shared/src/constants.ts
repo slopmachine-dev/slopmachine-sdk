@@ -39,6 +39,7 @@ export const DEFAULT_STATE = {
   bgColor: "white",
   textColor: "black",
   slopColor: "pink",
+  language: "Auto",
 };
 
 export const DROPDOWN_OPTIONS = {
@@ -80,5 +81,19 @@ export const DROPDOWN_OPTIONS = {
     { value: "blue", label: "Blue" },
     { value: "yellow", label: "Yellow" },
     { value: "purple", label: "Purple" },
+  ],
+  languages: [
+    { value: "Arabic", label: "Arabic" },
+    { value: "Chinese", label: "Chinese" },
+    { value: "English", label: "English" },
+    { value: "French", label: "French" },
+    { value: "German", label: "German" },
+    { value: "Hindi", label: "Hindi" },
+    { value: "Italian", label: "Italian" },
+    { value: "Japanese", label: "Japanese" },
+    { value: "Korean", label: "Korean" },
+    { value: "Portuguese", label: "Portuguese" },
+    { value: "Russian", label: "Russian" },
+    { value: "Spanish", label: "Spanish" },
   ],
 };
