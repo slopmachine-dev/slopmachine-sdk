@@ -29,6 +29,7 @@
     textExampleShareId,
     getBrowserLanguage,
     generateCodeLanguage,
+    examplesContent,
   } from "@slopmachine/demo-shared";
 
   import { mode, ModeWatcher } from "mode-watcher";
@@ -264,14 +265,14 @@
 <Header />
 <div class="min-h-screen p-8 font-sans max-w-4xl mx-auto space-y-12">
   <div class="space-y-2">
-    <h2 class="font-subheading">Simple Example</h2>
+    <h2 class="font-subheading">{examplesContent.simple.heading}</h2>
     <p class="text-foreground/50">
-      Grab the latest approved image from a
+      {examplesContent.simple.descriptionPrefix}
       <a
         href="http://slopmachine.dev/share/{simpleVersionedExampleShareId}"
         class="text-primary text-underline font-bold"
         target="_blank">Slop Machine bucket</a
-      >.
+      >{examplesContent.simple.descriptionSuffix}
     </p>
     <ExampleComponent code={simpleCode}>
       {#snippet output()}
@@ -334,14 +335,14 @@
   </div>
 
   <div class="space-y-2">
-    <h2 class="font-subheading">Controlled Example</h2>
+    <h2 class="font-subheading">{examplesContent.controlled.heading}</h2>
     <p class="text-foreground/50">
-      Update an existing image in a
+      {examplesContent.controlled.descriptionPrefix}
       <a
         href="http://slopmachine.dev/share/{managedExampleShareId}"
         class="text-primary text-underline font-bold"
         target="_blank">Slop Machine bucket</a
-      >, with specific changes allowed at runtime.
+      >{examplesContent.controlled.descriptionSuffix}
     </p>
     <ExampleComponent
       code={`<SlopImage
@@ -422,15 +423,14 @@
   </div>
 
   <div class="space-y-2">
-    <h2 class="font-subheading">Procedural Example</h2>
+    <h2 class="font-subheading">{examplesContent.procedural.heading}</h2>
     <p class="text-foreground/50">
-      Generate an image based on a
+      {examplesContent.procedural.descriptionPrefix}
       <a
         href="http://slopmachine.dev/share/{proceduralExampleShareId}"
         class="text-primary text-underline font-bold"
         target="_blank">Slop Machine bucket</a
-      >, based on the current date and personalized to the user's location and
-      weather.
+      >{examplesContent.procedural.descriptionSuffix}
     </p>
     <ExampleComponent
       code={`<SlopImage
@@ -528,14 +528,14 @@
   </div>
 
   <div class="space-y-2">
-    <h2 class="font-subheading">Video Example</h2>
+    <h2 class="font-subheading">{examplesContent.video.heading}</h2>
     <p class="text-foreground/50">
-      Generate a video based on a
+      {examplesContent.video.descriptionPrefix}
       <a
         href="http://slopmachine.dev/share/{videoExampleShareId}"
         class="text-primary text-underline font-bold"
         target="_blank">Slop Machine bucket</a
-      >, passing variables to configure the output.
+      >{examplesContent.video.descriptionSuffix}
     </p>
     <ExampleComponent
       code={`<SlopVideo
@@ -582,14 +582,14 @@
   </div>
 
   <div class="space-y-2">
-    <h2 class="font-subheading">Text Example</h2>
+    <h2 class="font-subheading">{examplesContent.text.heading}</h2>
     <p class="text-foreground/50">
-      Generate text based on a
+      {examplesContent.text.descriptionPrefix}
       <a
         href="http://slopmachine.dev/share/{textExampleShareId}"
         class="text-primary text-underline font-bold"
         target="_blank">Slop Machine bucket</a
-      >, passing variables to configure the output.
+      >{examplesContent.text.descriptionSuffix}
     </p>
     <ExampleComponent
       code={`<SlopText

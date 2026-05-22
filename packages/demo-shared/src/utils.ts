@@ -105,3 +105,32 @@ export const generateSimpleCode = (
     return `<SlopImage bucketId="${bucketId}" />`;
   }
 };
+
+export const examplesContent = {
+  simple: {
+    heading: "Simple Example",
+    descriptionPrefix: "Grab the latest approved image from a",
+    descriptionSuffix: ".",
+  },
+  controlled: {
+    heading: "Controlled Example",
+    descriptionPrefix: "Update an existing image in a",
+    descriptionSuffix: ", with specific changes allowed at runtime.",
+  },
+  procedural: {
+    heading: "Procedural Example",
+    descriptionPrefix: "Generate an image based on a",
+    descriptionSuffix:
+      ", based on the current date and personalized to the user's location and weather.",
+  },
+  video: {
+    heading: "Video Example",
+    descriptionPrefix: "Generate a video based on a",
+    descriptionSuffix: ", passing variables to configure the output.",
+  },
+  text: {
+    heading: "Text Example",
+    descriptionPrefix: "Generate text based on a",
+    descriptionSuffix: ", passing variables to configure the output.",
+  },
+};
