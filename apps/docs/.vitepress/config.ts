@@ -52,7 +52,7 @@ export default defineConfig({
   },
   title: "Slop Machine for Developers",
   description: "Documentation for Slop Machine Developer Tools",
-  base: "/slopmachine-sdk/",
+  base: "/",
   outDir: ".vitepress/dist",
   appearance: "force-auto",
   themeConfig: {
@@ -66,12 +66,12 @@ export default defineConfig({
       { text: "Getting Started", link: "/getting-started" },
       {
         text: "React Demo",
-        link: "https://slopmachine-dev.github.io/slopmachine-sdk/demo-react/",
+        link: "/demo-react/",
         target: "_self",
       },
       {
         text: "Svelte Demo",
-        link: "https://slopmachine-dev.github.io/slopmachine-sdk/demo-svelte/",
+        link: "/demo-svelte/",
         target: "_self",
       },
     ],

@@ -5,7 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   root: ".",
-  base: "./",
+  base: "/demo-react/",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
