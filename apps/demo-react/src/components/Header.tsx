@@ -23,19 +23,19 @@ export function Header() {
               Slop Machine
             </a>
             <a
-              href="https://slopmachine-dev.github.io/slopmachine-sdk/getting-started"
+              href="https://docs.slopmachine.dev/getting-started"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               Getting Started
             </a>
             <a
-              href="https://slopmachine-dev.github.io/slopmachine-sdk/demo-react/"
+              href="https://docs.slopmachine.dev/demo-react/"
               className="text-primary transition-colors"
             >
               React Demo
             </a>
             <a
-              href="https://slopmachine-dev.github.io/slopmachine-sdk/demo-svelte/"
+              href="https://docs.slopmachine.dev/demo-svelte/"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               Svelte Demo

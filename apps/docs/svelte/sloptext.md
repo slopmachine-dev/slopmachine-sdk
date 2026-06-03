@@ -8,7 +8,7 @@ The `@slopmachine/svelte` package provides a top-tier Developer Experience (DX) 
 
 By default, the component handles loading states with a nice built-in shimmer effect and loading spinner. It automatically fetches the markdown content from the generated text URL, parses it, and renders it cleanly once it is ready.
 
-Try the [Live Interactive Svelte Demo](https://slopmachine-dev.github.io/slopmachine-sdk/demo-svelte/) to see the component in action!
+Try the [Live Interactive Svelte Demo](https://docs.slopmachine.dev/demo-svelte/) to see the component in action!
 
 ## Installation
 

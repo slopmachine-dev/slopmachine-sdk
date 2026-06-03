@@ -14,7 +14,7 @@ pnpm add @slopmachine/svelte
 
 ## Demo
 
-https://slopmachine-dev.github.io/slopmachine-sdk/demo-svelte/
+https://docs.slopmachine.dev/demo-svelte/
 
 ## Usage
 

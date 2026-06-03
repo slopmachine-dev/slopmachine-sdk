@@ -14,7 +14,7 @@ pnpm add @slopmachine/react
 
 ## Demo
 
-https://slopmachine-dev.github.io/slopmachine-sdk/demo-react/
+https://docs.slopmachine.dev/demo-react/
 
 ## Usage
 

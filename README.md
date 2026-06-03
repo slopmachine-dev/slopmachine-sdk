@@ -83,12 +83,12 @@ function App() {
 
 Check out our live interactive demos to see the components in action:
 
-- [React Demo](https://slopmachine-dev.github.io/slopmachine-sdk/demo-react/)
-- [Svelte Demo](https://slopmachine-dev.github.io/slopmachine-sdk/demo-svelte/)
+- [React Demo](https://docs.slopmachine.dev/demo-react/)
+- [Svelte Demo](https://docs.slopmachine.dev/demo-svelte/)
 
 ## Documentation
 
-For full documentation, advanced usage, and API reference, please see our [Docs](https://slopmachine-dev.github.io/slopmachine-sdk/).
+For full documentation, advanced usage, and API reference, please see our [Docs](https://docs.slopmachine.dev/).
 
 ## Contributing
 

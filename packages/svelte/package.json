@@ -1,8 +1,8 @@
 {
   "name": "@slopmachine/svelte",
   "version": "0.1.22",
-  "llms": "https://slopmachine-dev.github.io/slopmachine-sdk/llms.txt",
-  "llmsFull": "https://slopmachine-dev.github.io/slopmachine-sdk/llms-full.txt",
+  "llms": "https://docs.slopmachine.dev/llms.txt",
+  "llmsFull": "https://docs.slopmachine.dev/llms-full.txt",
   "description": "The official Svelte SDK for Slop Machine",
   "type": "module",
   "main": "src/index.ts",

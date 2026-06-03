@@ -8,7 +8,7 @@ The `@slopmachine/react` package provides a top-tier Developer Experience (DX) f
 
 By default, the component handles loading states with a built-in shimmer effect and loading spinner. It automatically fetches the markdown content from the generated text URL, parses it, and renders it beautifully while ensuring the layout respects its container without unnecessary layout shifts.
 
-Try the [Live Interactive React Demo](https://slopmachine-dev.github.io/slopmachine-sdk/demo-react/) to see the component in action!
+Try the [Live Interactive React Demo](https://docs.slopmachine.dev/demo-react/) to see the component in action!
 
 ## Installation
 
