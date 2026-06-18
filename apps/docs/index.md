@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: "Brand-safe generative assets"
-  tagline: "100x your mediocrity"
+  tagline: "Mediocrity at scale"
   actions:
     - theme: brand
       text: Getting Started
