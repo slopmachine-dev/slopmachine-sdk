@@ -46,6 +46,11 @@ export interface SlopImageOptions {
    * Defaults to the production URL. Useful for testing against local deployments.
    */
   baseUrl?: string;
+  /**
+   * If `true` (or `?raw=true`), bypasses the WebP optimized media and returns the original generated file (e.g., PNG/JPEG).
+   * Defaults to false.
+   */
+  original?: boolean;
 }
 
 export function interpolatePrompt(
@@ -80,6 +85,7 @@ export function buildImageUrl(options: SlopImageOptions): string {
     quality = "fast",
     variables = {},
     baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage",
+    original,
   } = options;
 
   const params = new URLSearchParams();
@@ -96,6 +102,10 @@ export function buildImageUrl(options: SlopImageOptions): string {
       params.set("quality", quality);
     } else if (quality === "fast") {
       params.set("quality", "fast");
+    }
+
+    if (original) {
+      params.set("original", "true");
     }
 
     if (Object.keys(variables).length > 0) {
@@ -172,6 +182,11 @@ export interface SlopVideoOptions {
    * Defaults to the production URL. Useful for testing against local deployments.
    */
   baseUrl?: string;
+  /**
+   * If `true` (or `?raw=true`), bypasses the WebP optimized media and returns the original generated file.
+   * Defaults to false.
+   */
+  original?: boolean;
 }
 
 /**
@@ -190,6 +205,7 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
     variables = {},
     duration = 4,
     baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderVideo",
+    original,
   } = options;
 
   const params = new URLSearchParams();
@@ -207,6 +223,10 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
     }
     if (quality) {
       params.set("quality", quality);
+    }
+
+    if (original) {
+      params.set("original", "true");
     }
 
     if (Object.keys(variables).length > 0) {

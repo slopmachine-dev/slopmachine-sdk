@@ -102,6 +102,11 @@ Useful for cache-busting or fetching a specific generation iteration.
 **Type:** `string` (Optional)
 If a specific result ID is known, it can be fetched directly.
 
+### `original`
+
+**Type:** `boolean` (Optional, Default: `false`)
+If `true`, bypasses the optimized media and returns the original generated file.
+
 ### `variables`
 
 **Type:** `Record<string, string | number | undefined | null>` (Optional)

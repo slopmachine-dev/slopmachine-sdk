@@ -15,7 +15,7 @@
   />
   ```
 
-  @version 0.1.22
+  @version 0.1.24
 -->
 <script lang="ts">
   import {
@@ -60,6 +60,7 @@
     quality = "fast",
     variables = {},
     baseUrl = undefined,
+    original = false,
     class: className = "",
     objectFit = "cover",
     imageClass = "",
@@ -78,6 +79,7 @@
       variables,
       baseUrl,
       quality,
+      original,
     }),
   );
   let src = $state("");

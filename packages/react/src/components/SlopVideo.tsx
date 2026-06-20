@@ -47,7 +47,7 @@ export interface SlopVideoProps
  * />
  * ```
  *
- * @version 0.1.23
+ * @version 0.1.24
  */
 export const SlopVideo: React.FC<SlopVideoProps> = ({
   bucketId,
@@ -59,6 +59,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
   variables = {},
   duration,
   baseUrl,
+  original,
   loader,
   autoPlay = true,
   loop = true,
@@ -78,6 +79,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
         duration,
         baseUrl,
         quality,
+        original,
       }),
     [
       bucketId,
@@ -88,6 +90,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
       duration,
       baseUrl,
       quality,
+      original,
     ],
   );
 

@@ -96,6 +96,11 @@ Useful for cache-busting or fetching a specific generation iteration.
 **Type:** `string` (Optional)
 If a specific result ID is known, it can be fetched directly.
 
+### `original`
+
+**Type:** `boolean` (Optional, Default: `false`)
+If `true`, bypasses the WebP optimized media and returns the original generated file (e.g., PNG/JPEG).
+
 ### `variables`
 
 **Type:** `Record<string, string | number | undefined | null>` (Optional)

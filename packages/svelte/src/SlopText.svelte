@@ -23,7 +23,7 @@
    * </SlopText>
    * ```
    *
-   * @version 0.1.22
+   * @version 0.1.24
    */
   interface Props {
     // SlopTextOptions

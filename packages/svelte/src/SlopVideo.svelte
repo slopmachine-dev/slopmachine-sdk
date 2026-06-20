@@ -18,7 +18,7 @@
   />
   ```
 
-  @version 0.1.22
+  @version 0.1.24
 -->
 <script lang="ts">
   import {
@@ -62,6 +62,7 @@
     variables = {},
     duration,
     baseUrl = undefined,
+    original = false,
     class: className = "",
     loader,
     autoplay = true,
@@ -83,6 +84,7 @@
       duration,
       baseUrl,
       quality,
+      original,
     }),
   );
   let src = $state("");
