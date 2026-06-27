@@ -51,6 +51,10 @@ export interface SlopImageOptions {
    * Defaults to false.
    */
   original?: boolean;
+  /**
+   * Array of attachment URLs to include with the request.
+   */
+  attachments?: string[];
 }
 
 export function interpolatePrompt(
@@ -86,6 +90,7 @@ export function buildImageUrl(options: SlopImageOptions): string {
     variables = {},
     baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage",
     original,
+    attachments,
   } = options;
 
   const params = new URLSearchParams();
@@ -110,6 +115,10 @@ export function buildImageUrl(options: SlopImageOptions): string {
 
     if (Object.keys(variables).length > 0) {
       params.set("variables", JSON.stringify(variables));
+    }
+
+    if (attachments && attachments.length > 0) {
+      params.set("attachments", JSON.stringify(attachments));
     }
   } else {
     params.set("resultId", resultId);
@@ -187,6 +196,10 @@ export interface SlopVideoOptions {
    * Defaults to false.
    */
   original?: boolean;
+  /**
+   * Array of attachment URLs to include with the request.
+   */
+  attachments?: string[];
 }
 
 /**
@@ -206,6 +219,7 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
     duration = 4,
     baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderVideo",
     original,
+    attachments,
   } = options;
 
   const params = new URLSearchParams();
@@ -231,6 +245,10 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
 
     if (Object.keys(variables).length > 0) {
       params.set("variables", JSON.stringify(variables));
+    }
+
+    if (attachments && attachments.length > 0) {
+      params.set("attachments", JSON.stringify(attachments));
     }
   } else {
     params.set("resultId", resultId);
@@ -286,6 +304,10 @@ export interface SlopTextOptions {
    * Defaults to the production URL. Useful for testing against local deployments.
    */
   baseUrl?: string;
+  /**
+   * Array of attachment URLs to include with the request.
+   */
+  attachments?: string[];
 }
 
 /**
@@ -301,6 +323,7 @@ export function buildTextUrl(options: SlopTextOptions): string {
     resultId,
     variables = {},
     baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderText",
+    attachments,
   } = options;
 
   const params = new URLSearchParams();
@@ -316,6 +339,10 @@ export function buildTextUrl(options: SlopTextOptions): string {
 
     if (Object.keys(variables).length > 0) {
       params.set("variables", JSON.stringify(variables));
+    }
+
+    if (attachments && attachments.length > 0) {
+      params.set("attachments", JSON.stringify(attachments));
     }
   } else {
     params.set("resultId", resultId);
@@ -344,4 +371,37 @@ export function preloadText(options: SlopTextOptions): Promise<void> {
       .then(() => resolve())
       .catch((err) => reject(err));
   });
+}
+
+/**
+ * Uploads a base64 encoded file as a temporary attachment to be used in generation requests.
+ *
+ * @param base64 - The base64 encoded file data (without the data:mime/type;base64, prefix).
+ * @param mimeType - The MIME type of the file.
+ * @returns A promise that resolves to an object containing the URL of the uploaded attachment.
+ */
+export async function uploadTempAttachment(
+  base64: string,
+  mimeType: string,
+): Promise<{ url: string }> {
+  const response = await fetch(
+    "https://us-central1-slopmachine-12bfb.cloudfunctions.net/uploadTempAttachment",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ data: { base64, mimeType } }),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to upload attachment: ${response.statusText}`);
+  }
+  const json = await response.json();
+  if (json.error) {
+    throw new Error(
+      `Failed to upload attachment: ${json.error.message || JSON.stringify(json.error)}`,
+    );
+  }
+  return { url: json.result.url };
 }

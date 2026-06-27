@@ -113,6 +113,11 @@ If `true`, bypasses the optimized media and returns the original generated file.
 **Type:** `Record<string, string | number | undefined | null>` (Optional)
 A dictionary of prompt variables interpolated dynamically. Example: `{ subject: "dog", style: "neon" }`. Any extraneous or unused variables provided that are not required by the resolved templates are automatically stripped out to ensure they do not unnecessarily bust the cache.
 
+### `attachments`
+
+**Type:** `string[]` (Optional)
+An array of string URLs representing temporary file attachments to be used by the generative AI model.
+
 ### `baseUrl`
 
 **Type:** `string` (Optional)

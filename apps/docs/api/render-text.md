@@ -67,14 +67,15 @@ https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderText?bucketId=you
 
 ## Query Parameters
 
-| Parameter   | Type     | Required | Default    | Description                                                                                                                                                    |
-| :---------- | :------- | :------: | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bucketId`  | `string` | **Yes**  |            | The unique identifier of the Bucket you are generating text from.                                                                                              |
-| `prompt`    | `string` |    No    | _Bucket_   | The base prompt for generation. If omitted, the function falls back to the prompt defined in the target Bucket Version.                                        |
-| `variables` | `string` |    No    | `{}`       | A URL-encoded JSON string containing variables to inject into your prompt templates. Example: `{"name": "Alice"}`. Extraneous or unused variables are ignored. |
-| `model`     | `string` |    No    | `"gemini"` | Overrides the AI model used for generation.                                                                                                                    |
-| `version`   | `number` |    No    | _Current_  | The specific version number of the Bucket to target. Defaults to the active version.                                                                           |
-| `resultId`  | `string` |    No    |            | If provided, directly returns a specific, previously generated result by its ID, ignoring all other parameters.                                                |
+| Parameter     | Type       | Required | Default    | Description                                                                                                                                                    |
+| :------------ | :--------- | :------: | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bucketId`    | `string`   | **Yes**  |            | The unique identifier of the Bucket you are generating text from.                                                                                              |
+| `prompt`      | `string`   |    No    | _Bucket_   | The base prompt for generation. If omitted, the function falls back to the prompt defined in the target Bucket Version.                                        |
+| `variables`   | `string`   |    No    | `{}`       | A URL-encoded JSON string containing variables to inject into your prompt templates. Example: `{"name": "Alice"}`. Extraneous or unused variables are ignored. |
+| `attachments` | `string[]` |    No    |            | An array of string URLs representing uploaded temporary file attachments. Can be repeated in the query string or passed as a URL-encoded JSON array.           |
+| `model`       | `string`   |    No    | `"gemini"` | Overrides the AI model used for generation.                                                                                                                    |
+| `version`     | `number`   |    No    | _Current_  | The specific version number of the Bucket to target. Defaults to the active version.                                                                           |
+| `resultId`    | `string`   |    No    |            | If provided, directly returns a specific, previously generated result by its ID, ignoring all other parameters.                                                |
 
 ## How It Works
 

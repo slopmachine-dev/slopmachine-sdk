@@ -33,6 +33,7 @@
     model?: string | undefined;
     variables?: Record<string, string | number | undefined | null> | undefined;
     baseUrl?: string | undefined;
+    attachments?: string[] | undefined;
     errorFallback?: import("svelte").Snippet<[any]>;
     fallback?: import("svelte").Snippet;
     class?: string;
@@ -47,6 +48,7 @@
     model = undefined,
     variables = undefined,
     baseUrl = undefined,
+    attachments = undefined,
     errorFallback,
     fallback,
     class: className = "",
@@ -72,6 +74,7 @@
           resultId,
           variables,
           baseUrl,
+          attachments,
         });
 
         const response = await fetch(url);

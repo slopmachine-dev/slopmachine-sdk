@@ -42,6 +42,7 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
       resultId,
       variables,
       baseUrl,
+      attachments,
       fallback,
       errorFallback,
       ...props
@@ -66,6 +67,7 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
             resultId,
             variables,
             baseUrl,
+            attachments,
           });
 
           // Fetch the URL to get the content, following redirects automatically
@@ -106,7 +108,14 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
       return () => {
         isMounted = false;
       };
-    }, [bucketId, version, resultId, JSON.stringify(variables), baseUrl]);
+    }, [
+      bucketId,
+      version,
+      resultId,
+      JSON.stringify(variables),
+      JSON.stringify(attachments),
+      baseUrl,
+    ]);
 
     if (error && errorFallback) {
       return <>{errorFallback}</>;

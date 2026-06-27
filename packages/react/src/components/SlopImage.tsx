@@ -65,6 +65,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   variables = {},
   baseUrl,
   original,
+  attachments,
   loader,
   objectFit = "cover",
   imageClassName,
@@ -83,6 +84,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
         baseUrl,
         quality,
         original,
+        attachments,
       }),
     [
       bucketId,
@@ -93,6 +95,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
       baseUrl,
       quality,
       original,
+      attachments,
     ],
   );
 

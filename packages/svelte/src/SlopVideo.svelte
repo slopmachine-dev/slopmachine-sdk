@@ -63,6 +63,7 @@
     duration,
     baseUrl = undefined,
     original = false,
+    attachments = undefined,
     class: className = "",
     loader,
     autoplay = true,
@@ -85,6 +86,7 @@
       baseUrl,
       quality,
       original,
+      attachments,
     }),
   );
   let src = $state("");

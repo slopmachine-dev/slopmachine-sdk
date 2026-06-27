@@ -102,6 +102,7 @@ export default defineConfig({
           { text: "renderImage", link: "/api/render-image" },
           { text: "renderText", link: "/api/render-text" },
           { text: "renderVideo", link: "/api/render-video" },
+          { text: "uploadTempAttachment", link: "/api/upload-temp-attachment" },
         ],
       },
     ],

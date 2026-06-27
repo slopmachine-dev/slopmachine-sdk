@@ -68,16 +68,17 @@ https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderVideo?bucketId=yo
 
 ## Query Parameters
 
-| Parameter     | Type      | Required | Default   | Description                                                                                                                                                    |
-| :------------ | :-------- | :------: | :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bucketId`    | `string`  | **Yes**  |           | The unique identifier of the Bucket you are generating a video from.                                                                                           |
-| `variables`   | `string`  |    No    | `{}`      | A URL-encoded JSON string containing variables to inject into your prompt templates. Example: `{"name": "Alice"}`. Extraneous or unused variables are ignored. |
-| `aspectRatio` | `string`  |    No    | `"16:9"`  | Target aspect ratio (`"9:16"`, `"16:9"`).                                                                                                                      |
-| `duration`    | `number`  |    No    | `4`       | The duration of the generated video in seconds. Must be between 4 and 8.                                                                                       |
-| `quality`     | `string`  |    No    | `"fast"`  | The target quality (`"fast"` or `"high"`). Only affects new generations and is **ignored** for caching. Ignored if `model` is provided.                        |
-| `version`     | `number`  |    No    | _Current_ | The specific version number of the Bucket to target. Defaults to the active version.                                                                           |
-| `resultId`    | `string`  |    No    |           | If provided, directly returns a specific, previously generated result by its ID, ignoring all other parameters.                                                |
-| `original`    | `boolean` |    No    | `false`   | If `true` (or `?raw=true`), bypasses the optimized media and returns the original generated file.                                                              |
+| Parameter     | Type       | Required | Default   | Description                                                                                                                                                    |
+| :------------ | :--------- | :------: | :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bucketId`    | `string`   | **Yes**  |           | The unique identifier of the Bucket you are generating a video from.                                                                                           |
+| `variables`   | `string`   |    No    | `{}`      | A URL-encoded JSON string containing variables to inject into your prompt templates. Example: `{"name": "Alice"}`. Extraneous or unused variables are ignored. |
+| `attachments` | `string[]` |    No    |           | An array of string URLs representing uploaded temporary file attachments. Can be repeated in the query string or passed as a URL-encoded JSON array.           |
+| `aspectRatio` | `string`   |    No    | `"16:9"`  | Target aspect ratio (`"9:16"`, `"16:9"`).                                                                                                                      |
+| `duration`    | `number`   |    No    | `4`       | The duration of the generated video in seconds. Must be between 4 and 8.                                                                                       |
+| `quality`     | `string`   |    No    | `"fast"`  | The target quality (`"fast"` or `"high"`). Only affects new generations and is **ignored** for caching. Ignored if `model` is provided.                        |
+| `version`     | `number`   |    No    | _Current_ | The specific version number of the Bucket to target. Defaults to the active version.                                                                           |
+| `resultId`    | `string`   |    No    |           | If provided, directly returns a specific, previously generated result by its ID, ignoring all other parameters.                                                |
+| `original`    | `boolean`  |    No    | `false`   | If `true` (or `?raw=true`), bypasses the optimized media and returns the original generated file.                                                              |
 
 ## How It Works
 

@@ -61,6 +61,7 @@
     variables = {},
     baseUrl = undefined,
     original = false,
+    attachments = undefined,
     class: className = "",
     objectFit = "cover",
     imageClass = "",
@@ -80,6 +81,7 @@
       baseUrl,
       quality,
       original,
+      attachments,
     }),
   );
   let src = $state("");

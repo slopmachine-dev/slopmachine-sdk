@@ -60,6 +60,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
   duration,
   baseUrl,
   original,
+  attachments,
   loader,
   autoPlay = true,
   loop = true,
@@ -80,6 +81,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
         baseUrl,
         quality,
         original,
+        attachments,
       }),
     [
       bucketId,
@@ -91,6 +93,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
       baseUrl,
       quality,
       original,
+      attachments,
     ],
   );
 
