@@ -15,7 +15,7 @@
   />
   ```
 
-  @version 0.1.25
+  @version 0.1.26
 -->
 <script lang="ts">
   import {
@@ -50,6 +50,7 @@
      * Additional CSS classes to apply directly to the `<img />` element.
      */
     imageClass?: string;
+    [key: string]: any;
   }
 
   let {
@@ -66,6 +67,8 @@
     objectFit = "cover",
     imageClass = "",
     loader,
+    onload,
+    onerror,
     ...restProps
   }: SlopImageProps = $props();
 
@@ -142,12 +145,14 @@
     }
   });
 
-  function handleLoad() {
+  function handleLoad(e: Event) {
     isLoading = false;
+    onload?.(e);
   }
 
-  function handleError() {
+  function handleError(e: Event) {
     isLoading = false;
+    onerror?.(e);
   }
 </script>
 
@@ -193,10 +198,10 @@
       {src}
       {alt}
       style="object-fit: {objectFit};"
-      onload={handleLoad}
-      onerror={handleError}
       class="slop-image {imageClass} {isLoading ? '' : 'loaded'}"
       {...restProps}
+      onload={handleLoad}
+      onerror={handleError}
     />
   </div>
 </div>

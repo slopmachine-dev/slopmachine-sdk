@@ -13,6 +13,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "vitepress-plugin-llms": "^1.11.1"
+    "vitepress-plugin-llms": "^0.0.3"
   }
 }

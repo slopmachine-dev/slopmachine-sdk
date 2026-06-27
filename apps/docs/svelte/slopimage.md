@@ -54,6 +54,12 @@ You can override variables, specify an aspect ratio, pick a model, and even over
 </SlopImage>
 ```
 
+## Loading States
+
+To detect when the generation and loading is complete, you can pass standard HTML `onload` and `onerror` event handlers to the component. These events are forwarded to the underlying `<img>` element and will not override the built-in loading shimmer effect.
+
+You can also completely customize the loading UI by providing a custom `loader` snippet.
+
 ## Preloading
 
 You can import and use `preloadImage` from `@slopmachine/svelte` to cache the asset before rendering the component.

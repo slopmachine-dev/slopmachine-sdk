@@ -57,6 +57,12 @@ function Avatar() {
 }
 ```
 
+## Loading States
+
+To detect when the generation and loading is complete, you can pass standard HTML `onLoad` and `onError` event handlers to the component. These events are forwarded to the underlying `<img>` element and will not override the built-in loading shimmer effect.
+
+You can also completely customize the loading UI by providing a custom `loader` prop.
+
 ## Preloading
 
 You can import and use `preloadImage` from `@slopmachine/react` to cache the asset before rendering the component.

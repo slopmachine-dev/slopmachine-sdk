@@ -53,7 +53,7 @@ export interface SlopImageProps
  * />
  * ```
  *
- * @version 0.1.25
+ * @version 0.1.26
  */
 export const SlopImage: React.FC<SlopImageProps> = ({
   bucketId,
@@ -70,6 +70,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   objectFit = "cover",
   imageClassName,
   style,
+  onLoad,
+  onError,
   ...props
 }) => {
   // Construct API URL
@@ -301,8 +303,15 @@ export const SlopImage: React.FC<SlopImageProps> = ({
             key={src}
             src={src}
             alt={alt}
-            onLoad={() => setIsLoading(false)}
-            onError={() => setIsLoading(false)}
+            {...props}
+            onLoad={(e) => {
+              setIsLoading(false);
+              onLoad?.(e);
+            }}
+            onError={(e) => {
+              setIsLoading(false);
+              onError?.(e);
+            }}
             className={cn(
               "h-full w-full transition-opacity duration-500",
               isLoading ? "opacity-0" : "opacity-100",
@@ -315,7 +324,6 @@ export const SlopImage: React.FC<SlopImageProps> = ({
               transition: "opacity 500ms",
               opacity: isLoading ? 0 : 1,
             }}
-            {...props}
           />
         </div>
       </div>

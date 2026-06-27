@@ -18,7 +18,7 @@
   />
   ```
 
-  @version 0.1.25
+  @version 0.1.26
 -->
 <script lang="ts">
   import {
@@ -70,6 +70,8 @@
     loop = true,
     muted = true,
     playsinline = true,
+    onloadeddata,
+    onerror,
     ...restProps
   }: SlopVideoProps = $props();
 
@@ -146,12 +148,14 @@
     }
   });
 
-  function handleLoadedData() {
+  function handleLoadedData(e: Event) {
     isLoading = false;
+    onloadeddata?.(e);
   }
 
-  function handleError() {
+  function handleError(e: Event) {
     isLoading = false;
+    onerror?.(e);
   }
 </script>
 
@@ -200,10 +204,10 @@
       {loop}
       {muted}
       {playsinline}
-      onloadeddata={handleLoadedData}
-      onerror={handleError}
       class:loaded={!isLoading}
       {...restProps}
+      onloadeddata={handleLoadedData}
+      onerror={handleError}
     ></video>
   </div>
 </div>

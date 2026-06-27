@@ -47,7 +47,7 @@ export interface SlopVideoProps
  * />
  * ```
  *
- * @version 0.1.25
+ * @version 0.1.26
  */
 export const SlopVideo: React.FC<SlopVideoProps> = ({
   bucketId,
@@ -66,6 +66,8 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
   loop = true,
   muted = true,
   playsInline = true,
+  onLoadedData,
+  onError,
   ...props
 }) => {
   // Construct API URL
@@ -302,8 +304,15 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
             loop={loop}
             muted={muted}
             playsInline={playsInline}
-            onLoadedData={() => setIsLoading(false)}
-            onError={() => setIsLoading(false)}
+            {...props}
+            onLoadedData={(e) => {
+              setIsLoading(false);
+              onLoadedData?.(e);
+            }}
+            onError={(e) => {
+              setIsLoading(false);
+              onError?.(e);
+            }}
             className={cn(
               "h-full w-full object-cover transition-opacity duration-500",
               isLoading ? "opacity-0" : "opacity-100",
@@ -315,7 +324,6 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
               transition: "opacity 500ms",
               opacity: isLoading ? 0 : 1,
             }}
-            {...props}
           />
         </div>
       </div>
