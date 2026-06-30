@@ -165,6 +165,7 @@ div[class*="language-"] {
 /* Sidebar and Header separators */
 .VPNavBar {
   border-bottom: 4px solid var(--border-color) !important;
+  background-color: var(--vp-c-bg-alt) !important;
 }
 
 .has-sidebar.VPNavBar {
