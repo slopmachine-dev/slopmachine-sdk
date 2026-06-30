@@ -15,20 +15,6 @@ hero:
     - theme: alt
       text: Svelte Demo
       link: https://docs.slopmachine.dev/demo-svelte/
-
-features:
-  - title: React Support
-    details: "Fully typed and ready-to-use `SlopImage` component for React."
-    icon:
-      src: https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage?bucketId=iSjKmXd8pUziYmvtMHek&resultId=xITopgtsdLjwTBGNhUsN
-      width: 100px
-      height: 100px
-  - title: Svelte Support
-    details: "Native Svelte `SlopImage` component for seamless integration."
-    icon:
-      src: https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage?bucketId=iSjKmXd8pUziYmvtMHek&resultId=5EtbARLIlesyoU9VbolH
-      width: 100px
-      height: 100px
 ---
 
 <script setup>
