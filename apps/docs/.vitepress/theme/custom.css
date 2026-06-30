@@ -1,5 +1,6 @@
 :root {
   --vp-nav-height: 68px;
+  --vp-nav-bg-color: var(--vp-c-bg-alt);
 
   /* Typography */
   --vp-font-family-base:
