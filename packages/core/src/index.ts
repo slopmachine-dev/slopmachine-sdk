@@ -1,14 +1,5 @@
-export type ImageAspectRatio =
-  | "1:1"
-  | "2:3"
-  | "3:2"
-  | "3:4"
-  | "4:3"
-  | "4:5"
-  | "5:4"
-  | "9:16"
-  | "16:9"
-  | "21:9";
+import { AspectRatio as ImageAspectRatio, VideoAspectRatio } from "@pixerate/schemas";
+export type { ImageAspectRatio };
 
 export interface SlopImageOptions {
   /**
@@ -148,7 +139,7 @@ export function preloadImage(options: SlopImageOptions): Promise<void> {
   });
 }
 
-export type VideoAspectRatio = "9:16" | "16:9";
+export type { VideoAspectRatio };
 
 export interface SlopVideoOptions {
   /**

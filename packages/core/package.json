@@ -1,6 +1,6 @@
 {
   "name": "@slopmachine/core",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "description": "The official Core / VanillaJS SDK for Slop Machine",
   "llms": "https://docs.slopmachine.dev/llms.txt",
   "llmsFull": "https://docs.slopmachine.dev/llms-full.txt",
@@ -26,6 +26,9 @@
   "devDependencies": {
     "tsup": "^8.0.0",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@pixerate/schemas": "^1.0.0"
   },
   "license": "MIT"
 }
