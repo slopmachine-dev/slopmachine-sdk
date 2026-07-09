@@ -15,28 +15,28 @@ export function Header() {
             </span>
           </a>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+          <nav className="hidden md:flex items-center gap-3 text-sm font-medium">
             <a
               href="https://slopmachine.dev"
-              className="text-muted-foreground hover:text-primary transition-colors"
+              className="VPNavBarMenuLink"
             >
               Slop Machine
             </a>
             <a
               href="https://docs.slopmachine.dev/getting-started"
-              className="text-muted-foreground hover:text-primary transition-colors"
+              className="VPNavBarMenuLink"
             >
               Getting Started
             </a>
             <a
               href="https://docs.slopmachine.dev/demo-react/"
-              className="text-primary transition-colors"
+              className="VPNavBarMenuLink active"
             >
               React Demo
             </a>
             <a
               href="https://docs.slopmachine.dev/demo-svelte/"
-              className="text-muted-foreground hover:text-primary transition-colors"
+              className="VPNavBarMenuLink"
             >
               Svelte Demo
             </a>

@@ -20,28 +20,28 @@
         </span>
       </a>
 
-      <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+      <nav class="hidden md:flex items-center gap-3 text-sm font-medium">
         <a
           href="https://slopmachine.dev"
-          class="text-muted-foreground hover:text-primary transition-colors"
+          class="VPNavBarMenuLink"
         >
           Slop Machine
         </a>
         <a
           href="https://docs.slopmachine.dev/getting-started"
-          class="text-muted-foreground hover:text-primary transition-colors"
+          class="VPNavBarMenuLink"
         >
           Getting Started
         </a>
         <a
           href="https://docs.slopmachine.dev/demo-react/"
-          class="text-muted-foreground hover:text-primary transition-colors"
+          class="VPNavBarMenuLink"
         >
           React Demo
         </a>
         <a
           href="https://docs.slopmachine.dev/demo-svelte/"
-          class="text-primary transition-colors"
+          class="VPNavBarMenuLink active"
         >
           Svelte Demo
         </a>

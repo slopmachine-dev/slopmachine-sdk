@@ -21,6 +21,32 @@ npm run dev:react
 npm run dev:svelte
 ```
 
+## Documentation (VitePress)
+
+To preview the VitePress documentation locally, you can run the development server or compile the production build:
+
+### 1. Development Mode (Hot Reloading)
+
+This starts the VitePress development server with active file-watching and hot-reloading:
+
+```bash
+npm run docs:dev
+```
+
+Once started, open your browser and navigate to `http://localhost:5173`.
+
+### 2. Production Build & Local Preview
+
+To build the static production bundle and preview it locally as it would render in production:
+
+```bash
+# Build the documentation static assets
+npm run docs:build
+
+# Preview the built site locally
+npm run serve --workspace=apps/docs
+```
+
 ## Publishing to npm
 
 To publish the packages in this monorepo to npm, follow these steps:

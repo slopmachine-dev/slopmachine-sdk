@@ -469,3 +469,75 @@ a.button:active {
     opacity: 1;
   }
 }
+
+/* Navigation Menu Links styled as Neubrutalist Stickers */
+.VPNavBarMenuLink {
+  display: inline-flex !important;
+  align-items: center !important;
+  border: 2px solid var(--border, #000000) !important;
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  border-radius: 0px !important;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.1s ease !important;
+  box-shadow: 4px 4px 0 var(--shadow-color, #000000) !important;
+  user-select: none !important;
+  height: auto !important;
+  line-height: normal !important;
+  transform: rotate(var(--rotation, 0deg)) !important;
+}
+
+/* Pseudo element underline cleanup */
+.VPNavBarMenuLink::after,
+.VPNavBarMenuLink::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Sequential background colors and rotations using nth-child */
+.VPNavBarMenuLink:nth-child(4n+1) {
+  background-color: #ffd23f !important; /* Yellow */
+  color: #000000 !important;
+  --rotation: -2deg;
+}
+
+.VPNavBarMenuLink:nth-child(4n+2) {
+  background-color: #ff6b6b !important; /* Coral Red */
+  color: #ffffff !important;
+  --rotation: 1deg;
+}
+
+.VPNavBarMenuLink:nth-child(4n+3) {
+  background-color: #4ecdc4 !important; /* Teal */
+  color: #000000 !important;
+  --rotation: -1deg;
+}
+
+.VPNavBarMenuLink:nth-child(4n+4) {
+  background-color: #a067ff !important; /* Purple */
+  color: #ffffff !important;
+  --rotation: 2deg;
+}
+
+/* Hover Interactive states */
+.VPNavBarMenuLink:not(.active):hover {
+  transform: rotate(var(--rotation, 0deg)) translateY(-2px) !important;
+  box-shadow: 6px 6px 0 var(--shadow-color, #000000) !important;
+  color: inherit !important;
+}
+
+/* Active Press tactile state */
+.VPNavBarMenuLink:not(.active):active {
+  transform: rotate(var(--rotation, 0deg)) translate(2px, 2px) !important;
+  box-shadow: 0px 0px 0 var(--shadow-color, #000000) !important;
+}
+
+/* Stable Active Page Sticker */
+.VPNavBarMenuLink.active {
+  box-shadow: 1px 1px 0 var(--shadow-color, #000000) !important;
+  transform: rotate(var(--rotation, 0deg)) translate(3px, 3px) !important;
+  cursor: default !important;
+  pointer-events: none !important;
+}

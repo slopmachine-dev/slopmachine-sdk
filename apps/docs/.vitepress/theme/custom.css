@@ -168,13 +168,6 @@ div[class*="language-"] {
   background-color: var(--vp-c-bg-alt) !important;
 }
 
-.has-sidebar.VPNavBar {
-  border: none !important;
-}
-
-.VPSidebar {
-  border-right: var(--border-width) solid var(--border-color) !important;
-}
 
 .VPLocalNav {
   border-bottom: var(--border-width) solid var(--border-color) !important;
@@ -210,6 +203,7 @@ div[class*="language-"] {
 .VPNavBarTitle .title::after {
   content: "For Developers";
   margin-left: 12px;
+  margin-right: 12px;
   font-family: var(--vp-font-family-base, system-ui, sans-serif) !important;
   font-size: 0.65rem;
   font-weight: 500;
@@ -226,14 +220,7 @@ div[class*="language-"] {
   position: relative;
 }
 
-.has-sidebar .VPNavBarTitle .title::after {
-  display: none !important;
-}
 
-.has-sidebar .VPNavBarTitle .title {
-  max-width: var(--vp-sidebar-width);
-  border: none !important;
-}
 
 .VPNavBarSearch {
   display: none !important;
@@ -294,46 +281,106 @@ div[class*="language-"] {
   display: none !important;
 }
 
-/* Navbar Width Constraints */
+/* Navbar Width Constraints - Perfectly centered and identical on all pages */
 .VPNavBar .container {
   max-width: 80rem !important;
   margin-left: auto !important;
   margin-right: auto !important;
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
+  padding-left: 2rem !important;
+  padding-right: 2rem !important;
 }
 
-.has-sidebar.VPNavBar .container {
-  margin-left: var(--vp-sidebar-width) !important;
-  margin-right: 0 !important;
-  max-width: 100% !important;
+.VPNavBarTitle {
+  position: relative !important;
+  left: auto !important;
+  width: 272px !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
-.has-sidebar.VPNavBar .container,
-.has-sidebar.VPNavBar .content {
-  padding: 0 !important;
-}
-
-.has-sidebar.VPNavBar .content-body {
+.VPNavBar .content-body {
+  display: flex !important;
+  justify-content: flex-start !important;
   border-bottom: var(--border-width) solid var(--border-color) !important;
 }
 
-.has-sidebar.VPNavBar .divider {
-  display: none !important;
-}
-
-.VPSidebar,
-.has-sidebar.VPNavBar .title:not(a) {
-  max-width: var(--vp-sidebar-width) !important;
-  width: var(--vp-sidebar-width) !important;
-  padding-left: 32px !important;
-  padding-right: 32px !important;
+/* Navigation Menu Links styled as Neubrutalist Stickers */
+.VPNavBarMenu {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
 }
 
 .VPNavBarMenuLink {
-  padding-left: 24px !important;
-  padding-right: 0 !important;
-  color: var(--vp-c-text-3) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  border: 2px solid var(--border-color) !important;
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  border-radius: 0px !important;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.1s ease !important;
+  box-shadow: 4px 4px 0 var(--shadow-color) !important;
+  user-select: none !important;
+  height: auto !important;
+  line-height: normal !important;
+  transform: rotate(var(--rotation, 0deg)) !important;
+}
+
+/* Pseudo element underline cleanup */
+.VPNavBarMenuLink::after,
+.VPNavBarMenuLink::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Sequential background colors and rotations using nth-child */
+.VPNavBarMenuLink:nth-child(4n+1) {
+  background-color: #ffd23f !important; /* Yellow */
+  color: #000000 !important;
+  --rotation: -2deg;
+}
+
+.VPNavBarMenuLink:nth-child(4n+2) {
+  background-color: #ff6b6b !important; /* Coral Red */
+  color: #ffffff !important;
+  --rotation: 1deg;
+}
+
+.VPNavBarMenuLink:nth-child(4n+3) {
+  background-color: #4ecdc4 !important; /* Teal */
+  color: #000000 !important;
+  --rotation: -1deg;
+}
+
+.VPNavBarMenuLink:nth-child(4n+4) {
+  background-color: #a067ff !important; /* Purple */
+  color: #ffffff !important;
+  --rotation: 2deg;
+}
+
+/* Hover Interactive states */
+.VPNavBarMenuLink:not(.active):hover {
+  transform: rotate(var(--rotation, 0deg)) translateY(-2px) !important;
+  box-shadow: 6px 6px 0 var(--shadow-color) !important;
+  color: inherit !important;
+}
+
+/* Active Press tactile state */
+.VPNavBarMenuLink:not(.active):active {
+  transform: rotate(var(--rotation, 0deg)) translate(2px, 2px) !important;
+  box-shadow: 0px 0px 0 var(--shadow-color) !important;
+}
+
+/* Stable Active Page Sticker */
+.VPNavBarMenuLink.active {
+  box-shadow: 1px 1px 0 var(--shadow-color) !important;
+  transform: rotate(var(--rotation, 0deg)) translate(3px, 3px) !important;
+  cursor: default !important;
+  pointer-events: none !important;
 }
 
 .VPNavBarSocialLink > svg,
@@ -366,7 +413,6 @@ div[class*="language-"] {
   .VPNavBarTitle {
     /* Prevent title from expanding to push everything right */
     flex-shrink: 0 !important;
-    width: auto !important;
   }
 
   .VPNavBar .content {
@@ -386,12 +432,6 @@ div[class*="language-"] {
 
   .VPNavBarMenu,
   .VPNavBarSocialLinks {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  .has-sidebar .VPNavBarMenu,
-  .has-sidebar .VPNavBarSocialLinks {
     margin-left: 2rem !important;
     margin-right: 2rem !important;
   }
