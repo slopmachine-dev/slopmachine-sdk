@@ -498,27 +498,27 @@ a.button:active {
 
 /* Sequential background colors and rotations using nth-child */
 .VPNavBarMenuLink:nth-child(4n+1) {
-  background-color: #ffd23f !important; /* Yellow */
-  color: #000000 !important;
-  --rotation: -2deg;
-}
-
-.VPNavBarMenuLink:nth-child(4n+2) {
   background-color: #ff6b6b !important; /* Coral Red */
   color: #ffffff !important;
   --rotation: 1deg;
 }
 
-.VPNavBarMenuLink:nth-child(4n+3) {
+.VPNavBarMenuLink:nth-child(4n+2) {
   background-color: #4ecdc4 !important; /* Teal */
   color: #000000 !important;
   --rotation: -1deg;
 }
 
-.VPNavBarMenuLink:nth-child(4n+4) {
+.VPNavBarMenuLink:nth-child(4n+3) {
   background-color: #a067ff !important; /* Purple */
   color: #ffffff !important;
   --rotation: 2deg;
+}
+
+.VPNavBarMenuLink:nth-child(4n+4) {
+  background-color: #ffd23f !important; /* Yellow */
+  color: #000000 !important;
+  --rotation: -2deg;
 }
 
 /* Hover Interactive states */
