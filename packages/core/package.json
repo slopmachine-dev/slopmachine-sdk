@@ -28,7 +28,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@pixerate/schemas": "^1.0.0"
+    "@pixerate/schemas": "^1.1.0"
   },
   "license": "MIT"
 }
