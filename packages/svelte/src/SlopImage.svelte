@@ -54,10 +54,14 @@
   }
 
   let {
-    bucketId,
+    bucketId = undefined,
+    pipelineKey = undefined,
+    pipelineId = undefined,
+    prompt = undefined,
+    metadata = undefined,
     aspectRatio = "1:1",
-    version,
-    resultId,
+    version = undefined,
+    resultId = undefined,
     quality = "fast",
     variables = {},
     baseUrl = undefined,
@@ -77,6 +81,10 @@
   let computedSrc = $derived(
     buildImageUrl({
       bucketId,
+      pipelineKey,
+      pipelineId,
+      prompt,
+      metadata,
       aspectRatio,
       version,
       resultId,

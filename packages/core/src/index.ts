@@ -1,11 +1,120 @@
 import { AspectRatio as ImageAspectRatio, VideoAspectRatio } from "@pixerate/schemas";
-export type { ImageAspectRatio };
+export type { ImageAspectRatio, VideoAspectRatio };
+
+export interface PipelineStepResult {
+  stepId: string;
+  stepName?: string;
+  type: string;
+  outputUrl?: string;
+  outputText?: string;
+  outputData?: any;
+  computeTimeMs?: number;
+  fuelCost?: number;
+  error?: string;
+}
+
+export interface PipelineResult {
+  id: string;
+  pipelineId: string;
+  siloId: string;
+  url?: string;
+  text?: string;
+  data?: any;
+  resultType: string;
+  status: "completed" | "failed" | "pending";
+  stepResults: PipelineStepResult[];
+  totalComputeTimeMs: number;
+  totalFuelCost: number;
+  metadata?: Record<string, any>;
+  timestamp: any;
+  error?: string;
+}
+
+export interface SlopPipelineOptions {
+  /**
+   * The secret pipeline key used for executing a pipeline.
+   */
+  pipelineKey: string;
+  /**
+   * Optional pipeline identifier.
+   */
+  pipelineId?: string;
+  /**
+   * Dynamic runtime prompt to feed into the pipeline.
+   */
+  prompt?: string;
+  /**
+   * Variables to interpolate into prompt or step configs.
+   */
+  variables?: Record<string, string | number | undefined | null>;
+  /**
+   * Arbitrary user metadata to attach to the pipeline result document.
+   */
+  metadata?: Record<string, any>;
+  /**
+   * Whether to wait for full execution (default true) or return a job ID immediately.
+   */
+  sync?: boolean;
+  /**
+   * Whether to redirect to the primary media output URL upon completion.
+   */
+  redirect?: boolean;
+  /**
+   * Result ID to retrieve a specific previously generated result.
+   */
+  resultId?: string;
+  /**
+   * Base URL for the renderPipeline cloud function endpoint.
+   */
+  baseUrl?: string;
+}
+
+export interface ExecutePipelineOptions {
+  /**
+   * The secret pipeline key used for executing a pipeline.
+   */
+  pipelineKey: string;
+  /**
+   * Dynamic runtime prompt to feed into the pipeline.
+   */
+  prompt?: string;
+  /**
+   * Variables to interpolate into prompt or step configs.
+   */
+  variables?: Record<string, string | number | undefined | null>;
+  /**
+   * Arbitrary user metadata to attach to the pipeline result document.
+   */
+  metadata?: Record<string, any>;
+  /**
+   * Base URL for the renderPipeline cloud function endpoint.
+   */
+  baseUrl?: string;
+}
 
 export interface SlopImageOptions {
   /**
    * The unique identifier of your Slop Machine bucket.
+   * Required when using a bucket unless pipelineKey is provided.
    */
-  bucketId: string;
+  bucketId?: string;
+  /**
+   * The secret pipeline key used for executing a pipeline.
+   * Required when targeting a pipeline instead of a bucket.
+   */
+  pipelineKey?: string;
+  /**
+   * Optional pipeline identifier.
+   */
+  pipelineId?: string;
+  /**
+   * Dynamic runtime prompt (used when targeting a pipeline).
+   */
+  prompt?: string;
+  /**
+   * Arbitrary user metadata (used when targeting a pipeline).
+   */
+  metadata?: Record<string, any>;
   /**
    * The specific version of the prompt/settings to use.
    * If omitted, the latest version will be used.
@@ -68,24 +177,58 @@ export function interpolatePrompt(
 /**
  * Builds a URL to render or retrieve an image from Slop Machine.
  *
+ * Supports both standard Buckets (via `bucketId`) and multi-step Pipelines (via `pipelineKey`).
+ *
  * @param options - Configuration options for the image generation.
  * @returns A string containing the fully constructed URL.
  */
 export function buildImageUrl(options: SlopImageOptions): string {
   const {
     bucketId,
+    pipelineKey,
+    pipelineId,
+    prompt,
+    metadata,
     version,
     resultId,
     aspectRatio = "1:1",
     quality = "fast",
     variables = {},
-    baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage",
+    baseUrl,
     original,
     attachments,
   } = options;
 
+  if (pipelineKey) {
+    const endpoint =
+      baseUrl ||
+      "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderPipeline";
+    const params = new URLSearchParams();
+    params.set("pipelineKey", pipelineKey);
+    params.set("redirect", "true");
+
+    if (pipelineId) params.set("pipelineId", pipelineId);
+    if (prompt) params.set("prompt", prompt);
+    if (resultId) params.set("resultId", resultId);
+    if (aspectRatio) params.set("aspectRatio", aspectRatio);
+
+    if (Object.keys(variables).length > 0) {
+      params.set("variables", JSON.stringify(variables));
+    }
+    if (metadata && Object.keys(metadata).length > 0) {
+      params.set("metadata", JSON.stringify(metadata));
+    }
+
+    return `${endpoint}?${params.toString()}`;
+  }
+
+  const endpoint =
+    baseUrl ||
+    "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderImage";
   const params = new URLSearchParams();
-  params.set("bucketId", bucketId);
+  if (bucketId) {
+    params.set("bucketId", bucketId);
+  }
 
   if (!resultId) {
     if (aspectRatio) {
@@ -115,7 +258,7 @@ export function buildImageUrl(options: SlopImageOptions): string {
     params.set("resultId", resultId);
   }
 
-  return `${baseUrl}?${params.toString()}`;
+  return `${endpoint}?${params.toString()}`;
 }
 
 /**
@@ -139,13 +282,29 @@ export function preloadImage(options: SlopImageOptions): Promise<void> {
   });
 }
 
-export type { VideoAspectRatio };
-
 export interface SlopVideoOptions {
   /**
    * The unique identifier of your Slop Machine bucket.
+   * Required when using a bucket unless pipelineKey is provided.
    */
-  bucketId: string;
+  bucketId?: string;
+  /**
+   * The secret pipeline key used for executing a pipeline.
+   * Required when targeting a pipeline instead of a bucket.
+   */
+  pipelineKey?: string;
+  /**
+   * Optional pipeline identifier.
+   */
+  pipelineId?: string;
+  /**
+   * Dynamic runtime prompt (used when targeting a pipeline).
+   */
+  prompt?: string;
+  /**
+   * Arbitrary user metadata (used when targeting a pipeline).
+   */
+  metadata?: Record<string, any>;
   /**
    * The specific version of the prompt/settings to use.
    * If omitted, the latest version will be used.
@@ -196,25 +355,60 @@ export interface SlopVideoOptions {
 /**
  * Builds a URL to render or retrieve a video from Slop Machine.
  *
+ * Supports both standard Buckets (via `bucketId`) and multi-step Pipelines (via `pipelineKey`).
+ *
  * @param options - Configuration options for the video generation.
  * @returns A string containing the fully constructed URL.
  */
 export function buildVideoUrl(options: SlopVideoOptions): string {
   const {
     bucketId,
+    pipelineKey,
+    pipelineId,
+    prompt,
+    metadata,
     version,
     resultId,
     aspectRatio = "16:9",
     quality = "fast",
     variables = {},
     duration = 4,
-    baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderVideo",
+    baseUrl,
     original,
     attachments,
   } = options;
 
+  if (pipelineKey) {
+    const endpoint =
+      baseUrl ||
+      "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderPipeline";
+    const params = new URLSearchParams();
+    params.set("pipelineKey", pipelineKey);
+    params.set("redirect", "true");
+
+    if (pipelineId) params.set("pipelineId", pipelineId);
+    if (prompt) params.set("prompt", prompt);
+    if (resultId) params.set("resultId", resultId);
+    if (aspectRatio) params.set("aspectRatio", aspectRatio);
+    if (duration) params.set("duration", String(duration));
+
+    if (Object.keys(variables).length > 0) {
+      params.set("variables", JSON.stringify(variables));
+    }
+    if (metadata && Object.keys(metadata).length > 0) {
+      params.set("metadata", JSON.stringify(metadata));
+    }
+
+    return `${endpoint}?${params.toString()}`;
+  }
+
+  const endpoint =
+    baseUrl ||
+    "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderVideo";
   const params = new URLSearchParams();
-  params.set("bucketId", bucketId);
+  if (bucketId) {
+    params.set("bucketId", bucketId);
+  }
 
   if (!resultId) {
     if (aspectRatio) {
@@ -245,7 +439,7 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
     params.set("resultId", resultId);
   }
 
-  return `${baseUrl}?${params.toString()}`;
+  return `${endpoint}?${params.toString()}`;
 }
 
 /**
@@ -262,8 +456,6 @@ export function preloadVideo(options: SlopVideoOptions): Promise<void> {
       return;
     }
 
-    // We can just fetch the URL to preload it into the browser's cache.
-    // We use no-cors to avoid CORS errors for simple preloads
     fetch(buildVideoUrl(options), { mode: "no-cors" })
       .then(() => resolve())
       .catch((err) => reject(err));
@@ -273,8 +465,26 @@ export function preloadVideo(options: SlopVideoOptions): Promise<void> {
 export interface SlopTextOptions {
   /**
    * The unique identifier of your Slop Machine bucket.
+   * Required when using a bucket unless pipelineKey is provided.
    */
-  bucketId: string;
+  bucketId?: string;
+  /**
+   * The secret pipeline key used for executing a pipeline.
+   * Required when targeting a pipeline instead of a bucket.
+   */
+  pipelineKey?: string;
+  /**
+   * Optional pipeline identifier.
+   */
+  pipelineId?: string;
+  /**
+   * Dynamic runtime prompt (used when targeting a pipeline).
+   */
+  prompt?: string;
+  /**
+   * Arbitrary user metadata (used when targeting a pipeline).
+   */
+  metadata?: Record<string, any>;
   /**
    * The specific version of the prompt/settings to use.
    * If omitted, the latest version will be used.
@@ -304,34 +514,62 @@ export interface SlopTextOptions {
 /**
  * Builds a URL to render or retrieve text from Slop Machine.
  *
+ * Supports both standard Buckets (via `bucketId`) and multi-step Pipelines (via `pipelineKey`).
+ *
  * @param options - Configuration options for the text generation.
  * @returns A string containing the fully constructed URL.
  */
 export function buildTextUrl(options: SlopTextOptions): string {
   const {
     bucketId,
+    pipelineKey,
+    pipelineId,
+    prompt,
+    metadata,
     version,
     resultId,
     variables = {},
-    baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderText",
+    baseUrl,
     attachments,
   } = options;
 
+  if (pipelineKey) {
+    const endpoint =
+      baseUrl ||
+      "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderPipeline";
+    const params = new URLSearchParams();
+    params.set("pipelineKey", pipelineKey);
+    params.set("sync", "true");
+
+    if (pipelineId) params.set("pipelineId", pipelineId);
+    if (prompt) params.set("prompt", prompt);
+    if (resultId) params.set("resultId", resultId);
+
+    if (Object.keys(variables).length > 0) {
+      params.set("variables", JSON.stringify(variables));
+    }
+    if (metadata && Object.keys(metadata).length > 0) {
+      params.set("metadata", JSON.stringify(metadata));
+    }
+
+    return `${endpoint}?${params.toString()}`;
+  }
+
+  const endpoint =
+    baseUrl ||
+    "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderText";
   const params = new URLSearchParams();
-  params.set("bucketId", bucketId);
+  if (bucketId) {
+    params.set("bucketId", bucketId);
+  }
 
   if (!resultId) {
     if (version) {
       params.set("version", String(version));
     }
-    if (resultId) {
-      params.set("resultId", resultId);
-    }
-
     if (Object.keys(variables).length > 0) {
       params.set("variables", JSON.stringify(variables));
     }
-
     if (attachments && attachments.length > 0) {
       params.set("attachments", JSON.stringify(attachments));
     }
@@ -339,7 +577,7 @@ export function buildTextUrl(options: SlopTextOptions): string {
     params.set("resultId", resultId);
   }
 
-  return `${baseUrl}?${params.toString()}`;
+  return `${endpoint}?${params.toString()}`;
 }
 
 /**
@@ -356,12 +594,98 @@ export function preloadText(options: SlopTextOptions): Promise<void> {
       return;
     }
 
-    // Fetch the URL to preload it into the browser's cache.
-    // We use no-cors to avoid CORS errors for simple preloads
     fetch(buildTextUrl(options), { mode: "no-cors" })
       .then(() => resolve())
       .catch((err) => reject(err));
   });
+}
+
+/**
+ * Builds a URL to execute or inspect a multi-step Pipeline from Slop Machine.
+ *
+ * @param options - Configuration options for the pipeline execution.
+ * @returns A string containing the fully constructed URL.
+ */
+export function buildPipelineUrl(options: SlopPipelineOptions): string {
+  const {
+    pipelineKey,
+    pipelineId,
+    prompt,
+    variables = {},
+    metadata = {},
+    sync = true,
+    redirect = false,
+    resultId,
+    baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderPipeline",
+  } = options;
+
+  const params = new URLSearchParams();
+  params.set("pipelineKey", pipelineKey);
+
+  if (pipelineId) params.set("pipelineId", pipelineId);
+  if (prompt) params.set("prompt", prompt);
+  if (resultId) params.set("resultId", resultId);
+  if (sync !== undefined) params.set("sync", String(sync));
+  if (redirect) params.set("redirect", "true");
+
+  if (Object.keys(variables).length > 0) {
+    params.set("variables", JSON.stringify(variables));
+  }
+  if (Object.keys(metadata).length > 0) {
+    params.set("metadata", JSON.stringify(metadata));
+  }
+
+  return `${baseUrl}?${params.toString()}`;
+}
+
+/**
+ * Executes a Slop Machine multi-step Pipeline programmatically and returns the full typed result payload.
+ *
+ * @param options - Execution parameters including the pipelineKey and runtime prompt/variables/metadata.
+ * @returns A promise resolving to the completed PipelineResult document.
+ */
+export async function executePipeline(
+  options: ExecutePipelineOptions,
+): Promise<PipelineResult> {
+  const {
+    pipelineKey,
+    prompt,
+    variables,
+    metadata,
+    baseUrl = "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderPipeline",
+  } = options;
+
+  const response = await fetch(baseUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${pipelineKey}`,
+    },
+    body: JSON.stringify({
+      pipelineKey,
+      prompt,
+      variables,
+      metadata,
+      sync: true,
+    }),
+  });
+
+  if (!response.ok) {
+    let errorDetail = response.statusText;
+    try {
+      const errorJson = await response.json();
+      if (errorJson.error) {
+        errorDetail = errorJson.error;
+      }
+    } catch {
+      // Use statusText
+    }
+    throw new Error(
+      `Pipeline execution failed (${response.status}): ${errorDetail}`,
+    );
+  }
+
+  return (await response.json()) as PipelineResult;
 }
 
 /**

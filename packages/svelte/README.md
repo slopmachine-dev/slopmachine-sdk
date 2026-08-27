@@ -1,15 +1,15 @@
 # @slopmachine/svelte
 
-The official Svelte wrapper for Slop Machine. Easily integrate Slop Machine image generation into your Svelte 5 applications.
+The official Svelte SDK for Slop Machine. Easily integrate Slop Machine image, video, and text generation into your Svelte 5 applications.
 
 ## Installation
 
 ```bash
-npm install @slopmachine/svelte
+npm install @slopmachine/svelte @slopmachine/core
 # or
-yarn add @slopmachine/svelte
+yarn add @slopmachine/svelte @slopmachine/core
 # or
-pnpm add @slopmachine/svelte
+pnpm add @slopmachine/svelte @slopmachine/core
 ```
 
 ## Demo
@@ -18,33 +18,66 @@ https://docs.slopmachine.dev/demo-svelte/
 
 ## Usage
 
+### 1. Using Pre-Templated Buckets
+
 ```svelte
 <script lang="ts">
-  import { SlopImage } from "@slopmachine/svelte";
+  import { SlopImage, SlopVideo, SlopText } from "@slopmachine/svelte";
 </script>
 
-<div style="width: 400px; height: 400px;">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
   <SlopImage
-    prompt={"A cute dog wearing a hat in a {style} style"}
+    bucketId="my-bucket-id"
     aspectRatio="1:1"
-    variables={{ style: "realistic" }}
+    variables={{ style: "realistic", character: "owl" }}
+    class="rounded-lg shadow"
+  />
+
+  <SlopVideo
+    bucketId="my-video-bucket"
+    aspectRatio="16:9"
+    duration={4}
+    autoplay
+    loop
+    muted
+  />
+
+  <SlopText
+    bucketId="my-text-bucket"
+    variables={{ item: "magical sword" }}
   />
 </div>
 ```
 
-## API / Props
+### 2. Using Dynamic Multi-Step Pipelines
 
-### `SlopImage`
+Pipelines give developers runtime prompt flexibility and multi-step AI chaining:
 
-The `SlopImage` component inherits standard HTML `<img>` attributes and accepts the following additional props:
+```svelte
+<script lang="ts">
+  import { SlopImage, SlopVideo, SlopText } from "@slopmachine/svelte";
+</script>
 
-| Prop          | Type                     | Default      | Description                                             |
-| :------------ | :----------------------- | :----------- | :------------------------------------------------------ |
-| `prompt`      | `string`                 | **Required** | The prompt to use for image generation.                 |
-| `aspectRatio` | `string`                 | `"1:1"`      | The aspect ratio of the image (e.g. `"16:9"`, `"1:1"`). |
-| `variables`   | `Record<string, string>` | `{}`         | Variables to interpolate into the prompt.               |
-| `model`       | `string`                 | `undefined`  | The AI model to use for generation.                     |
-| `baseUrl`     | `string`                 | `undefined`  | Custom base URL for the Slop Machine API.               |
+<div>
+  <SlopImage
+    pipelineKey="pipe_live_abc123"
+    prompt="A futuristic neon marketplace in Tokyo at dusk"
+    aspectRatio="16:9"
+    metadata={{ source: "user-generated-content" }}
+  />
+
+  <SlopVideo
+    pipelineKey="pipe_live_def456"
+    prompt="Hyperlapse sunset over Martian red sand dunes"
+    aspectRatio="9:16"
+  />
+
+  <SlopText
+    pipelineKey="pipe_live_ghi789"
+    prompt="Write an intro paragraph for a sci-fi novel about sentient houseplants"
+  />
+</div>
+```
 
 ## License
 

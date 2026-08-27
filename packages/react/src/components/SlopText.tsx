@@ -24,11 +24,19 @@ export interface SlopTextProps
  *
  * @example
  * ```tsx
+ * // Using a Bucket
  * <SlopText
  *   bucketId="my-text-bucket"
  *   fallback={<div>Loading story...</div>}
  *   errorFallback={<div>Failed to load story</div>}
  *   className="text-lg text-gray-800"
+ * />
+ *
+ * // Using a Pipeline with runtime prompt
+ * <SlopText
+ *   pipelineKey="pipe_live_abc123"
+ *   prompt="Write a whimsical haiku about quantum physics"
+ *   metadata={{ userId: "123" }}
  * />
  * ```
  *
@@ -38,6 +46,10 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
   (
     {
       bucketId,
+      pipelineKey,
+      pipelineId,
+      prompt,
+      metadata,
       version,
       resultId,
       variables,
@@ -63,6 +75,10 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
 
           const url = buildTextUrl({
             bucketId,
+            pipelineKey,
+            pipelineId,
+            prompt,
+            metadata,
             version,
             resultId,
             variables,

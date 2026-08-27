@@ -44,6 +44,7 @@ export interface SlopImageProps
  *
  * @example
  * ```tsx
+ * // Using a Bucket
  * <SlopImage
  *   bucketId="my-bucket"
  *   resultId="some-result"
@@ -51,12 +52,24 @@ export interface SlopImageProps
  *   className="rounded-lg"
  *   objectFit="cover"
  * />
+ *
+ * // Using a Pipeline with runtime prompt
+ * <SlopImage
+ *   pipelineKey="pipe_live_abc123"
+ *   prompt="1960s retro robot eating pizza on Mars"
+ *   aspectRatio="16:9"
+ *   metadata={{ userId: "123" }}
+ * />
  * ```
  *
  * @version 0.1.26
  */
 export const SlopImage: React.FC<SlopImageProps> = ({
   bucketId,
+  pipelineKey,
+  pipelineId,
+  prompt,
+  metadata,
   className,
   aspectRatio = "1:1",
   version,
@@ -79,6 +92,10 @@ export const SlopImage: React.FC<SlopImageProps> = ({
     () =>
       buildImageUrl({
         bucketId,
+        pipelineKey,
+        pipelineId,
+        prompt,
+        metadata,
         aspectRatio,
         version,
         resultId,
@@ -90,6 +107,10 @@ export const SlopImage: React.FC<SlopImageProps> = ({
       }),
     [
       bucketId,
+      pipelineKey,
+      pipelineId,
+      prompt,
+      metadata,
       aspectRatio,
       version,
       resultId,
