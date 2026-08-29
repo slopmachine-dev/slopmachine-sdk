@@ -208,9 +208,7 @@ export function buildImageUrl(options: SlopImageOptions): string {
     params.set("redirect", "true");
 
     if (pipelineId) params.set("pipelineId", pipelineId);
-    if (prompt) params.set("prompt", prompt);
     if (resultId) params.set("resultId", resultId);
-    if (aspectRatio) params.set("aspectRatio", aspectRatio);
 
     if (Object.keys(variables).length > 0) {
       params.set("variables", JSON.stringify(variables));
@@ -387,10 +385,7 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
     params.set("redirect", "true");
 
     if (pipelineId) params.set("pipelineId", pipelineId);
-    if (prompt) params.set("prompt", prompt);
     if (resultId) params.set("resultId", resultId);
-    if (aspectRatio) params.set("aspectRatio", aspectRatio);
-    if (duration) params.set("duration", String(duration));
 
     if (Object.keys(variables).length > 0) {
       params.set("variables", JSON.stringify(variables));
@@ -542,7 +537,6 @@ export function buildTextUrl(options: SlopTextOptions): string {
     params.set("sync", "true");
 
     if (pipelineId) params.set("pipelineId", pipelineId);
-    if (prompt) params.set("prompt", prompt);
     if (resultId) params.set("resultId", resultId);
 
     if (Object.keys(variables).length > 0) {
@@ -663,7 +657,7 @@ export async function executePipeline(
     },
     body: JSON.stringify({
       pipelineKey,
-      prompt,
+      ...(prompt ? { prompt } : {}),
       variables,
       metadata,
       sync: true,
