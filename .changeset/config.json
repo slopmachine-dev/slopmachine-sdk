@@ -17,6 +17,7 @@
     "@slopmachine/demo-shared",
     "demo-react",
     "demo-svelte",
-    "docs"
+    "docs",
+    "slopmachine-sdk-monorepo"
   ]
 }

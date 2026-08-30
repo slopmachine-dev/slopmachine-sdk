@@ -18,6 +18,8 @@
     "docs:build": "npm run build --workspace=apps/docs",
     "changeset": "changeset",
     "version-packages": "changeset version && npm run sync-version",
+    "version:packages": "changeset version && npm run sync-version",
+    "bump-version": "node scripts/bump-version.mjs && npm run sync-version",
     "release": "npm run build:packages && changeset publish"
   },
   "devDependencies": {
