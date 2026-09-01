@@ -32,13 +32,13 @@ export interface PipelineResult {
 
 export interface SlopPipelineOptions {
   /**
-   * The secret pipeline key used for executing a pipeline.
+   * The unique identifier of the pipeline to execute.
    */
-  pipelineKey: string;
+  pipelineId: string;
   /**
-   * Optional pipeline identifier.
+   * Optional silo identifier for direct pipeline path resolution.
    */
-  pipelineId?: string;
+  siloId?: string;
   /**
    * Dynamic runtime prompt to feed into the pipeline.
    */
@@ -71,9 +71,13 @@ export interface SlopPipelineOptions {
 
 export interface ExecutePipelineOptions {
   /**
-   * The secret pipeline key used for executing a pipeline.
+   * The unique identifier of the pipeline to execute.
    */
-  pipelineKey: string;
+  pipelineId: string;
+  /**
+   * Optional silo identifier for direct pipeline path resolution.
+   */
+  siloId?: string;
   /**
    * Dynamic runtime prompt to feed into the pipeline.
    */
@@ -95,18 +99,18 @@ export interface ExecutePipelineOptions {
 export interface SlopImageOptions {
   /**
    * The unique identifier of your Slop Machine bucket.
-   * Required when using a bucket unless pipelineKey is provided.
+   * Required when using a bucket unless pipelineId is provided.
    */
   bucketId?: string;
   /**
-   * The secret pipeline key used for executing a pipeline.
+   * The unique identifier of your Slop Machine pipeline.
    * Required when targeting a pipeline instead of a bucket.
    */
-  pipelineKey?: string;
-  /**
-   * Optional pipeline identifier.
-   */
   pipelineId?: string;
+  /**
+   * Optional silo identifier.
+   */
+  siloId?: string;
   /**
    * Dynamic runtime prompt (used when targeting a pipeline).
    */
@@ -177,7 +181,7 @@ export function interpolatePrompt(
 /**
  * Builds a URL to render or retrieve an image from Slop Machine.
  *
- * Supports both standard Buckets (via `bucketId`) and multi-step Pipelines (via `pipelineKey`).
+ * Supports both standard Buckets (via `bucketId`) and multi-step Pipelines (via `pipelineId`).
  *
  * @param options - Configuration options for the image generation.
  * @returns A string containing the fully constructed URL.
@@ -185,8 +189,8 @@ export function interpolatePrompt(
 export function buildImageUrl(options: SlopImageOptions): string {
   const {
     bucketId,
-    pipelineKey,
     pipelineId,
+    siloId,
     prompt,
     metadata,
     version,
@@ -199,15 +203,16 @@ export function buildImageUrl(options: SlopImageOptions): string {
     attachments,
   } = options;
 
-  if (pipelineKey) {
+  if (pipelineId) {
     const endpoint =
       baseUrl ||
       "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderPipeline";
     const params = new URLSearchParams();
-    params.set("pipelineKey", pipelineKey);
+    params.set("pipelineId", pipelineId);
     params.set("redirect", "true");
 
-    if (pipelineId) params.set("pipelineId", pipelineId);
+    if (siloId) params.set("siloId", siloId);
+    if (prompt) params.set("prompt", prompt);
     if (resultId) params.set("resultId", resultId);
 
     if (Object.keys(variables).length > 0) {
@@ -283,18 +288,18 @@ export function preloadImage(options: SlopImageOptions): Promise<void> {
 export interface SlopVideoOptions {
   /**
    * The unique identifier of your Slop Machine bucket.
-   * Required when using a bucket unless pipelineKey is provided.
+   * Required when using a bucket unless pipelineId is provided.
    */
   bucketId?: string;
   /**
-   * The secret pipeline key used for executing a pipeline.
+   * The unique identifier of your Slop Machine pipeline.
    * Required when targeting a pipeline instead of a bucket.
    */
-  pipelineKey?: string;
-  /**
-   * Optional pipeline identifier.
-   */
   pipelineId?: string;
+  /**
+   * Optional silo identifier.
+   */
+  siloId?: string;
   /**
    * Dynamic runtime prompt (used when targeting a pipeline).
    */
@@ -353,7 +358,7 @@ export interface SlopVideoOptions {
 /**
  * Builds a URL to render or retrieve a video from Slop Machine.
  *
- * Supports both standard Buckets (via `bucketId`) and multi-step Pipelines (via `pipelineKey`).
+ * Supports both standard Buckets (via `bucketId`) and multi-step Pipelines (via `pipelineId`).
  *
  * @param options - Configuration options for the video generation.
  * @returns A string containing the fully constructed URL.
@@ -361,8 +366,8 @@ export interface SlopVideoOptions {
 export function buildVideoUrl(options: SlopVideoOptions): string {
   const {
     bucketId,
-    pipelineKey,
     pipelineId,
+    siloId,
     prompt,
     metadata,
     version,
@@ -376,15 +381,16 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
     attachments,
   } = options;
 
-  if (pipelineKey) {
+  if (pipelineId) {
     const endpoint =
       baseUrl ||
       "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderPipeline";
     const params = new URLSearchParams();
-    params.set("pipelineKey", pipelineKey);
+    params.set("pipelineId", pipelineId);
     params.set("redirect", "true");
 
-    if (pipelineId) params.set("pipelineId", pipelineId);
+    if (siloId) params.set("siloId", siloId);
+    if (prompt) params.set("prompt", prompt);
     if (resultId) params.set("resultId", resultId);
 
     if (Object.keys(variables).length > 0) {
@@ -460,18 +466,18 @@ export function preloadVideo(options: SlopVideoOptions): Promise<void> {
 export interface SlopTextOptions {
   /**
    * The unique identifier of your Slop Machine bucket.
-   * Required when using a bucket unless pipelineKey is provided.
+   * Required when using a bucket unless pipelineId is provided.
    */
   bucketId?: string;
   /**
-   * The secret pipeline key used for executing a pipeline.
+   * The unique identifier of your Slop Machine pipeline.
    * Required when targeting a pipeline instead of a bucket.
    */
-  pipelineKey?: string;
-  /**
-   * Optional pipeline identifier.
-   */
   pipelineId?: string;
+  /**
+   * Optional silo identifier.
+   */
+  siloId?: string;
   /**
    * Dynamic runtime prompt (used when targeting a pipeline).
    */
@@ -509,7 +515,7 @@ export interface SlopTextOptions {
 /**
  * Builds a URL to render or retrieve text from Slop Machine.
  *
- * Supports both standard Buckets (via `bucketId`) and multi-step Pipelines (via `pipelineKey`).
+ * Supports both standard Buckets (via `bucketId`) and multi-step Pipelines (via `pipelineId`).
  *
  * @param options - Configuration options for the text generation.
  * @returns A string containing the fully constructed URL.
@@ -517,8 +523,8 @@ export interface SlopTextOptions {
 export function buildTextUrl(options: SlopTextOptions): string {
   const {
     bucketId,
-    pipelineKey,
     pipelineId,
+    siloId,
     prompt,
     metadata,
     version,
@@ -528,15 +534,16 @@ export function buildTextUrl(options: SlopTextOptions): string {
     attachments,
   } = options;
 
-  if (pipelineKey) {
+  if (pipelineId) {
     const endpoint =
       baseUrl ||
       "https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderPipeline";
     const params = new URLSearchParams();
-    params.set("pipelineKey", pipelineKey);
+    params.set("pipelineId", pipelineId);
     params.set("sync", "true");
 
-    if (pipelineId) params.set("pipelineId", pipelineId);
+    if (siloId) params.set("siloId", siloId);
+    if (prompt) params.set("prompt", prompt);
     if (resultId) params.set("resultId", resultId);
 
     if (Object.keys(variables).length > 0) {
@@ -602,8 +609,8 @@ export function preloadText(options: SlopTextOptions): Promise<void> {
  */
 export function buildPipelineUrl(options: SlopPipelineOptions): string {
   const {
-    pipelineKey,
     pipelineId,
+    siloId,
     prompt,
     variables = {},
     metadata = {},
@@ -614,9 +621,9 @@ export function buildPipelineUrl(options: SlopPipelineOptions): string {
   } = options;
 
   const params = new URLSearchParams();
-  params.set("pipelineKey", pipelineKey);
+  params.set("pipelineId", pipelineId);
 
-  if (pipelineId) params.set("pipelineId", pipelineId);
+  if (siloId) params.set("siloId", siloId);
   if (prompt) params.set("prompt", prompt);
   if (resultId) params.set("resultId", resultId);
   if (sync !== undefined) params.set("sync", String(sync));
@@ -635,14 +642,15 @@ export function buildPipelineUrl(options: SlopPipelineOptions): string {
 /**
  * Executes a Slop Machine multi-step Pipeline programmatically and returns the full typed result payload.
  *
- * @param options - Execution parameters including the pipelineKey and runtime prompt/variables/metadata.
+ * @param options - Execution parameters including the pipelineId and runtime prompt/variables/metadata.
  * @returns A promise resolving to the completed PipelineResult document.
  */
 export async function executePipeline(
   options: ExecutePipelineOptions,
 ): Promise<PipelineResult> {
   const {
-    pipelineKey,
+    pipelineId,
+    siloId,
     prompt,
     variables,
     metadata,
@@ -653,10 +661,10 @@ export async function executePipeline(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${pipelineKey}`,
     },
     body: JSON.stringify({
-      pipelineKey,
+      pipelineId,
+      ...(siloId ? { siloId } : {}),
       ...(prompt ? { prompt } : {}),
       variables,
       metadata,

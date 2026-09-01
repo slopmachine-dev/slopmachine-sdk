@@ -34,7 +34,7 @@ export interface SlopTextProps
  *
  * // Using a Pipeline with runtime prompt
  * <SlopText
- *   pipelineKey="pipe_live_abc123"
+ *   pipelineId="pipe_live_abc123"
  *   prompt="Write a whimsical haiku about quantum physics"
  *   metadata={{ userId: "123" }}
  * />
@@ -46,8 +46,8 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
   (
     {
       bucketId,
-      pipelineKey,
       pipelineId,
+      siloId,
       prompt,
       metadata,
       version,
@@ -75,8 +75,8 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
 
           const url = buildTextUrl({
             bucketId,
-            pipelineKey,
             pipelineId,
+            siloId,
             prompt,
             metadata,
             version,

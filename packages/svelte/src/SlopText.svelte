@@ -28,8 +28,8 @@
   interface Props {
     // SlopTextOptions
     bucketId?: string | undefined;
-    pipelineKey?: string | undefined;
     pipelineId?: string | undefined;
+    siloId?: string | undefined;
     prompt?: string | undefined;
     metadata?: Record<string, any> | undefined;
     version?: number | undefined;
@@ -47,8 +47,8 @@
 
   let {
     bucketId = undefined,
-    pipelineKey = undefined,
     pipelineId = undefined,
+    siloId = undefined,
     prompt = undefined,
     metadata = undefined,
     version = undefined,
@@ -78,8 +78,8 @@
 
         const url = buildTextUrl({
           bucketId,
-          pipelineKey,
           pipelineId,
+          siloId,
           prompt,
           metadata,
           version,

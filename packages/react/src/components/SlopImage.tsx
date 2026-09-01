@@ -55,7 +55,7 @@ export interface SlopImageProps
  *
  * // Using a Pipeline with runtime prompt
  * <SlopImage
- *   pipelineKey="pipe_live_abc123"
+ *   pipelineId="pipe_live_abc123"
  *   prompt="1960s retro robot eating pizza on Mars"
  *   aspectRatio="16:9"
  *   metadata={{ userId: "123" }}
@@ -66,8 +66,8 @@ export interface SlopImageProps
  */
 export const SlopImage: React.FC<SlopImageProps> = ({
   bucketId,
-  pipelineKey,
   pipelineId,
+  siloId,
   prompt,
   metadata,
   className,
@@ -92,8 +92,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
     () =>
       buildImageUrl({
         bucketId,
-        pipelineKey,
         pipelineId,
+        siloId,
         prompt,
         metadata,
         aspectRatio,
@@ -107,8 +107,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
       }),
     [
       bucketId,
-      pipelineKey,
       pipelineId,
+      siloId,
       prompt,
       metadata,
       aspectRatio,

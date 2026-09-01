@@ -49,7 +49,7 @@ export interface SlopVideoProps
  *
  * // Using a Pipeline with runtime prompt
  * <SlopVideo
- *   pipelineKey="pipe_live_abc123"
+ *   pipelineId="pipe_live_abc123"
  *   prompt="Drone shot of a cyberpunk city in rain"
  *   aspectRatio="16:9"
  *   metadata={{ campaign: "spring_launch" }}
@@ -60,8 +60,8 @@ export interface SlopVideoProps
  */
 export const SlopVideo: React.FC<SlopVideoProps> = ({
   bucketId,
-  pipelineKey,
   pipelineId,
+  siloId,
   prompt,
   metadata,
   className,
@@ -88,8 +88,8 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
     () =>
       buildVideoUrl({
         bucketId,
-        pipelineKey,
         pipelineId,
+        siloId,
         prompt,
         metadata,
         aspectRatio,
@@ -104,8 +104,8 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
       }),
     [
       bucketId,
-      pipelineKey,
       pipelineId,
+      siloId,
       prompt,
       metadata,
       aspectRatio,

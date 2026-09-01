@@ -66,20 +66,20 @@ function PipelineExample() {
   return (
     <div>
       <SlopImage
-        pipelineKey="pipe_live_abc123"
+        pipelineId="pipe_live_abc123"
         prompt="1960s retro robot eating synthetic pizza on Mars"
         aspectRatio="1:1"
         metadata={{ campaign: "retro_future_2026", userId: "u_101" }}
       />
 
       <SlopVideo
-        pipelineKey="pipe_live_def456"
+        pipelineId="pipe_live_def456"
         prompt="A drone swooping through neon skyscrapers in heavy rain"
         aspectRatio="9:16"
       />
 
       <SlopText
-        pipelineKey="pipe_live_ghi789"
+        pipelineId="pipe_live_ghi789"
         prompt="Write a whimsical product tagline for a cybernetic toaster"
       />
     </div>

@@ -60,20 +60,20 @@ Pipelines give developers runtime prompt flexibility and multi-step AI chaining:
 
 <div>
   <SlopImage
-    pipelineKey="pipe_live_abc123"
+    pipelineId="pipe_live_abc123"
     prompt="A futuristic neon marketplace in Tokyo at dusk"
     aspectRatio="16:9"
     metadata={{ source: "user-generated-content" }}
   />
 
   <SlopVideo
-    pipelineKey="pipe_live_def456"
+    pipelineId="pipe_live_def456"
     prompt="Hyperlapse sunset over Martian red sand dunes"
     aspectRatio="9:16"
   />
 
   <SlopText
-    pipelineKey="pipe_live_ghi789"
+    pipelineId="pipe_live_ghi789"
     prompt="Write an intro paragraph for a sci-fi novel about sentient houseplants"
   />
 </div>

@@ -54,8 +54,8 @@
 
   let {
     bucketId = undefined,
-    pipelineKey = undefined,
     pipelineId = undefined,
+    siloId = undefined,
     prompt = undefined,
     metadata = undefined,
     aspectRatio = "16:9",
@@ -84,8 +84,8 @@
   let computedSrc = $derived(
     buildVideoUrl({
       bucketId,
-      pipelineKey,
       pipelineId,
+      siloId,
       prompt,
       metadata,
       aspectRatio,

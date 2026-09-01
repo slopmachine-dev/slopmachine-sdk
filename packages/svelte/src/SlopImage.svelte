@@ -55,8 +55,8 @@
 
   let {
     bucketId = undefined,
-    pipelineKey = undefined,
     pipelineId = undefined,
+    siloId = undefined,
     prompt = undefined,
     metadata = undefined,
     aspectRatio = "1:1",
@@ -81,8 +81,8 @@
   let computedSrc = $derived(
     buildImageUrl({
       bucketId,
-      pipelineKey,
       pipelineId,
+      siloId,
       prompt,
       metadata,
       aspectRatio,

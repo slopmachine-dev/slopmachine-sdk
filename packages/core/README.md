@@ -16,7 +16,7 @@ pnpm add @slopmachine/core
 
 - **URL Builders**: `buildImageUrl`, `buildVideoUrl`, `buildTextUrl`, and `buildPipelineUrl` for safe, deterministic API URL generation.
 - **Preloaders**: `preloadImage`, `preloadVideo`, and `preloadText` to cache assets ahead of time in client applications.
-- **Multi-Step Pipelines**: Programmatic execution via `executePipeline({ pipelineKey, prompt, variables, metadata })`.
+- **Multi-Step Pipelines**: Programmatic execution via `executePipeline({ pipelineId, prompt, variables, metadata })`.
 - **Buckets & Pipelines Support**: Seamlessly switch between pre-templated Buckets and dynamic runtime Pipelines.
 
 ## Programmatic Pipeline Execution
@@ -25,7 +25,7 @@ pnpm add @slopmachine/core
 import { executePipeline } from "@slopmachine/core";
 
 const result = await executePipeline({
-  pipelineKey: "pipe_live_abc123",
+  pipelineId: "pipe_live_abc123",
   prompt: "A cinematic tracking shot through a cyberpunk alleyway",
   metadata: { userId: "usr_42" },
 });
