@@ -34,6 +34,12 @@
           Getting Started
         </a>
         <a
+          href="https://docs.slopmachine.dev/docs"
+          class="VPNavBarMenuLink"
+        >
+          Documentation
+        </a>
+        <a
           href="https://docs.slopmachine.dev/demo-react/"
           class="VPNavBarMenuLink"
         >

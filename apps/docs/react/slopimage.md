@@ -34,7 +34,7 @@ function MyGallery() {
 
 ## Advanced Usage
 
-You can override variables, specify an aspect ratio, pick a model, and even override the default loading skeleton via the `loader` prop. `SlopImage` also inherits standard `<img>` attributes (excluding `src` and `alt`, which are managed for you).
+You can override variables, pass custom metadata at runtime, specify an aspect ratio, pick a model, and even override the default loading skeleton via the `loader` prop. `SlopImage` also inherits standard `<img>` attributes (excluding `src` and `alt`, which are managed for you).
 
 ```tsx
 import { SlopImage } from "@slopmachine/react";
@@ -46,6 +46,7 @@ function Avatar() {
       aspectRatio="1:1"
       model="gemini-flash"
       variables={{ theme: "cyberpunk", detail: 100 }}
+      metadata={{ userId: "usr_123", source: "profile-editor" }}
       className="rounded-full shadow-lg"
       loader={
         <div className="flex h-full items-center justify-center text-blue-500">
@@ -112,6 +113,11 @@ If `true`, bypasses the WebP optimized media and returns the original generated 
 
 **Type:** `Record<string, string | number | undefined | null>` (Optional)
 A dictionary of prompt variables interpolated dynamically. Example: `{ character: "cat", style: "neon" }`. Any extraneous or unused variables provided that are not required by the resolved templates are automatically stripped out to ensure they do not unnecessarily bust the cache.
+
+### `metadata`
+
+**Type:** `Record<string, any>` (Optional)
+Arbitrary custom metadata to attach to the generation request and resulting document. Available for both Buckets and Pipelines. Example: `{ userId: "usr_123", feature: "avatar-generator" }`.
 
 ### `attachments`
 

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    [
+      "@slopmachine/core",
+      "@slopmachine/react",
+      "@slopmachine/svelte"
+    ]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "@slopmachine/demo-shared",
+    "demo-react",
+    "demo-svelte",
+    "docs",
+    "slopmachine-sdk-monorepo"
+  ]
+}

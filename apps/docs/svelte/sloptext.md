@@ -32,7 +32,7 @@ The minimum required prop is `bucketId`. This ties the component to a specific A
 
 ## Advanced Usage
 
-You can override variables, pick a model, and even override the default loading skeleton via the `loader` snippet. `SlopText` automatically fetches the text from the `renderText` endpoint and renders it as Markdown.
+You can override variables, pass custom metadata at runtime, pick a model, and even override the default loading skeleton via the `loader` snippet. `SlopText` automatically fetches the text from the `renderText` endpoint and renders it as Markdown.
 
 ```svelte
 <script>
@@ -43,6 +43,7 @@ You can override variables, pick a model, and even override the default loading 
   bucketId="blog-post-bucket"
   model="gemini-pro"
   variables={{ topic: "cyberpunk", length: "long" }}
+  metadata={{ authorId: "usr_42", department: "content" }}
   class="text-lg text-gray-800"
 >
   {#snippet loader()}
@@ -92,6 +93,11 @@ If a specific result ID is known, it can be fetched directly.
 
 **Type:** `Record<string, string | number | undefined | null>` (Optional)
 A dictionary of prompt variables interpolated dynamically. Example: `{ topic: "svelte", style: "tutorial" }`. Any extraneous or unused variables provided that are not required by the resolved templates are automatically stripped out to ensure they do not unnecessarily bust the cache.
+
+### `metadata`
+
+**Type:** `Record<string, any>` (Optional)
+Arbitrary custom metadata to attach to the generation request and resulting document. Available for both Buckets and Pipelines. Example: `{ userId: "usr_123", authorId: "usr_42" }`.
 
 ### `attachments`
 

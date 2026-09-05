@@ -36,6 +36,7 @@ export interface SlopVideoProps
  *
  * @example
  * ```tsx
+ * // Using a Bucket
  * <SlopVideo
  *   bucketId="my-bucket"
  *   resultId="some-result"
@@ -45,12 +46,24 @@ export interface SlopVideoProps
  *   loop
  *   muted
  * />
+ *
+ * // Using a Pipeline with runtime prompt
+ * <SlopVideo
+ *   pipelineId="pipe_live_abc123"
+ *   prompt="Drone shot of a cyberpunk city in rain"
+ *   aspectRatio="16:9"
+ *   metadata={{ campaign: "spring_launch" }}
+ * />
  * ```
  *
  * @version 0.1.26
  */
 export const SlopVideo: React.FC<SlopVideoProps> = ({
   bucketId,
+  pipelineId,
+  siloId,
+  prompt,
+  metadata,
   className,
   aspectRatio = "16:9",
   version,
@@ -75,6 +88,10 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
     () =>
       buildVideoUrl({
         bucketId,
+        pipelineId,
+        siloId,
+        prompt,
+        metadata,
         aspectRatio,
         version,
         resultId,
@@ -87,6 +104,10 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
       }),
     [
       bucketId,
+      pipelineId,
+      siloId,
+      prompt,
+      metadata,
       aspectRatio,
       version,
       resultId,

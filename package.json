@@ -15,9 +15,15 @@
     "docs:dev": "npm run dev --workspace=apps/docs",
     "build:react": "npm run build --workspace=apps/demo-react",
     "build:svelte": "npm run build --workspace=apps/demo-svelte",
-    "docs:build": "npm run build --workspace=apps/docs"
+    "docs:build": "npm run build --workspace=apps/docs",
+    "changeset": "changeset",
+    "version-packages": "changeset version && npm run sync-version",
+    "version:packages": "changeset version && npm run sync-version",
+    "bump-version": "node scripts/bump-version.mjs && npm run sync-version",
+    "release": "npm run build:packages && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^3.0.1",
     "prettier": "^3.8.1",
     "prettier-plugin-svelte": "^3.5.0"
   },
