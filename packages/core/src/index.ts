@@ -116,7 +116,7 @@ export interface SlopImageOptions {
    */
   prompt?: string;
   /**
-   * Arbitrary user metadata (used when targeting a pipeline).
+   * Arbitrary user metadata to attach to the generation request / result document.
    */
   metadata?: Record<string, any>;
   /**
@@ -254,6 +254,10 @@ export function buildImageUrl(options: SlopImageOptions): string {
       params.set("variables", JSON.stringify(variables));
     }
 
+    if (metadata && Object.keys(metadata).length > 0) {
+      params.set("metadata", JSON.stringify(metadata));
+    }
+
     if (attachments && attachments.length > 0) {
       params.set("attachments", JSON.stringify(attachments));
     }
@@ -305,7 +309,7 @@ export interface SlopVideoOptions {
    */
   prompt?: string;
   /**
-   * Arbitrary user metadata (used when targeting a pipeline).
+   * Arbitrary user metadata to attach to the generation request / result document.
    */
   metadata?: Record<string, any>;
   /**
@@ -433,6 +437,10 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
       params.set("variables", JSON.stringify(variables));
     }
 
+    if (metadata && Object.keys(metadata).length > 0) {
+      params.set("metadata", JSON.stringify(metadata));
+    }
+
     if (attachments && attachments.length > 0) {
       params.set("attachments", JSON.stringify(attachments));
     }
@@ -483,7 +491,7 @@ export interface SlopTextOptions {
    */
   prompt?: string;
   /**
-   * Arbitrary user metadata (used when targeting a pipeline).
+   * Arbitrary user metadata to attach to the generation request / result document.
    */
   metadata?: Record<string, any>;
   /**
@@ -570,6 +578,9 @@ export function buildTextUrl(options: SlopTextOptions): string {
     }
     if (Object.keys(variables).length > 0) {
       params.set("variables", JSON.stringify(variables));
+    }
+    if (metadata && Object.keys(metadata).length > 0) {
+      params.set("metadata", JSON.stringify(metadata));
     }
     if (attachments && attachments.length > 0) {
       params.set("attachments", JSON.stringify(attachments));

@@ -59,7 +59,7 @@ await preloadText({
 
 If you are not using JavaScript or prefer to build the URL yourself, you can append the parameters directly to the base URL.
 
-**Important:** The `variables` parameter must be a valid, URL-encoded JSON string.
+**Important:** The `variables` and `metadata` parameters must be valid, URL-encoded JSON strings.
 
 ```text
 https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderText?bucketId=your-bucket-id&variables=%7B%22theme%22%3A%22dark%22%2C%22username%22%3A%22alice%22%7D
@@ -72,6 +72,7 @@ https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderText?bucketId=you
 | `bucketId`    | `string`   | **Yes**  |            | The unique identifier of the Bucket you are generating text from.                                                                                              |
 | `prompt`      | `string`   |    No    | _Bucket_   | The base prompt for generation. If omitted, the function falls back to the prompt defined in the target Bucket Version.                                        |
 | `variables`   | `string`   |    No    | `{}`       | A URL-encoded JSON string containing variables to inject into your prompt templates. Example: `{"name": "Alice"}`. Extraneous or unused variables are ignored. |
+| `metadata`    | `string`   |    No    | `{}`       | A URL-encoded JSON string containing arbitrary user metadata to attach to the generation request or result document. Example: `{"userId": "123"}`.               |
 | `attachments` | `string[]` |    No    |            | An array of string URLs representing uploaded temporary file attachments. Can be repeated in the query string or passed as a URL-encoded JSON array.           |
 | `model`       | `string`   |    No    | `"gemini"` | Overrides the AI model used for generation.                                                                                                                    |
 | `version`     | `number`   |    No    | _Current_  | The specific version number of the Bucket to target. Defaults to the active version.                                                                           |

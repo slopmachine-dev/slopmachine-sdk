@@ -31,9 +31,10 @@ npm install @slopmachine/svelte @slopmachine/core
 Slop Machine provides two powerful paradigms for AI generation:
 
 ### 1. Buckets (Pre-Templated)
-Ideal when prompt templates and guardrails are defined in advance in the Slop Machine dashboard. Developers supply dynamic variables at runtime (e.g. `{ username: "Alice", theme: "retro" }`).
+Ideal when prompt templates and guardrails are defined in advance in the Slop Machine dashboard. Developers supply dynamic variables at runtime (e.g. `{ username: "Alice", theme: "retro" }`) as well as optional custom `metadata` (e.g. `{ userId: "usr_123", feature: "avatar" }`) to attach arbitrary contextual data to the generation request and result document.
 - Identified by `bucketId`.
 - Prompt structure is pre-configured and managed by versions in the Silo.
+- Supports runtime `variables`, `metadata`, and temporary `attachments`.
 
 ### 2. Pipelines (Developer Runtime Control)
 Ideal when external processes or users supply dynamic prompts on demand, or when multi-step chaining (e.g., text generation &rarr; video generation &rarr; audio &rarr; video text compositing) is required.

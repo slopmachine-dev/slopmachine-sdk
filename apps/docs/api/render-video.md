@@ -60,7 +60,7 @@ await preloadVideo({
 
 If you are not using JavaScript or prefer to build the URL yourself, you can append the parameters directly to the base URL.
 
-**Important:** The `variables` parameter must be a valid, URL-encoded JSON string.
+**Important:** The `variables` and `metadata` parameters must be valid, URL-encoded JSON strings.
 
 ```text
 https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderVideo?bucketId=your-bucket-id&aspectRatio=16%3A9&variables=%7B%22theme%22%3A%22dark%22%2C%22subject%22%3A%22a%20soaring%20eagle%22%7D
@@ -72,6 +72,7 @@ https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderVideo?bucketId=yo
 | :------------ | :--------- | :------: | :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `bucketId`    | `string`   | **Yes**  |           | The unique identifier of the Bucket you are generating a video from.                                                                                           |
 | `variables`   | `string`   |    No    | `{}`      | A URL-encoded JSON string containing variables to inject into your prompt templates. Example: `{"name": "Alice"}`. Extraneous or unused variables are ignored. |
+| `metadata`    | `string`   |    No    | `{}`      | A URL-encoded JSON string containing arbitrary user metadata to attach to the generation request or result document. Example: `{"userId": "123"}`.               |
 | `attachments` | `string[]` |    No    |           | An array of string URLs representing uploaded temporary file attachments. Can be repeated in the query string or passed as a URL-encoded JSON array.           |
 | `aspectRatio` | `string`   |    No    | `"16:9"`  | Target aspect ratio (`"9:16"`, `"16:9"`).                                                                                                                      |
 | `duration`    | `number`   |    No    | `4`       | The duration of the generated video in seconds. Must be between 4 and 8.                                                                                       |

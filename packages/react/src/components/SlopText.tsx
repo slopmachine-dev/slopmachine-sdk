@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { buildTextUrl, type SlopTextOptions } from "@slopmachine/core";
 import { marked } from "marked";
 
@@ -65,6 +65,34 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
+    const rawUrl = useMemo(
+      () =>
+        buildTextUrl({
+          bucketId,
+          pipelineId,
+          siloId,
+          prompt,
+          metadata,
+          version,
+          resultId,
+          variables,
+          baseUrl,
+          attachments,
+        }),
+      [
+        bucketId,
+        pipelineId,
+        siloId,
+        prompt,
+        JSON.stringify(metadata),
+        version,
+        resultId,
+        JSON.stringify(variables),
+        baseUrl,
+        JSON.stringify(attachments),
+      ],
+    );
+
     useEffect(() => {
       let isMounted = true;
 
@@ -73,21 +101,8 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
           setLoading(true);
           setError(null);
 
-          const url = buildTextUrl({
-            bucketId,
-            pipelineId,
-            siloId,
-            prompt,
-            metadata,
-            version,
-            resultId,
-            variables,
-            baseUrl,
-            attachments,
-          });
-
           // Fetch the URL to get the content, following redirects automatically
-          const response = await fetch(url, { cache: "no-store" });
+          const response = await fetch(rawUrl, { cache: "no-store" });
           if (!response.ok) {
             let errorMessage = response.statusText;
             try {
@@ -124,14 +139,7 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
       return () => {
         isMounted = false;
       };
-    }, [
-      bucketId,
-      version,
-      resultId,
-      JSON.stringify(variables),
-      JSON.stringify(attachments),
-      baseUrl,
-    ]);
+    }, [rawUrl]);
 
     if (error && errorFallback) {
       return <>{errorFallback}</>;
