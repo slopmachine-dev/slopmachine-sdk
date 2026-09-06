@@ -334,7 +334,7 @@ export interface SlopVideoOptions {
   variables?: Record<string, string | number | undefined | null>;
   /**
    * The duration of the generated video in seconds.
-   * Must be between 4 and 8. Defaults to 4.
+   * If not specified, defaults to the bucket version's configured duration (or 4).
    */
   duration?: number;
   /**
@@ -349,19 +349,18 @@ export interface SlopVideoOptions {
    */
   baseUrl?: string;
   /**
-   * If `true` (or `?raw=true`), bypasses the WebP optimized media and returns the original generated file.
-   * Defaults to false.
+   * If true, serves the original generated uncompressed asset directly from storage.
    */
   original?: boolean;
   /**
-   * Array of attachment URLs to include with the request.
+   * Array of runtime image attachments (URLs) to use with the video model.
+   * Only allowed if the bucket version has runtime attachments enabled.
    */
   attachments?: string[];
 }
 
 /**
- * Builds a URL to render or retrieve a video from Slop Machine.
- *
+ * Builds the URL to render or stream an AI-generated video.
  * Supports both standard Buckets (via `bucketId`) and multi-step Pipelines (via `pipelineId`).
  *
  * @param options - Configuration options for the video generation.
@@ -379,7 +378,7 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
     aspectRatio = "16:9",
     quality = "fast",
     variables = {},
-    duration = 4,
+    duration,
     baseUrl,
     original,
     attachments,
