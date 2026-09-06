@@ -1,15 +1,15 @@
 # @slopmachine/react
 
-The official React SDK for Slop Machine. This package provides React components to easily integrate Slop Machine image generation into your applications.
+The official React SDK for Slop Machine. This package provides high-performance, layout-stable React components to seamlessly integrate AI images, videos, and text into your web applications.
 
 ## Installation
 
 ```bash
-npm install @slopmachine/react
+npm install @slopmachine/react @slopmachine/core
 # or
-yarn add @slopmachine/react
+yarn add @slopmachine/react @slopmachine/core
 # or
-pnpm add @slopmachine/react
+pnpm add @slopmachine/react @slopmachine/core
 ```
 
 ## Demo
@@ -18,37 +18,74 @@ https://docs.slopmachine.dev/demo-react/
 
 ## Usage
 
-```tsx
-import { SlopImage } from "@slopmachine/react";
+### 1. Using Pre-Templated Buckets
 
-function App() {
+```tsx
+import { SlopImage, SlopVideo, SlopText } from "@slopmachine/react";
+
+function BucketExample() {
   return (
-    <div style={{ width: "400px", height: "400px" }}>
+    <div>
+      {/* Dynamic Image */}
       <SlopImage
-        prompt="A cute cat drinking coffee in a {style} style"
-        aspectRatio="1:1"
-        variables={{ style: "anime" }}
+        bucketId="my-bucket-id"
+        aspectRatio="16:9"
+        variables={{ style: "anime", character: "wizard" }}
+        className="rounded-lg shadow-md"
+      />
+
+      {/* Dynamic Video */}
+      <SlopVideo
+        bucketId="my-video-bucket"
+        aspectRatio="16:9"
+        duration={5}
+        autoPlay
+        loop
+        muted
+      />
+
+      {/* Dynamic Text / Story */}
+      <SlopText
+        bucketId="my-text-bucket"
+        variables={{ hero: "Arthur" }}
+        className="prose"
       />
     </div>
   );
 }
-
-export default App;
 ```
 
-## API / Props
+### 2. Using Dynamic Multi-Step Pipelines
 
-### `SlopImage`
+Pipelines give you full runtime control over the prompt and pipeline execution while persisting results directly to Slop Machine:
 
-The `SlopImage` component inherits from standard `React.ImgHTMLAttributes<HTMLImageElement>` (excluding `src` and `alt`) and accepts the following additional props:
+```tsx
+import { SlopImage, SlopVideo, SlopText } from "@slopmachine/react";
 
-| Prop          | Type                     | Default      | Description                                             |
-| :------------ | :----------------------- | :----------- | :------------------------------------------------------ |
-| `prompt`      | `string`                 | **Required** | The prompt to use for image generation.                 |
-| `aspectRatio` | `string`                 | `"1:1"`      | The aspect ratio of the image (e.g. `"16:9"`, `"1:1"`). |
-| `variables`   | `Record<string, string>` | `{}`         | Variables to interpolate into the prompt.               |
-| `model`       | `string`                 | `undefined`  | The AI model to use for generation.                     |
-| `baseUrl`     | `string`                 | `undefined`  | Custom base URL for the Slop Machine API.               |
+function PipelineExample() {
+  return (
+    <div>
+      <SlopImage
+        pipelineId="pipe_live_abc123"
+        prompt="1960s retro robot eating synthetic pizza on Mars"
+        aspectRatio="1:1"
+        metadata={{ campaign: "retro_future_2026", userId: "u_101" }}
+      />
+
+      <SlopVideo
+        pipelineId="pipe_live_def456"
+        prompt="A drone swooping through neon skyscrapers in heavy rain"
+        aspectRatio="9:16"
+      />
+
+      <SlopText
+        pipelineId="pipe_live_ghi789"
+        prompt="Write a whimsical product tagline for a cybernetic toaster"
+      />
+    </div>
+  );
+}
+```
 
 ## License
 

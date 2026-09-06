@@ -1,0 +1,68 @@
+name: Release & Publish Packages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Build & Publish Changed Packages to NPM
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'slopmachine-dev' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check for pending changesets
+        id: changeset_check
+        run: |
+          CHANGESETS=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)
+          echo "count=$CHANGESETS" >> $GITHUB_OUTPUT
+          if [ "$CHANGESETS" -gt "0" ]; then
+            echo "Pending changesets found: $CHANGESETS"
+          else
+            echo "No pending changesets found. Skipping NPM publish."
+          fi
+
+      - name: Version packages & update CHANGELOG.md files
+        if: steps.changeset_check.outputs.count > 0 || github.event_name == 'workflow_dispatch'
+        run: npm run version-packages
+
+      - name: Build all packages
+        if: steps.changeset_check.outputs.count > 0 || github.event_name == 'workflow_dispatch'
+        run: npm run build:packages
+
+      - name: Publish changed packages to NPM
+        if: steps.changeset_check.outputs.count > 0 || github.event_name == 'workflow_dispatch'
+        run: npx changeset publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Commit version bumps & changelogs, push git tags
+        if: steps.changeset_check.outputs.count > 0 || github.event_name == 'workflow_dispatch'
+        run: |
+          git add .
+          git commit -m "chore(release): version packages and update changelogs [skip ci]" || echo "No changes to commit"
+          git push origin HEAD --tags || echo "Failed to push tags"

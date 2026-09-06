@@ -30,7 +30,7 @@ The minimum required prop is `bucketId`, which maps directly to your generation 
 
 ## Advanced Usage
 
-You can override variables, specify an aspect ratio, pick a model, and even override the default loading skeleton via the `loader` Svelte snippet. Standard `<video>` attributes are also supported via `...restProps`.
+You can override variables, pass custom metadata at runtime, specify an aspect ratio, pick a model, and even override the default loading skeleton via the `loader` Svelte snippet. Standard `<video>` attributes are also supported via `...restProps`.
 
 ```svelte
 <script>
@@ -41,6 +41,7 @@ You can override variables, specify an aspect ratio, pick a model, and even over
   bucketId="promo-video-bucket"
   aspectRatio="16:9"
   variables={{ theme: "cyberpunk", speed: "fast" }}
+  metadata={{ campaign: "summer_launch", source: "landing_hero" }}
   class="rounded-lg shadow-xl"
   autoplay
   loop
@@ -118,6 +119,11 @@ If `true`, bypasses the optimized media and returns the original generated file.
 
 **Type:** `Record<string, string | number | undefined | null>` (Optional)
 A dictionary of prompt variables interpolated dynamically. Example: `{ subject: "dog", style: "neon" }`. Any extraneous or unused variables provided that are not required by the resolved templates are automatically stripped out to ensure they do not unnecessarily bust the cache.
+
+### `metadata`
+
+**Type:** `Record<string, any>` (Optional)
+Arbitrary custom metadata to attach to the generation request and resulting document. Available for both Buckets and Pipelines. Example: `{ userId: "usr_123", campaign: "summer_launch" }`.
 
 ### `attachments`
 

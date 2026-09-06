@@ -53,10 +53,14 @@
   }
 
   let {
-    bucketId,
+    bucketId = undefined,
+    pipelineId = undefined,
+    siloId = undefined,
+    prompt = undefined,
+    metadata = undefined,
     aspectRatio = "16:9",
-    version,
-    resultId,
+    version = undefined,
+    resultId = undefined,
     model,
     quality = "fast",
     variables = {},
@@ -80,6 +84,10 @@
   let computedSrc = $derived(
     buildVideoUrl({
       bucketId,
+      pipelineId,
+      siloId,
+      prompt,
+      metadata,
       aspectRatio,
       version,
       resultId,

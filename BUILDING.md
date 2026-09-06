@@ -47,11 +47,36 @@ npm run docs:build
 npm run serve --workspace=apps/docs
 ```
 
-## Publishing to npm
+## Versioning & Changesets
 
-To publish the packages in this monorepo to npm, follow these steps:
+We mandate the use of [Changesets](https://github.com/changesets/changesets) for managing package versioning, changelog entries, and releases across this monorepo.
 
-1. `npm login` to authenticate.
-2. Manually updating the versions in `packages/core/package.json`, `packages/react/package.json`, and `packages/svelte/package.json`.
-3. Running `npm run build:packages` to build the projects.
-4. Using the workspace command to publish them simultaneously: `npm publish --workspace=packages/core --workspace=packages/react --workspace=packages/svelte --access public`
+### 1. Adding a Changeset
+
+Whenever you make changes to packages in `packages/`:
+
+```bash
+npm run changeset
+```
+
+Follow the prompts to select the affected packages, choose the bump level (`major`, `minor`, `patch`), and write a concise description of the changes. Commit the generated markdown file in `.changeset/` along with your PR.
+
+> **Note:** Pull request CI runs `npx changeset status --since=origin/main` and will fail if changes were made to publishable packages without an accompanying changeset.
+
+### 2. Versioning and Releases
+
+Releases are automated via GitHub Actions:
+- When a PR with changesets is merged into `main`, GitHub Actions creates or updates a **Version Packages** release PR.
+- When the release PR is merged into `main`, GitHub Actions builds and publishes the updated packages to npm.
+
+#### Manual Release (if needed)
+
+If you need to cut a release manually:
+
+```bash
+# 1. Consume changesets and bump versions (also runs scripts/sync-version.mjs)
+npm run version-packages
+
+# 2. Build packages and publish to npm
+npm run release
+```

@@ -1,0 +1,39 @@
+name: CI - Test & Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Test & Build (Node 20)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for changeset on PRs
+        if: github.event_name == 'pull_request'
+        run: |
+          CHANGESETS=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)
+          if [ "$CHANGESETS" -eq "0" ]; then
+            echo "::error title=Missing Changeset::No changeset found in .changeset/. Please run 'npm run changeset' and include the generated markdown file in your PR so packages can be published on merge."
+            exit 1
+          else
+            echo "Pending changeset found: $CHANGESETS"
+          fi
+
+      - name: Build all workspace packages
+        run: npm run build

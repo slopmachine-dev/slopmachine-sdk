@@ -34,7 +34,7 @@ function MyArticle() {
 
 ## Advanced Usage
 
-You can override variables, specify a model, and even override the default loading skeleton via the `loader` prop. `SlopText` automatically fetches the text from the `renderText` endpoint and renders it as Markdown.
+You can override variables, pass custom metadata at runtime, specify a model, and even override the default loading skeleton via the `loader` prop. `SlopText` automatically fetches the text from the `renderText` endpoint and renders it as Markdown.
 
 ```tsx
 import { SlopText } from "@slopmachine/react";
@@ -45,6 +45,7 @@ function BlogPost() {
       bucketId="blog-post-bucket"
       model="gemini-pro"
       variables={{ topic: "cyberpunk", length: "long" }}
+      metadata={{ authorId: "usr_42", department: "content" }}
       className="text-lg text-gray-800"
       loader={
         <div className="flex h-32 items-center justify-center text-blue-500">
@@ -95,6 +96,11 @@ If a specific result ID is known, it can be fetched directly.
 
 **Type:** `Record<string, string | number | undefined | null>` (Optional)
 A dictionary of prompt variables interpolated dynamically. Example: `{ topic: "react", style: "educational" }`. Any extraneous or unused variables provided that are not required by the resolved templates are automatically stripped out to ensure they do not unnecessarily bust the cache.
+
+### `metadata`
+
+**Type:** `Record<string, any>` (Optional)
+Arbitrary custom metadata to attach to the generation request and resulting document. Available for both Buckets and Pipelines. Example: `{ userId: "usr_123", authorId: "usr_42" }`.
 
 ### `attachments`
 

@@ -64,6 +64,7 @@ export default defineConfig({
         target: "_self",
       },
       { text: "Getting Started", link: "/getting-started" },
+      { text: "Documentation", link: "/docs" },
       {
         text: "React Demo",
         link: "/demo-react/",

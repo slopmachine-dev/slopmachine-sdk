@@ -29,6 +29,12 @@ export function Header() {
               Getting Started
             </a>
             <a
+              href="https://docs.slopmachine.dev/docs"
+              className="VPNavBarMenuLink"
+            >
+              Documentation
+            </a>
+            <a
               href="https://docs.slopmachine.dev/demo-react/"
               className="VPNavBarMenuLink active"
             >

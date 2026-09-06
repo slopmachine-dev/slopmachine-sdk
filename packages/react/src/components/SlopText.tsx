@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { buildTextUrl, type SlopTextOptions } from "@slopmachine/core";
 import { marked } from "marked";
 
@@ -24,11 +24,19 @@ export interface SlopTextProps
  *
  * @example
  * ```tsx
+ * // Using a Bucket
  * <SlopText
  *   bucketId="my-text-bucket"
  *   fallback={<div>Loading story...</div>}
  *   errorFallback={<div>Failed to load story</div>}
  *   className="text-lg text-gray-800"
+ * />
+ *
+ * // Using a Pipeline with runtime prompt
+ * <SlopText
+ *   pipelineId="pipe_live_abc123"
+ *   prompt="Write a whimsical haiku about quantum physics"
+ *   metadata={{ userId: "123" }}
  * />
  * ```
  *
@@ -38,6 +46,10 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
   (
     {
       bucketId,
+      pipelineId,
+      siloId,
+      prompt,
+      metadata,
       version,
       resultId,
       variables,
@@ -53,6 +65,34 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
+    const rawUrl = useMemo(
+      () =>
+        buildTextUrl({
+          bucketId,
+          pipelineId,
+          siloId,
+          prompt,
+          metadata,
+          version,
+          resultId,
+          variables,
+          baseUrl,
+          attachments,
+        }),
+      [
+        bucketId,
+        pipelineId,
+        siloId,
+        prompt,
+        JSON.stringify(metadata),
+        version,
+        resultId,
+        JSON.stringify(variables),
+        baseUrl,
+        JSON.stringify(attachments),
+      ],
+    );
+
     useEffect(() => {
       let isMounted = true;
 
@@ -61,17 +101,8 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
           setLoading(true);
           setError(null);
 
-          const url = buildTextUrl({
-            bucketId,
-            version,
-            resultId,
-            variables,
-            baseUrl,
-            attachments,
-          });
-
           // Fetch the URL to get the content, following redirects automatically
-          const response = await fetch(url, { cache: "no-store" });
+          const response = await fetch(rawUrl, { cache: "no-store" });
           if (!response.ok) {
             let errorMessage = response.statusText;
             try {
@@ -108,14 +139,7 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
       return () => {
         isMounted = false;
       };
-    }, [
-      bucketId,
-      version,
-      resultId,
-      JSON.stringify(variables),
-      JSON.stringify(attachments),
-      baseUrl,
-    ]);
+    }, [rawUrl]);
 
     if (error && errorFallback) {
       return <>{errorFallback}</>;

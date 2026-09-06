@@ -1,0 +1,45 @@
+name: Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version bump type or exact version (e.g. patch, minor, major, 0.2.0)"
+        required: true
+        default: "patch"
+
+jobs:
+  version-bump:
+    name: Bump Version & Tag
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump workspace version
+        run: |
+          npm run bump-version -- ${{ github.event.inputs.version }}
+
+      - name: Commit and push changes
+        run: |
+          git add .
+          git commit -m "chore(release): bump version to ${{ github.event.inputs.version }}"
+          git tag -a "v${{ github.event.inputs.version }}" -m "Release v${{ github.event.inputs.version }}"
+          git push origin HEAD --tags
