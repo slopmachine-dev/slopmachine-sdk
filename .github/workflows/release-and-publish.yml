@@ -24,7 +24,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          registry-url: "https://registry.npmjs.org"
           cache: "npm"
 
       - name: Install dependencies
@@ -57,8 +56,6 @@ jobs:
       - name: Publish changed packages to NPM
         if: steps.changeset_check.outputs.count > 0 || github.event_name == 'workflow_dispatch'
         run: npx changeset publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Commit version bumps & changelogs, push git tags
         if: steps.changeset_check.outputs.count > 0 || github.event_name == 'workflow_dispatch'
