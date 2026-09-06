@@ -92,7 +92,7 @@ Sets the CSS aspect ratio of the wrapper element to prevent layout shifts. Examp
 
 ### `duration`
 
-**Type:** `number` (Optional, Default: `4`)
+**Type:** `number` (Optional, Default: bucket version duration or `4`)
 The duration of the generated video in seconds. Must be between 4 and 8. Ignored if `resultId` is provided.
 
 ### `model`
