@@ -8,17 +8,17 @@ on:
 
 jobs:
   test:
-    name: Test & Build (Node 20)
+    name: Test & Build (Node 24)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: "npm"
 
       - name: Install dependencies
