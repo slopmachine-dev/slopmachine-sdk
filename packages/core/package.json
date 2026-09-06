@@ -1,6 +1,6 @@
 {
   "name": "@slopmachine/core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "The official Core / VanillaJS SDK for Slop Machine",
   "llms": "https://docs.slopmachine.dev/llms.txt",
   "llmsFull": "https://docs.slopmachine.dev/llms-full.txt",
