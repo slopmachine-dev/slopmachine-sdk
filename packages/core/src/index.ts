@@ -140,12 +140,6 @@ export interface SlopImageOptions {
    */
   variables?: Record<string, string | number | undefined | null>;
   /**
-   * The target quality ("fast" or "high"). Only affects new generations and is ignored for caching.
-   * Ignored if `model` is provided.
-   * Defaults to "fast".
-   */
-  quality?: "fast" | "high";
-  /**
    * The base URL for the Slop Machine API.
    * Defaults to the production URL. Useful for testing against local deployments.
    */
@@ -196,7 +190,6 @@ export function buildImageUrl(options: SlopImageOptions): string {
     version,
     resultId,
     aspectRatio = "1:1",
-    quality = "fast",
     variables = {},
     baseUrl,
     original,
@@ -239,11 +232,6 @@ export function buildImageUrl(options: SlopImageOptions): string {
     }
     if (version) {
       params.set("version", String(version));
-    }
-    if (quality && quality !== "fast") {
-      params.set("quality", quality);
-    } else if (quality === "fast") {
-      params.set("quality", "fast");
     }
 
     if (original) {
@@ -338,12 +326,6 @@ export interface SlopVideoOptions {
    */
   duration?: number;
   /**
-   * The target quality ("fast" or "high"). Only affects new generations and is ignored for caching.
-   * Ignored if `model` is provided.
-   * Defaults to "fast".
-   */
-  quality?: "fast" | "high";
-  /**
    * The base URL for the Slop Machine API.
    * Defaults to the production URL. Useful for testing against local deployments.
    */
@@ -376,7 +358,6 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
     version,
     resultId,
     aspectRatio = "16:9",
-    quality = "fast",
     variables = {},
     duration,
     baseUrl,
@@ -423,9 +404,6 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
     }
     if (duration) {
       params.set("duration", String(duration));
-    }
-    if (quality) {
-      params.set("quality", quality);
     }
 
     if (original) {

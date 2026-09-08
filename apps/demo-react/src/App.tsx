@@ -371,7 +371,6 @@ function App() {
                   bgcolor: bgColor,
                   slopcolor: slopColor,
                 }}
-                quality="high"
                 className="w-full h-full object-cover transition-opacity duration-500 aspect-square"
               />
             }
@@ -478,7 +477,6 @@ function App() {
               ) : (
                 <SlopImage
                   bucketId={proceduralExampleBucketId}
-                  quality="high"
                   variables={{
                     location: effectiveLocation,
                     weather: effectiveWeather,

@@ -76,7 +76,6 @@ https://us-central1-slopmachine-12bfb.cloudfunctions.net/renderVideo?bucketId=yo
 | `attachments` | `string[]` |    No    |           | An array of string URLs representing uploaded temporary file attachments. Can be repeated in the query string or passed as a URL-encoded JSON array.           |
 | `aspectRatio` | `string`   |    No    | `"16:9"`  | Target aspect ratio (`"9:16"`, `"16:9"`).                                                                                                                      |
 | `duration`    | `number`   |    No    | _Version default or 4_ | The duration of the generated video in seconds. Must be between 4 and 8. Defaults to bucket version's duration setting (or 4). |
-| `quality`     | `string`   |    No    | `"fast"`  | The target quality (`"fast"` or `"high"`). Only affects new generations and is **ignored** for caching. Ignored if `model` is provided.                        |
 | `version`     | `number`   |    No    | _Current_ | The specific version number of the Bucket to target. Defaults to the active version.                                                                           |
 | `resultId`    | `string`   |    No    |           | If provided, directly returns a specific, previously generated result by its ID, ignoring all other parameters.                                                |
 | `original`    | `boolean`  |    No    | `false`   | If `true` (or `?raw=true`), bypasses the optimized media and returns the original generated file.                                                              |

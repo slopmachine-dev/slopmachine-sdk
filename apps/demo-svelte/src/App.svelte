@@ -362,7 +362,6 @@
             bgcolor: bgColor,
             slopcolor: slopColor,
           }}
-          quality="high"
           class="w-full h-full object-cover transition-opacity duration-500 aspect-square"
         />
       {/snippet}
@@ -454,7 +453,6 @@
         {:else}
           <SlopImage
             bucketId={proceduralExampleBucketId}
-            quality="high"
             variables={{
               location: effectiveLocation,
               weather: effectiveWeather,
