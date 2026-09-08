@@ -1,5 +1,16 @@
 # @slopmachine/svelte
 
+## 0.4.0
+
+### Minor Changes
+
+- 25bf4d8: Remove quality prop and query parameter across SDK and components.
+
+### Patch Changes
+
+- Updated dependencies [25bf4d8]
+  - @slopmachine/core@0.4.0
+
 ## 0.3.0
 
 ### Patch Changes

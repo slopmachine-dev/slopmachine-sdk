@@ -1,5 +1,11 @@
 # @slopmachine/core
 
+## 0.4.0
+
+### Minor Changes
+
+- 25bf4d8: Remove quality prop and query parameter across SDK and components.
+
 ## 0.3.0
 
 ### Minor Changes
