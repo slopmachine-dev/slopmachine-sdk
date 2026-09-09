@@ -2,6 +2,8 @@
 
 This document outlines the coding conventions and patterns used in the `@slopmachine/react` SDK. Future agents should adhere to these guidelines when making modifications or adding new components.
 
+> **Important:** Review the repository-wide guidelines in [AGENTS.md](../../AGENTS.md) and check [GOTCHAS.md](../../GOTCHAS.md) for known issues, pitfalls, and workarounds before starting tasks. Maintain `GOTCHAS.md` whenever resolving new pitfalls.
+
 ## Dependencies and Styling
 
 - **Class Merging:** Use `clsx` and `tailwind-merge` to construct and merge Tailwind CSS classes. A utility function `cn(...inputs: ClassValue[])` is typically used for this purpose.

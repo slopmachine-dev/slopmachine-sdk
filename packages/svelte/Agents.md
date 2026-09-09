@@ -2,6 +2,8 @@
 
 This document outlines the coding conventions, architecture, and patterns used in the `@slopmachine/svelte` SDK package. Future agents and contributors should adhere to these guidelines when making changes.
 
+> **Important:** Review the repository-wide guidelines in [AGENTS.md](../../AGENTS.md) and check [GOTCHAS.md](../../GOTCHAS.md) for known issues, pitfalls, and workarounds before starting tasks. Maintain `GOTCHAS.md` whenever resolving new pitfalls.
+
 ## 1. Svelte 5 Runes
 
 The SDK utilizes **Svelte 5** and exclusively relies on **runes** for state management and reactivity.
