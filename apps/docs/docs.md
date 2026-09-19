@@ -29,6 +29,8 @@ Direct cloud function endpoints for media rendering, pipeline execution, and fil
   Generate AI copywriting, dynamic slogans, and text snippets using templated prompt buckets.
 - **[Upload Temp Attachment API](/api/upload-temp-attachment)**  
   Upload temporary media files (images/attachments) to pass to generation endpoints via the `attachments` parameter.
+- **[Rate Result API](/api/rate-result)**  
+  Rate generated results as "good", "bad", or reset ratings with parent bucket/pipeline domain whitelist authorization.
 
 ---
 

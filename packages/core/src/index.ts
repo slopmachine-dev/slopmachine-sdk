@@ -710,3 +710,69 @@ export async function uploadTempAttachment(
   }
   return { url: json.result.url };
 }
+
+export type ResultRating = "good" | "bad" | null;
+
+export interface RateResultOptions {
+  /**
+   * Base URL for the rateResult cloud function endpoint.
+   */
+  baseUrl?: string;
+}
+
+export interface RateResultResponse {
+  success: boolean;
+  resultId: string;
+  rating: ResultRating;
+}
+
+/**
+ * Rates a previously generated result as "good", "bad", or clears its rating (null).
+ *
+ * The rating change is applied on the backend only if the request originates
+ * from an authorized domain (or if no domain whitelist is configured for the parent bucket/pipeline).
+ *
+ * @param resultId - The unique ID of the result to rate.
+ * @param rating - The rating to apply ("good", "bad", or null to clear).
+ * @param options - Optional configuration options including baseUrl.
+ * @returns A promise resolving to the rating update response.
+ */
+export async function rateResult(
+  resultId: string,
+  rating: ResultRating,
+  options?: RateResultOptions,
+): Promise<RateResultResponse> {
+  if (!resultId) {
+    throw new Error("resultId is required");
+  }
+
+  const endpoint =
+    options?.baseUrl ||
+    "https://us-central1-slopmachine-12bfb.cloudfunctions.net/rateResult";
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      resultId,
+      rating,
+    }),
+  });
+
+  if (!response.ok) {
+    let errorDetail = response.statusText;
+    try {
+      const errorJson = await response.json();
+      if (errorJson.error) {
+        errorDetail = errorJson.error;
+      }
+    } catch {
+      // Use statusText
+    }
+    throw new Error(`Failed to rate result (${response.status}): ${errorDetail}`);
+  }
+
+  return (await response.json()) as RateResultResponse;
+}
