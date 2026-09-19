@@ -7,6 +7,9 @@ export type {
   SlopImageOptions,
   SlopVideoOptions,
   SlopTextOptions,
+  ResultRating,
+  RateResultOptions,
+  RateResultResponse,
 } from "@slopmachine/core";
 
-export { preloadImage } from "@slopmachine/core";
+export { preloadImage, rateResult } from "@slopmachine/core";
