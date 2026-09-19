@@ -1,5 +1,11 @@
 # @slopmachine/core
 
+## 0.5.0
+
+### Minor Changes
+
+- 119e423: Add `rateResult` function to allow rating generated results as good, bad, or clearing their rating.
+
 ## 0.4.0
 
 ### Minor Changes

@@ -1,5 +1,16 @@
 # @slopmachine/react
 
+## 0.5.0
+
+### Minor Changes
+
+- 119e423: Add `rateResult` function to allow rating generated results as good, bad, or clearing their rating.
+
+### Patch Changes
+
+- Updated dependencies [119e423]
+  - @slopmachine/core@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes
