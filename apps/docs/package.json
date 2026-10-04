@@ -14,6 +14,6 @@
   "license": "MIT",
   "dependencies": {
     "minimatch": "^10.2.5",
-    "vitepress-plugin-llms": "^0.0.3"
+    "vitepress-plugin-llms": "^1.14.0"
   }
 }
