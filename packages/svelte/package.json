@@ -24,7 +24,7 @@
     "marked": "^17.0.4"
   },
   "peerDependencies": {
-    "svelte": "^5.0.0"
+    "svelte": "^5.57.1"
   },
   "license": "MIT"
 }
