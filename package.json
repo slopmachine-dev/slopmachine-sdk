@@ -23,9 +23,9 @@
     "release": "npm run build:packages && changeset publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^3.0.1",
-    "prettier": "^3.8.1",
-    "prettier-plugin-svelte": "^3.5.0"
+    "@changesets/cli": "^3.0.3",
+    "prettier": "^3.9.9",
+    "prettier-plugin-svelte": "^4.1.1"
   },
   "license": "MIT"
 }

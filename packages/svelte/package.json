@@ -21,10 +21,10 @@
   "dependencies": {
     "@slopmachine/core": "^0.5.0",
     "@types/marked": "^5.0.2",
-    "marked": "^17.0.4"
+    "marked": "^18.0.14"
   },
   "peerDependencies": {
-    "svelte": "^5.0.0"
+    "svelte": "^5.57.1"
   },
   "license": "MIT"
 }
