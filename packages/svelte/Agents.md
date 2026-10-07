@@ -35,10 +35,11 @@ Components should follow a clear top-to-bottom structure:
 
 ## 5. Exporting Patterns
 
-- **No Bundling**: The package is published as uncompiled source code to let the consuming project's bundler handle the Svelte compilation.
+- **Built with `svelte-package`, not bundled**: `npm run build` runs `svelte-package -i src -o dist`. Components ship as uncompiled `.svelte` files, so the consuming project's Svelte compiler handles them, alongside generated `.svelte.d.ts` types. `src/index.ts` becomes `dist/index.js` + `dist/index.d.ts`. Don't bundle or pre-compile components.
 - **package.json Setup**:
   - Exposes `"type": "module"`.
-  - The `"svelte"`, `"main"`, and `"exports"` fields point directly to `./src/index.ts`.
+  - `"svelte"`, `"types"`, and `"exports"` point to `./dist/index.js` / `./dist/index.d.ts`; `"files"` publishes only `dist` and `CHANGELOG.md`.
+  - Keep `@sveltejs/package` on `^2.5.x` (3.x forces TypeScript 6; see GOTCHAS.md).
 - Component exports should be simple and direct via `src/index.ts`.
 
 ## 6. Error Handling and Loading

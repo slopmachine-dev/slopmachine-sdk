@@ -9,9 +9,14 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
       "default": "./dist/index.js"
     }
   },
@@ -32,9 +37,13 @@
     "vitest": "^5.0.3"
   },
   "dependencies": {
-    "@pixerate/schemas": "^1.1.0",
     "dompurify": "^3.4.16",
     "marked": "^17.0.4"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": false
 }
