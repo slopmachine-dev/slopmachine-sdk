@@ -1,7 +1,27 @@
-import { AspectRatio as ImageAspectRatio, VideoAspectRatio } from "@pixerate/schemas";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
-export type { ImageAspectRatio, VideoAspectRatio };
+
+/**
+ * Aspect ratios supported by the renderImage endpoint.
+ * Keep in sync with `AspectRatioSchema` in the backend's `@pixerate/schemas`.
+ */
+export type ImageAspectRatio =
+  | "1:1"
+  | "2:3"
+  | "3:2"
+  | "3:4"
+  | "4:3"
+  | "4:5"
+  | "5:4"
+  | "9:16"
+  | "16:9"
+  | "21:9";
+
+/**
+ * Aspect ratios supported by the renderVideo endpoint.
+ * Keep in sync with `VideoAspectRatioSchema` in the backend's `@pixerate/schemas`.
+ */
+export type VideoAspectRatio = "9:16" | "16:9";
 
 export interface PipelineStepResult {
   stepId: string;
