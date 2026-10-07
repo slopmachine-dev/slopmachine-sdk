@@ -1,12 +1,15 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 import {
   buildImageUrl,
+  createRenderUrlMonitor,
+  type SlopMachineError,
   type SlopImageOptions,
   type ImageAspectRatio,
 } from "@slopmachine/core";
+import { ErrorOverlay, type SlopErrorFallback } from "./ErrorOverlay";
 
 // Utility for Tailwind classes
 function cn(...inputs: ClassValue[]) {
@@ -26,6 +29,17 @@ export interface SlopImageProps
    * If not provided, a default spinner and shimmer effect will be shown.
    */
   loader?: React.ReactNode;
+  /**
+   * Content to display if the image fails to generate or load.
+   * Pass a node, or a function that receives the `SlopMachineError` and returns a node.
+   * If not provided, a default error message is shown in place of the image.
+   */
+  errorFallback?: SlopErrorFallback;
+  /**
+   * Called once per URL when the image fails to generate or load.
+   * `error.status` holds the HTTP status when the API reported the failure.
+   */
+  onGenerationError?: (error: SlopMachineError) => void;
   /**
    * How the image should be resized to fit its container. Defaults to "cover".
    */
@@ -80,6 +94,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   original,
   attachments,
   loader,
+  errorFallback,
+  onGenerationError,
   objectFit = "cover",
   imageClassName,
   style,
@@ -124,7 +140,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
 
   const [src, setSrc] = useState(rawSrc);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       setSrc(rawSrc);
     }, 100);
@@ -134,39 +150,37 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   const alt = "Image produced by Slop Machine (slopmachine.dev)";
 
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<SlopMachineError | null>(null);
   const [currentSrc, setCurrentSrc] = useState(src);
-
   if (src !== currentSrc) {
     setCurrentSrc(src);
     setIsLoading(true);
+    setError(null);
   }
 
-  React.useEffect(() => {
-    if (!src) return;
+  // Keep the latest callback without re-running effects when it changes identity
+  const onGenerationErrorRef = useRef(onGenerationError);
+  useEffect(() => {
+    onGenerationErrorRef.current = onGenerationError;
+  });
 
-    fetch(src, { method: "HEAD" })
-      .then(async (res) => {
-        if (!res.ok) {
-          let errorMessage = res.statusText;
-          try {
-            const errRes = await fetch(src);
-            const errorText = await errRes.text();
-            const errorData = JSON.parse(errorText);
-            if (errorData.error) {
-              errorMessage = errorData.error;
-            }
-          } catch (e) {
-            // Failed to fetch or parse error details
-          }
-          console.error("SlopImage error:", res.status, errorMessage);
-          setIsLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error(`Error fetching image from ${src}:`, err);
+  // Shares one URL check between the HEAD probe and the media element's error event
+  const monitor = useMemo(
+    () =>
+      createRenderUrlMonitor((err) => {
+        console.error("SlopImage error:", err.status ?? "", err.message);
         setIsLoading(false);
-      });
-  }, [src]);
+        setError(err);
+        onGenerationErrorRef.current?.(err);
+      }),
+    [],
+  );
+
+  useEffect(() => {
+    if (!src) return;
+    monitor.watch(src);
+    return () => monitor.stop();
+  }, [src, monitor]);
 
   return (
     <>
@@ -319,6 +333,14 @@ export const SlopImage: React.FC<SlopImageProps> = ({
             </>
           )}
 
+          {error && (
+            <ErrorOverlay
+              error={error}
+              errorFallback={errorFallback}
+              label="Failed to load image"
+            />
+          )}
+
           {/* Image */}
           <img
             key={src}
@@ -330,12 +352,13 @@ export const SlopImage: React.FC<SlopImageProps> = ({
               onLoad?.(e);
             }}
             onError={(e) => {
-              setIsLoading(false);
+              monitor.mediaFailed(src, "Failed to load image");
               onError?.(e);
             }}
+            aria-hidden={error ? true : props["aria-hidden"]}
             className={cn(
               "h-full w-full transition-opacity duration-500",
-              isLoading ? "opacity-0" : "opacity-100",
+              isLoading || error ? "opacity-0" : "opacity-100",
               imageClassName,
             )}
             style={{
@@ -343,7 +366,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
               width: "100%",
               objectFit,
               transition: "opacity 500ms",
-              opacity: isLoading ? 0 : 1,
+              opacity: isLoading || error ? 0 : 1,
             }}
           />
         </div>

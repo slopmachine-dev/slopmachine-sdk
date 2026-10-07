@@ -23,10 +23,13 @@
 <script lang="ts">
   import {
     buildVideoUrl,
+    createRenderUrlMonitor,
+    type SlopMachineError,
     type SlopVideoOptions,
     type VideoAspectRatio,
   } from "@slopmachine/core";
   import type { Snippet } from "svelte";
+  import ErrorOverlay from "./ErrorOverlay.svelte";
 
   export interface SlopVideoProps extends Omit<
     SlopVideoOptions,
@@ -45,6 +48,17 @@
      * If not provided, a default spinner and shimmer effect will be shown.
      */
     loader?: Snippet;
+    /**
+     * Custom Svelte snippet to display if the video fails to generate or load.
+     * Receives `{ error }`, a `SlopMachineError`.
+     * If not provided, a default error message is shown in place of the video.
+     */
+    errorFallback?: Snippet<[{ error: SlopMachineError }]>;
+    /**
+     * Called once per URL when the video fails to generate or load.
+     * `error.status` holds the HTTP status when the API reported the failure.
+     */
+    onGenerationError?: (error: SlopMachineError) => void;
     autoplay?: boolean;
     loop?: boolean;
     muted?: boolean;
@@ -69,6 +83,8 @@
     attachments = undefined,
     class: className = "",
     loader,
+    errorFallback,
+    onGenerationError,
     autoplay = true,
     loop = true,
     muted = true,
@@ -79,6 +95,7 @@
   }: SlopVideoProps = $props();
 
   let isLoading = $state(true);
+  let error = $state<SlopMachineError | null>(null);
 
   let computedSrc = $derived(
     buildVideoUrl({
@@ -114,44 +131,23 @@
   $effect(() => {
     if (src !== prevSrc) {
       isLoading = true;
+      error = null;
       prevSrc = src;
     }
   });
 
-  $effect(() => {
-    if (src) {
-      const abortController = new AbortController();
-      fetch(src, { method: "HEAD", signal: abortController.signal })
-        .then(async (res) => {
-          if (!res.ok) {
-            let errorMessage = res.statusText;
-            try {
-              const errRes = await fetch(src, {
-                signal: abortController.signal,
-              });
-              const errorText = await errRes.text();
-              const errorData = JSON.parse(errorText);
-              if (errorData.error) {
-                errorMessage = errorData.error;
-              }
-            } catch (e: any) {
-              if (e.name !== "AbortError") {
-                // Failed to fetch or parse error details
-              }
-            }
-            console.error("SlopVideo error:", res.status, errorMessage);
-            isLoading = false;
-          }
-        })
-        .catch((err) => {
-          if (err.name !== "AbortError") {
-            console.error(`Error fetching video from ${src}:`, err);
-            isLoading = false;
-          }
-        });
+  // Shares one URL check between the HEAD probe and the media element's error event
+  const monitor = createRenderUrlMonitor((err) => {
+    console.error("SlopVideo error:", err.status ?? "", err.message);
+    isLoading = false;
+    error = err;
+    onGenerationError?.(err);
+  });
 
-      return () => abortController.abort();
-    }
+  $effect(() => {
+    if (!src) return;
+    monitor.watch(src);
+    return () => monitor.stop();
   });
 
   function handleLoadedData(e: Event) {
@@ -160,7 +156,8 @@
   }
 
   function handleError(e: Event) {
-    isLoading = false;
+    // An empty src (before the debounced URL is set) can fire a spurious error
+    if (src) monitor.mediaFailed(src, "Failed to load video");
     onerror?.(e);
   }
 </script>
@@ -203,15 +200,20 @@
       {/if}
     {/if}
 
+    {#if error}
+      <ErrorOverlay {error} {errorFallback} label="Failed to load video" />
+    {/if}
+
     <!-- svelte-ignore a11y_media_has_caption -->
     <video
-      {src}
+      src={src || undefined}
       {autoplay}
       {loop}
       {muted}
       {playsinline}
-      class:loaded={!isLoading}
+      class:loaded={!isLoading && !error}
       {...restProps}
+      aria-hidden={error ? true : restProps["aria-hidden"]}
       onloadeddata={handleLoadedData}
       onerror={handleError}
     ></video>

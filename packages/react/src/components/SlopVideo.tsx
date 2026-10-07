@@ -1,12 +1,15 @@
-import React, { useMemo, useState, useRef, useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 import {
   buildVideoUrl,
+  createRenderUrlMonitor,
+  type SlopMachineError,
   type SlopVideoOptions,
   type VideoAspectRatio,
 } from "@slopmachine/core";
+import { ErrorOverlay, type SlopErrorFallback } from "./ErrorOverlay";
 
 // Utility for Tailwind classes
 function cn(...inputs: ClassValue[]) {
@@ -26,6 +29,17 @@ export interface SlopVideoProps
    * If not provided, a default spinner and shimmer effect will be shown.
    */
   loader?: React.ReactNode;
+  /**
+   * Content to display if the video fails to generate or load.
+   * Pass a node, or a function that receives the `SlopMachineError` and returns a node.
+   * If not provided, a default error message is shown in place of the video.
+   */
+  errorFallback?: SlopErrorFallback;
+  /**
+   * Called once per URL when the video fails to generate or load.
+   * `error.status` holds the HTTP status when the API reported the failure.
+   */
+  onGenerationError?: (error: SlopMachineError) => void;
 }
 
 /**
@@ -74,6 +88,8 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
   original,
   attachments,
   loader,
+  errorFallback,
+  onGenerationError,
   autoPlay = true,
   loop = true,
   muted = true,
@@ -127,40 +143,38 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
   }, [rawSrc]);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<SlopMachineError | null>(null);
   const [currentSrc, setCurrentSrc] = useState(src);
   const videoRef = useRef<HTMLVideoElement>(null);
-
   if (src !== currentSrc) {
     setCurrentSrc(src);
     setIsLoading(true);
+    setError(null);
   }
+
+  // Keep the latest callback without re-running effects when it changes identity
+  const onGenerationErrorRef = useRef(onGenerationError);
+  useEffect(() => {
+    onGenerationErrorRef.current = onGenerationError;
+  });
+
+  // Shares one URL check between the HEAD probe and the media element's error event
+  const monitor = useMemo(
+    () =>
+      createRenderUrlMonitor((err) => {
+        console.error("SlopVideo error:", err.status ?? "", err.message);
+        setIsLoading(false);
+        setError(err);
+        onGenerationErrorRef.current?.(err);
+      }),
+    [],
+  );
 
   useEffect(() => {
     if (!src) return;
-
-    fetch(src, { method: "HEAD" })
-      .then(async (res) => {
-        if (!res.ok) {
-          let errorMessage = res.statusText;
-          try {
-            const errRes = await fetch(src);
-            const errorText = await errRes.text();
-            const errorData = JSON.parse(errorText);
-            if (errorData.error) {
-              errorMessage = errorData.error;
-            }
-          } catch (e) {
-            // Failed to fetch or parse error details
-          }
-          console.error("SlopVideo error:", res.status, errorMessage);
-          setIsLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error(`Error fetching video from ${src}:`, err);
-        setIsLoading(false);
-      });
-  }, [src]);
+    monitor.watch(src);
+    return () => monitor.stop();
+  }, [src, monitor]);
 
   return (
     <>
@@ -313,6 +327,14 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
             </>
           )}
 
+          {error && (
+            <ErrorOverlay
+              error={error}
+              errorFallback={errorFallback}
+              label="Failed to load video"
+            />
+          )}
+
           {/* Video */}
           <video
             key={src}
@@ -328,19 +350,20 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
               onLoadedData?.(e);
             }}
             onError={(e) => {
-              setIsLoading(false);
+              monitor.mediaFailed(src, "Failed to load video");
               onError?.(e);
             }}
+            aria-hidden={error ? true : props["aria-hidden"]}
             className={cn(
               "h-full w-full object-cover transition-opacity duration-500",
-              isLoading ? "opacity-0" : "opacity-100",
+              isLoading || error ? "opacity-0" : "opacity-100",
             )}
             style={{
               height: "100%",
               width: "100%",
               objectFit: "cover",
               transition: "opacity 500ms",
-              opacity: isLoading ? 0 : 1,
+              opacity: isLoading || error ? 0 : 1,
             }}
           />
         </div>

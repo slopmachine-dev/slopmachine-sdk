@@ -20,10 +20,13 @@
 <script lang="ts">
   import {
     buildImageUrl,
+    createRenderUrlMonitor,
+    type SlopMachineError,
     type SlopImageOptions,
     type ImageAspectRatio,
   } from "@slopmachine/core";
   import type { Snippet } from "svelte";
+  import ErrorOverlay from "./ErrorOverlay.svelte";
 
   export interface SlopImageProps extends Omit<
     SlopImageOptions,
@@ -42,6 +45,17 @@
      * If not provided, a default spinner and shimmer effect will be shown.
      */
     loader?: Snippet;
+    /**
+     * Custom Svelte snippet to display if the image fails to generate or load.
+     * Receives `{ error }`, a `SlopMachineError`.
+     * If not provided, a default error message is shown in place of the image.
+     */
+    errorFallback?: Snippet<[{ error: SlopMachineError }]>;
+    /**
+     * Called once per URL when the image fails to generate or load.
+     * `error.status` holds the HTTP status when the API reported the failure.
+     */
+    onGenerationError?: (error: SlopMachineError) => void;
     /**
      * How the image should be resized to fit its container. Defaults to "cover".
      */
@@ -71,12 +85,15 @@
     objectFit = "cover",
     imageClass = "",
     loader,
+    errorFallback,
+    onGenerationError,
     onload,
     onerror,
     ...restProps
   }: SlopImageProps = $props();
 
   let isLoading = $state(true);
+  let error = $state<SlopMachineError | null>(null);
 
   let computedSrc = $derived(
     buildImageUrl({
@@ -113,44 +130,23 @@
   $effect(() => {
     if (src !== prevSrc) {
       isLoading = true;
+      error = null;
       prevSrc = src;
     }
   });
 
-  $effect(() => {
-    if (src) {
-      const abortController = new AbortController();
-      fetch(src, { method: "HEAD", signal: abortController.signal })
-        .then(async (res) => {
-          if (!res.ok) {
-            let errorMessage = res.statusText;
-            try {
-              const errRes = await fetch(src, {
-                signal: abortController.signal,
-              });
-              const errorText = await errRes.text();
-              const errorData = JSON.parse(errorText);
-              if (errorData.error) {
-                errorMessage = errorData.error;
-              }
-            } catch (e: any) {
-              if (e.name !== "AbortError") {
-                // Failed to fetch or parse error details
-              }
-            }
-            console.error("SlopImage error:", res.status, errorMessage);
-            isLoading = false;
-          }
-        })
-        .catch((err) => {
-          if (err.name !== "AbortError") {
-            console.error(`Error fetching image from ${src}:`, err);
-            isLoading = false;
-          }
-        });
+  // Shares one URL check between the HEAD probe and the media element's error event
+  const monitor = createRenderUrlMonitor((err) => {
+    console.error("SlopImage error:", err.status ?? "", err.message);
+    isLoading = false;
+    error = err;
+    onGenerationError?.(err);
+  });
 
-      return () => abortController.abort();
-    }
+  $effect(() => {
+    if (!src) return;
+    monitor.watch(src);
+    return () => monitor.stop();
   });
 
   function handleLoad(e: Event) {
@@ -159,7 +155,8 @@
   }
 
   function handleError(e: Event) {
-    isLoading = false;
+    // An empty src (before the debounced URL is set) can fire a spurious error
+    if (src) monitor.mediaFailed(src, "Failed to load image");
     onerror?.(e);
   }
 </script>
@@ -202,12 +199,17 @@
       {/if}
     {/if}
 
+    {#if error}
+      <ErrorOverlay {error} {errorFallback} label="Failed to load image" />
+    {/if}
+
     <img
-      {src}
+      src={src || undefined}
       {alt}
       style="object-fit: {objectFit};"
-      class="slop-image {imageClass} {isLoading ? '' : 'loaded'}"
+      class="slop-image {imageClass} {isLoading || error ? '' : 'loaded'}"
       {...restProps}
+      aria-hidden={error ? true : restProps["aria-hidden"]}
       onload={handleLoad}
       onerror={handleError}
     />
