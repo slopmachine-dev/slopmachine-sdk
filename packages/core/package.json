@@ -28,7 +28,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@pixerate/schemas": "^1.1.0",
+    "@pixerate/schemas": "^1.23.0",
     "dompurify": "^3.4.16",
     "marked": "^17.0.4"
   },
