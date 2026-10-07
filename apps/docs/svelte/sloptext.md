@@ -112,7 +112,7 @@ An array of string URLs representing temporary file attachments to be used by th
 ### `baseUrl`
 
 **Type:** `string` (Optional)
-Override the default Slop Machine API URL if you are using a self-hosted or proxy backend.
+Full endpoint URL to send requests to instead of the default production `renderText` endpoint (or `renderPipeline` when using `pipelineId`).
 
 ### `fallback` (Snippet)
 

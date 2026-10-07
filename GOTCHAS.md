@@ -101,3 +101,12 @@ When adding a new entry, use the following structure:
 - **Symptoms / Error:** Importing `SlopImage` / `SlopVideo` / `SlopText` from a React Server Component (e.g. a Next.js App Router page) fails the build with `useState is not a function`. A `"use client"` line at the top of a source file has no effect.
 - **Root Cause:** esbuild (used by tsup) drops module-level directives when bundling, so `"use client"` written in source never reaches `dist/`.
 - **Solution / Workaround:** Add the directive with `banner: { js: '"use client";' }` in `packages/react/tsup.config.ts` (already configured), and check that `dist/index.mjs` and `dist/index.js` start with it. The whole entry is client-only, so server code that needs plain helpers (URL builders, `rateResult`, `SlopMachineError`) should import them from `@slopmachine/core`.
+
+---
+
+### Changing generated URLs busts every browser and CDN cache
+
+- **Affected Area:** `packages/core` (`buildImageUrl`, `buildVideoUrl`, `buildTextUrl`, `buildPipelineUrl`, `toQuery`)
+- **Symptoms / Error:** After a harmless-looking refactor, every image and video re-downloads (and may re-request generation) for all users, even though the backend returns the same cached result.
+- **Root Cause:** Browsers and CDNs cache by the exact URL string. Reordering query parameters, changing how values are encoded, or adding a parameter with a default value produces a new URL for identical inputs.
+- **Solution / Workaround:** Keep the order of entries passed to `toQuery` as-is, and only add parameters that are omitted when unset. `packages/core/test/url-stability.test.ts` pins exact URL strings; if it fails, treat that as a cache-busting change, not a test to update.
