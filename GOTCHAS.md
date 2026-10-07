@@ -35,9 +35,9 @@ When adding a new entry, use the following structure:
 ### PR CI failure due to missing Changeset
 
 - **Affected Area:** `packages/core`, `packages/react`, `packages/svelte`, GitHub Actions CI
-- **Symptoms / Error:** GitHub Actions pull request check fails with `npx changeset status --since=origin/main`.
-- **Root Cause:** Changes were made to publishable packages without generating a corresponding changeset file in `.changeset/`.
-- **Solution / Workaround:** Run `npm run changeset`, select the affected packages, specify the bump type (major, minor, patch), enter a summary, and commit the generated markdown file.
+- **Symptoms / Error:** The "Check for changeset on PRs" CI step fails with `Some packages have been changed but no changesets were found` from `npx changeset status --since=origin/main`.
+- **Root Cause:** Files in a publishable package changed in this PR without a changeset added in this PR. A changeset already pending on `main` doesn't count. PRs touching only docs, demos, `demo-shared`, CI or root files never need one.
+- **Solution / Workaround:** Run `npm run changeset`, select the affected packages, specify the bump type (major, minor, patch), enter a summary, and commit the generated markdown file. If the package change shouldn't produce a release (tests, dev tooling, comments), commit an empty changeset from `npx changeset add --empty`.
 
 ---
 

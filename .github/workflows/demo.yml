@@ -5,20 +5,16 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+# Deploys to Cloudflare Pages via wrangler; no GitHub Pages permissions needed
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: "pages"
+  group: "deploy-demo"
   cancel-in-progress: false
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -44,9 +40,6 @@ jobs:
           cp -a apps/docs/.vitepress/dist/. dist-demo/
           cp -a apps/demo-react/dist/. dist-demo/demo-react/
           cp -a apps/demo-svelte/dist/. dist-demo/demo-svelte/
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

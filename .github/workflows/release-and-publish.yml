@@ -1,15 +1,28 @@
 name: Release & Publish Packages
 
+# Flow on every push to main:
+#   1. If changesets are pending: version packages, then commit and push the
+#      version bump. A failed push stops the run before anything is published.
+#   2. Build and run `changeset publish`, which only publishes versions not yet
+#      on npm. This is a no-op when nothing is new, and it retries any earlier
+#      publish that failed after its version bump was pushed.
+# workflow_dispatch re-runs the same flow (e.g. to retry a failed publish).
+
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
+
+# Never run two releases at once; queue rather than cancel a release mid-publish
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   publish:
-    name: Build & Publish Changed Packages to NPM
+    name: Version & Publish Packages to NPM
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'slopmachine-dev' || github.event_name == 'workflow_dispatch'
+    if: github.repository_owner == 'slopmachine-dev'
     permissions:
       contents: write
       id-token: write
@@ -40,27 +53,31 @@ jobs:
         run: |
           CHANGESETS=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)
           echo "count=$CHANGESETS" >> $GITHUB_OUTPUT
-          if [ "$CHANGESETS" -gt "0" ]; then
-            echo "Pending changesets found: $CHANGESETS"
-          else
-            echo "No pending changesets found. Skipping NPM publish."
-          fi
+          echo "Pending changesets: $CHANGESETS"
 
       - name: Version packages & update CHANGELOG.md files
-        if: steps.changeset_check.outputs.count > 0 || github.event_name == 'workflow_dispatch'
+        if: steps.changeset_check.outputs.count > 0
         run: npm run version-packages
 
-      - name: Build all packages
-        if: steps.changeset_check.outputs.count > 0 || github.event_name == 'workflow_dispatch'
+      # Push the version bump before publishing so npm can never get ahead of git.
+      # If main moved since checkout, the push fails and nothing is published;
+      # the next push to main picks up the still-pending changesets.
+      - name: Commit & push version bumps and changelogs
+        if: steps.changeset_check.outputs.count > 0
+        run: |
+          git add .changeset packages
+          if git diff --cached --quiet; then
+            echo "No version changes to commit"
+          else
+            git commit -m "chore(release): version packages and update changelogs [skip ci]"
+            git push origin HEAD:main
+          fi
+
+      - name: Build packages
         run: npm run build:packages
 
-      - name: Publish changed packages to NPM
-        if: steps.changeset_check.outputs.count > 0 || github.event_name == 'workflow_dispatch'
+      - name: Publish unpublished versions to NPM
         run: npx changeset publish
 
-      - name: Commit version bumps & changelogs, push git tags
-        if: steps.changeset_check.outputs.count > 0 || github.event_name == 'workflow_dispatch'
-        run: |
-          git add .
-          git commit -m "chore(release): version packages and update changelogs [skip ci]" || echo "No changes to commit"
-          git push origin HEAD --tags || echo "Failed to push tags"
+      - name: Push release tags
+        run: git push origin --tags

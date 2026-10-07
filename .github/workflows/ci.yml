@@ -14,6 +14,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Full history so the changeset check can diff against origin/main
+          fetch-depth: 0
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
@@ -24,16 +27,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Fails only if a publishable package changed without a changeset in this PR.
+      # Docs/demo/CI-only PRs pass; use `npx changeset add --empty` to opt out explicitly.
       - name: Check for changeset on PRs
         if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
-        run: |
-          CHANGESETS=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)
-          if [ "$CHANGESETS" -eq "0" ]; then
-            echo "::error title=Missing Changeset::No changeset found in .changeset/. Please run 'npm run changeset' and include the generated markdown file in your PR so packages can be published on merge."
-            exit 1
-          else
-            echo "Pending changeset found: $CHANGESETS"
-          fi
+        run: npx changeset status --since=origin/${{ github.base_ref }}
 
       - name: Build all workspace packages
         run: npm run build
