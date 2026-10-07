@@ -71,22 +71,27 @@ npm run changeset
 
 Follow the prompts to select the affected packages, choose the bump level (`major`, `minor`, `patch`), and write a concise description of the changes. Commit the generated markdown file in `.changeset/` along with your PR.
 
-> **Note:** Pull request CI runs `npx changeset status --since=origin/main` and will fail if changes were made to publishable packages without an accompanying changeset.
+> **Note:** Pull request CI runs `npx changeset status --since=origin/main` and fails if a publishable package (`packages/core`, `packages/react`, `packages/svelte`) changed without a changeset in that PR. Changes that only touch docs, demos, CI or root files don't need one. If a package change shouldn't trigger a release (e.g. tests or dev tooling), add an empty changeset with `npx changeset add --empty`.
 
 ### 2. Versioning and Releases
 
-Releases are automated via GitHub Actions:
-- When a PR with changesets is merged into `main`, GitHub Actions creates or updates a **Version Packages** release PR.
-- When the release PR is merged into `main`, GitHub Actions builds and publishes the updated packages to npm.
+Releases are fully automated by the **Release & Publish Packages** workflow on every push to `main`:
+
+1. If changesets are pending, it runs `npm run version-packages` (bumps the fixed `@slopmachine/*` group, writes changelogs, syncs `@version` tags), then commits and pushes a `chore(release): …` commit to `main`. If that push fails (e.g. `main` moved), the run stops before publishing; the changesets stay pending for the next run.
+2. It builds the packages and runs `changeset publish`, which publishes only versions not yet on npm, then pushes the release tags. When nothing is new this is a no-op.
+
+Because publishing only happens after the version bump is on `main`, npm can never get ahead of git. If a publish fails, re-run the workflow (or use **Run workflow** / `workflow_dispatch`); it will publish whatever versions are still missing from npm.
+
+Changesets is the only supported way to version packages. Don't edit package versions by hand.
 
 #### Manual Release (if needed)
 
-If you need to cut a release manually:
+If you need to cut a release locally:
 
 ```bash
 # 1. Consume changesets and bump versions (also runs scripts/sync-version.mjs)
 npm run version-packages
 
-# 2. Build packages and publish to npm
+# 2. Commit and push the version bump to main first, then build and publish
 npm run release
 ```
