@@ -31,6 +31,8 @@ import { SlopImage } from "@slopmachine/react";
 
 When `pipelineId` is passed to `<SlopImage>` or `<SlopVideo>`, the SDK automatically appends `redirect=true`, allowing the media tag to transparently redirect to the final rendered asset URL.
 
+`aspectRatio` still sizes the component's layout box with pipelines, but it isn't sent to the API. Bucket-only options (`model`, `version`, `original`, `attachments`, and `duration` for video) aren't supported by the pipeline endpoint: they're left out of the request and the SDK logs a one-time console warning.
+
 ## Programmatic Execution (`executePipeline`)
 
 For backend workflows or programmatic client execution returning the full typed execution breakdown:

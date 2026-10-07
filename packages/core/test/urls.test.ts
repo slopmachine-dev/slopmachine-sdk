@@ -205,6 +205,18 @@ describe("interpolatePrompt", () => {
     ).toBe("{a} {b} x");
   });
 
+  it("treats keys literally, even with regex metacharacters", () => {
+    expect(
+      interpolatePrompt("{a.b} {axb} {c+}", { "a.b": "dot", "c+": "plus" }),
+    ).toBe("dot {axb} plus");
+  });
+
+  it("inserts values literally, including $ patterns", () => {
+    expect(interpolatePrompt("Price: {p}", { p: "$100 or $& or $1" })).toBe(
+      "Price: $100 or $& or $1",
+    );
+  });
+
   it("returns an empty string without a prompt", () => {
     expect(interpolatePrompt(undefined, { a: "x" })).toBe("");
   });
