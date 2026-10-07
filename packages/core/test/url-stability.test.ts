@@ -75,7 +75,12 @@ describe("generated URLs are byte-for-byte stable", () => {
 
   it("buildTextUrl (bucket)", () => {
     expect(
-      buildTextUrl({ bucketId: "b1", model: "gemini-pro", version: 1, ...full }),
+      buildTextUrl({
+        bucketId: "b1",
+        model: "gemini-pro",
+        version: 1,
+        ...full,
+      }),
     ).toBe(
       `${API}/renderText?bucketId=b1&model=gemini-pro&version=1&variables=%7B%22theme%22%3A%22dark%22%2C%22n%22%3A2%7D&metadata=%7B%22userId%22%3A%22u1%22%7D&attachments=%5B%22https%3A%2F%2Fa.dev%2Fx.png%22%5D`,
     );
@@ -83,8 +88,15 @@ describe("generated URLs are byte-for-byte stable", () => {
 
   it("buildTextUrl (pipeline)", () => {
     expect(
-      buildTextUrl({ pipelineId: "p1", siloId: "s1", prompt: "go", resultId: "r1" }),
-    ).toBe(`${API}/renderPipeline?pipelineId=p1&sync=true&siloId=s1&prompt=go&resultId=r1`);
+      buildTextUrl({
+        pipelineId: "p1",
+        siloId: "s1",
+        prompt: "go",
+        resultId: "r1",
+      }),
+    ).toBe(
+      `${API}/renderPipeline?pipelineId=p1&sync=true&siloId=s1&prompt=go&resultId=r1`,
+    );
   });
 
   it("buildPipelineUrl", () => {

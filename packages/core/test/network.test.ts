@@ -88,11 +88,12 @@ describe("checkRenderUrl", () => {
   });
 
   it("falls back to the status text when the body is not JSON", async () => {
-    mockFetch(async () =>
-      new Response("<html>oops</html>", {
-        status: 502,
-        statusText: "Bad Gateway",
-      }),
+    mockFetch(
+      async () =>
+        new Response("<html>oops</html>", {
+          status: 502,
+          statusText: "Bad Gateway",
+        }),
     );
     await expect(checkRenderUrl("https://api/x")).rejects.toMatchObject({
       message: "Bad Gateway",
@@ -141,7 +142,9 @@ describe("createRenderUrlMonitor", () => {
   it("prefers the API's error detail when the media element fails first", async () => {
     const head = deferred<Response>();
     mockFetch(async (_url, init) =>
-      init?.method === "HEAD" ? head.promise : json({ error: "bad input" }, 400),
+      init?.method === "HEAD"
+        ? head.promise
+        : json({ error: "bad input" }, 400),
     );
     const onError = vi.fn();
     const monitor = createRenderUrlMonitor(onError);
@@ -220,7 +223,8 @@ describe("createRenderUrlMonitor", () => {
   it("drops results for a URL that is no longer watched", async () => {
     const headA = deferred<Response>();
     mockFetch(async (url, init) => {
-      if (url === "https://api/a" && init?.method === "HEAD") return headA.promise;
+      if (url === "https://api/a" && init?.method === "HEAD")
+        return headA.promise;
       if (url === "https://api/a") return json({ error: "stale" }, 400);
       return new Response(null, { status: 200 });
     });
@@ -258,7 +262,8 @@ describe("createRenderUrlMonitor", () => {
 
   it("reports again after switching away from a failed URL and back", async () => {
     mockFetch(async (url, init) => {
-      if (url === "https://api/bad") return apiError("bad input", 400)(url, init);
+      if (url === "https://api/bad")
+        return apiError("bad input", 400)(url, init);
       return new Response(null, { status: 200 });
     });
     const onError = vi.fn();
@@ -306,7 +311,9 @@ describe("executePipeline", () => {
 
 describe("rateResult", () => {
   it("requires a resultId", async () => {
-    await expect(rateResult("", "good")).rejects.toThrow("resultId is required");
+    await expect(rateResult("", "good")).rejects.toThrow(
+      "resultId is required",
+    );
   });
 
   it("POSTs the rating and returns the response", async () => {

@@ -426,8 +426,13 @@ export function interpolatePrompt(
  * @returns A string containing the fully constructed URL.
  */
 export function buildImageUrl(options: SlopImageOptions): string {
-  const { bucketId, pipelineId, resultId, aspectRatio = "1:1", baseUrl } =
-    options;
+  const {
+    bucketId,
+    pipelineId,
+    resultId,
+    aspectRatio = "1:1",
+    baseUrl,
+  } = options;
 
   if (pipelineId) {
     warnIgnoredPipelineOptions(options, [
@@ -551,8 +556,13 @@ export interface SlopVideoOptions {
  * @returns A string containing the fully constructed URL.
  */
 export function buildVideoUrl(options: SlopVideoOptions): string {
-  const { bucketId, pipelineId, resultId, aspectRatio = "16:9", baseUrl } =
-    options;
+  const {
+    bucketId,
+    pipelineId,
+    resultId,
+    aspectRatio = "16:9",
+    baseUrl,
+  } = options;
 
   if (pipelineId) {
     warnIgnoredPipelineOptions(options, [
@@ -779,14 +789,7 @@ export function buildPipelineUrl(options: SlopPipelineOptions): string {
 export async function executePipeline(
   options: ExecutePipelineOptions,
 ): Promise<PipelineResult> {
-  const {
-    pipelineId,
-    siloId,
-    prompt,
-    variables,
-    metadata,
-    baseUrl,
-  } = options;
+  const { pipelineId, siloId, prompt, variables, metadata, baseUrl } = options;
 
   const response = await fetch(endpoint("renderPipeline", baseUrl), {
     method: "POST",
@@ -832,16 +835,13 @@ export async function uploadTempAttachment(
   base64: string,
   mimeType: string,
 ): Promise<{ url: string }> {
-  const response = await fetch(
-    endpoint("uploadTempAttachment"),
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ data: { base64, mimeType } }),
+  const response = await fetch(endpoint("uploadTempAttachment"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({ data: { base64, mimeType } }),
+  });
   if (!response.ok) {
     throw new Error(`Failed to upload attachment: ${response.statusText}`);
   }
@@ -911,7 +911,9 @@ export async function rateResult(
     } catch {
       // Use statusText
     }
-    throw new Error(`Failed to rate result (${response.status}): ${errorDetail}`);
+    throw new Error(
+      `Failed to rate result (${response.status}): ${errorDetail}`,
+    );
   }
 
   return (await response.json()) as RateResultResponse;

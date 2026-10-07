@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockInstance,
+} from "vitest";
 
 const PROD = "https://us-central1-slopmachine-12bfb.cloudfunctions.net";
 
@@ -66,7 +74,12 @@ describe("bucket-only options with pipelineId", () => {
 
   it("does not warn for bucket requests", async () => {
     const core = await loadCore();
-    core.buildImageUrl({ bucketId: "b", model: "m", version: 2, attachments: ["a"] });
+    core.buildImageUrl({
+      bucketId: "b",
+      model: "m",
+      version: 2,
+      attachments: ["a"],
+    });
     expect(warn).not.toHaveBeenCalled();
   });
 });
