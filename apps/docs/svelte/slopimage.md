@@ -61,6 +61,28 @@ To detect when the generation and loading is complete, you can pass standard HTM
 
 You can also completely customize the loading UI by providing a custom `loader` snippet.
 
+## Error States
+
+If the image fails to generate or load, the component replaces it with a default error message in the same space, so the layout doesn't shift. Use the `errorFallback` snippet to render your own UI, and `onGenerationError` to log or report the failure.
+
+```svelte
+<script lang="ts">
+  import { SlopImage, type SlopMachineError } from "@slopmachine/svelte";
+
+  function report(error: SlopMachineError) {
+    analytics.track("slop_error", { status: error.status, message: error.message });
+  }
+</script>
+
+<SlopImage bucketId="my-unique-bucket-id" onGenerationError={report}>
+  {#snippet errorFallback({ error })}
+    <p>Couldn't generate this image: {error.message}</p>
+  {/snippet}
+</SlopImage>
+```
+
+Both receive a `SlopMachineError`. When the API rejected the request, `error.message` is the API's error (e.g. a missing required variable) and `error.status` is the HTTP status (`400` for validation errors, `500` for generation failures). If the image file itself failed to load, `status` is `undefined`. `onGenerationError` is called once per URL.
+
 ## Preloading
 
 You can import and use `preloadImage` from `@slopmachine/svelte` to cache the asset before rendering the component.
@@ -147,6 +169,16 @@ Additional CSS classes to apply directly to the inner `<img>` element. Useful wh
 
 **Type:** Svelte `Snippet` (Optional)
 Replaces the default spinner and shimmer effect. Pass a snippet to render custom skeleton markup or text while the image is loading.
+
+### `errorFallback` Snippet
+
+**Type:** Svelte `Snippet<[{ error: SlopMachineError }]>` (Optional)
+Replaces the default error message shown when the image fails to generate or load. Receives `{ error }`.
+
+### `onGenerationError`
+
+**Type:** `(error: SlopMachineError) => void` (Optional)
+Called once per URL when the image fails to generate or load. See [Error States](#error-states).
 
 ### HTML Props
 

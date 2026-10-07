@@ -1,6 +1,7 @@
 export { SlopImage, type SlopImageProps } from "./components/SlopImage";
 export { SlopVideo, type SlopVideoProps } from "./components/SlopVideo";
 export { SlopText, type SlopTextProps } from "./components/SlopText";
+export type { SlopErrorFallback } from "./components/ErrorOverlay";
 
 export type {
   ImageAspectRatio,
@@ -18,4 +19,5 @@ export {
   preloadVideo,
   preloadText,
   rateResult,
+  SlopMachineError,
 } from "@slopmachine/core";

@@ -17,4 +17,5 @@ export {
   preloadVideo,
   preloadText,
   rateResult,
+  SlopMachineError,
 } from "@slopmachine/core";

@@ -162,6 +162,145 @@ export interface SlopImageOptions {
   attachments?: string[];
 }
 
+/**
+ * Error raised when Slop Machine fails to generate or serve a result.
+ */
+export class SlopMachineError extends Error {
+  /**
+   * The HTTP status returned by the API (e.g. `400` for validation errors,
+   * `500` for generation failures). Undefined when the media element itself
+   * failed to load and no API status is known.
+   */
+  readonly status?: number;
+
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = "SlopMachineError";
+    this.status = status;
+  }
+}
+
+/**
+ * Checks that a render URL resolves successfully, without downloading the media body.
+ *
+ * Sends a `HEAD` request. If the API responds with an error status, the error
+ * detail is read from the JSON response body and thrown as a `SlopMachineError`.
+ * Network-level failures (offline, CORS, aborted) are rethrown as-is, so callers
+ * can tell "the API reported an error" apart from "the check could not be made".
+ *
+ * @param url - A URL produced by `buildImageUrl`, `buildVideoUrl`, or `buildTextUrl`.
+ * @param init - Optional `AbortSignal` to cancel the check.
+ * @returns A promise that resolves if the URL is servable.
+ */
+export async function checkRenderUrl(
+  url: string,
+  init?: { signal?: AbortSignal },
+): Promise<void> {
+  const response = await fetch(url, { method: "HEAD", signal: init?.signal });
+  if (response.ok) return;
+
+  let message =
+    response.statusText || `Request failed with status ${response.status}`;
+  try {
+    // HEAD responses have no body, so fetch again to read the error detail.
+    const errorResponse = await fetch(url, { signal: init?.signal });
+    const errorData = JSON.parse(await errorResponse.text());
+    if (typeof errorData.error === "string") {
+      message = errorData.error;
+    } else if (typeof errorData.error?.message === "string") {
+      message = errorData.error.message;
+    }
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") throw err;
+    // Otherwise fall back to the status text
+  }
+  throw new SlopMachineError(message, response.status);
+}
+
+export interface RenderUrlMonitor {
+  /**
+   * Starts checking `url`, cancelling any check for a different URL.
+   * Reports an error if the API rejects the URL.
+   */
+  watch(url: string): void;
+  /**
+   * Call when the `<img>`/`<video>` element fires its `error` event for `url`.
+   * Waits for the URL check so the API's error message and status are reported
+   * when available, falling back to a `SlopMachineError(fallbackMessage)`.
+   *
+   * Pass the component's current URL only. This may run before `watch(url)`
+   * (the element can fail before an effect runs), so it starts the check itself.
+   */
+  mediaFailed(url: string, fallbackMessage: string): void;
+  /**
+   * Cancels the current check. Pending results for it are discarded.
+   */
+  stop(): void;
+}
+
+/**
+ * Low-level helper for framework components that render a media URL.
+ *
+ * A failing render URL is noticed twice: by the `HEAD` check (which can read the
+ * API's error detail) and by the media element's `error` event (which usually
+ * fires first but carries no detail). The monitor shares one check per URL
+ * between both, reports at most one error per URL, and drops results for URLs
+ * that are no longer current.
+ *
+ * @param onError - Called at most once per watched URL with the best available error.
+ */
+export function createRenderUrlMonitor(
+  onError: (error: SlopMachineError, url: string) => void,
+): RenderUrlMonitor {
+  let current: {
+    url: string;
+    controller: AbortController;
+    result: Promise<SlopMachineError | null>;
+  } | null = null;
+  let reportedUrl: string | null = null;
+
+  function check(url: string): Promise<SlopMachineError | null> {
+    if (current?.url === url) return current.result;
+    current?.controller.abort();
+    const controller = new AbortController();
+    const result = checkRenderUrl(url, { signal: controller.signal }).then(
+      () => null,
+      // Network, CORS and abort failures carry no API detail
+      (err) => (err instanceof SlopMachineError ? err : null),
+    );
+    current = { url, controller, result };
+    return result;
+  }
+
+  function report(error: SlopMachineError, url: string) {
+    if (current?.url !== url || reportedUrl === url) return;
+    reportedUrl = url;
+    onError(error, url);
+  }
+
+  return {
+    watch(url) {
+      if (current?.url !== url) {
+        current?.controller.abort();
+        current = null;
+        reportedUrl = null;
+      }
+      check(url).then((error) => {
+        if (error) report(error, url);
+      });
+    },
+    mediaFailed(url, fallbackMessage) {
+      check(url).then((error) =>
+        report(error ?? new SlopMachineError(fallbackMessage), url),
+      );
+    },
+    stop() {
+      current?.controller.abort();
+      current = null;
+    },
+  };
+}
+
 export function interpolatePrompt(
   prompt?: string,
   variables?: Record<string, string | number | undefined | null>,

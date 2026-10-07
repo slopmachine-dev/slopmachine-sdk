@@ -64,6 +64,24 @@ To detect when the generation and loading is complete, you can pass standard HTM
 
 You can also completely customize the loading UI by providing a custom `loader` prop.
 
+## Error States
+
+If the video fails to generate or load, the component replaces it with a default error message in the same space, so the layout doesn't shift. Use `errorFallback` to render your own UI, and `onGenerationError` to log or report the failure.
+
+```tsx
+import { SlopVideo, type SlopMachineError } from "@slopmachine/react";
+
+<SlopVideo
+  bucketId="my-unique-bucket-id"
+  errorFallback={(error) => <p>Couldn't generate this video: {error.message}</p>}
+  onGenerationError={(error: SlopMachineError) => {
+    analytics.track("slop_error", { status: error.status, message: error.message });
+  }}
+/>
+```
+
+Both receive a `SlopMachineError`. When the API rejected the request, `error.message` is the API's error (e.g. a missing required variable) and `error.status` is the HTTP status (`400` for validation errors, `500` for generation failures). If the video file itself failed to load, `status` is `undefined`. `onGenerationError` is called once per URL.
+
 ## Preloading
 
 You can import and use `preloadVideo` from `@slopmachine/react` to cache the asset before rendering the component.
@@ -133,6 +151,16 @@ Override the default Slop Machine API URL if you are using a self-hosted or prox
 
 **Type:** `React.ReactNode` (Optional)
 Replaces the default spinner and shimmer effect. Render a custom skeleton or text while the video is loading.
+
+### `errorFallback`
+
+**Type:** `React.ReactNode | ((error: SlopMachineError) => React.ReactNode)` (Optional)
+Replaces the default error message shown when the video fails to generate or load. Pass a node, or a function that receives the error.
+
+### `onGenerationError`
+
+**Type:** `(error: SlopMachineError) => void` (Optional)
+Called once per URL when the video fails to generate or load. See [Error States](#error-states).
 
 ### HTML `<video>` Props
 

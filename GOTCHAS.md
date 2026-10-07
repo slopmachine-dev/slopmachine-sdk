@@ -74,3 +74,12 @@ When adding a new entry, use the following structure:
 - **Symptoms / Error:** Sanitized output is either fully HTML-escaped or, worse, returned unsanitized, even though `window` exists by the time `sanitize()` is called.
 - **Root Cause:** The default `dompurify` export initialises once at import time. If no `window` existed then (Node, or jsdom set up after the import), `isSupported` is `false` forever, and in that state `DOMPurify.sanitize()` returns its input **unchanged**.
 - **Solution / Workaround:** Never call the default export's `sanitize` directly. Create an instance lazily with `DOMPurify(window)` at call time and check `isSupported`, falling back to HTML-escaping (see `getPurifier()` in `packages/core/src/index.ts`).
+
+---
+
+### Media `error` event fires before the API's error detail is available
+
+- **Affected Area:** `packages/core` (`createRenderUrlMonitor`), `SlopImage` / `SlopVideo` in `packages/react` and `packages/svelte`
+- **Symptoms / Error:** A failed generation (e.g. HTTP 400 "Missing required variable") is reported as a generic "Failed to load image" with no `status`, even though the API returned a detailed JSON error.
+- **Root Cause:** The `<img>`/`<video>` element requests the URL directly and fires `error` as soon as it gets a non-media response. The detail can only be read by the separate `HEAD` check plus a follow-up `GET`, which finishes later. Reporting whichever failure arrives first means the generic one usually wins.
+- **Solution / Workaround:** Route both failure sources through `createRenderUrlMonitor`. On a media `error` it waits for the shared URL check and reports the API error when there is one, falling back to the generic message. It also reports at most once per URL and drops results for URLs that are no longer current. Don't add a second, independent error path in components.
