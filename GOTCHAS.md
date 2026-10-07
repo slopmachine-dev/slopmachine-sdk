@@ -56,3 +56,21 @@ When adding a new entry, use the following structure:
 - **Symptoms / Error:** Expecting a pre-compiled JS bundle or `dist/` directory for `@slopmachine/svelte` causes build or import errors.
 - **Root Cause:** `@slopmachine/svelte` is published as uncompiled source code (`src/index.ts`) so consuming bundlers (like SvelteKit or Vite) compile Svelte components directly.
 - **Solution / Workaround:** Do not attempt to run a bundler or emit pre-compiled JS in `packages/svelte`; ensure `package.json` points `"svelte"`, `"main"`, and `"exports"` directly to `./src/index.ts`.
+
+---
+
+### Stale `node_modules` surfaces as misleading type errors
+
+- **Affected Area:** `packages/core`, `packages/react`, `packages/svelte`
+- **Symptoms / Error:** `npm run build:packages` fails with `TS2307: Cannot find module '@pixerate/schemas'` in core, followed by `TS7016: Could not find a declaration file for module '@slopmachine/core'` and `Property 'bucketId' does not exist on type 'SlopTextProps'` in react/svelte. The JS bundles still emit, so `dist/` looks partly built.
+- **Root Cause:** `node_modules` is out of sync with `package-lock.json` (e.g. `@pixerate/schemas` was never installed). Core's DTS step fails, so no `dist/index.d.ts` is written, and every downstream package loses the core types. The SlopText "missing property" errors are a side effect, not real bugs.
+- **Solution / Workaround:** Run `npm ci` at the repo root, then `npm run build:packages`. Check `npm ls @pixerate/schemas` if in doubt.
+
+---
+
+### DOMPurify silently stops sanitizing if imported before a DOM exists
+
+- **Affected Area:** `packages/core` (`renderMarkdown`), tests or SSR setups that create a DOM after import
+- **Symptoms / Error:** Sanitized output is either fully HTML-escaped or, worse, returned unsanitized, even though `window` exists by the time `sanitize()` is called.
+- **Root Cause:** The default `dompurify` export initialises once at import time. If no `window` existed then (Node, or jsdom set up after the import), `isSupported` is `false` forever, and in that state `DOMPurify.sanitize()` returns its input **unchanged**.
+- **Solution / Workaround:** Never call the default export's `sanitize` directly. Create an instance lazily with `DOMPurify(window)` at call time and check `isSupported`, falling back to HTML-escaping (see `getPurifier()` in `packages/core/src/index.ts`).

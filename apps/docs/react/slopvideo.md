@@ -32,7 +32,7 @@ function MyGallery() {
 
 ## Advanced Usage
 
-You can override variables, pass custom metadata at runtime, specify an aspect ratio, pick a model, and even override the default loading skeleton via the `loader` prop. `SlopVideo` also inherits standard `<video>` attributes (excluding `src`, which is managed for you).
+You can override variables, pass custom metadata at runtime, specify an aspect ratio, and even override the default loading skeleton via the `loader` prop. `SlopVideo` also inherits standard `<video>` attributes (excluding `src`, which is managed for you).
 
 ```tsx
 import { SlopVideo } from "@slopmachine/react";
@@ -93,11 +93,6 @@ Sets the CSS aspect ratio of the wrapper element to prevent layout shifts. Examp
 
 **Type:** `number` (Optional, Default: bucket version duration or `4`)
 The duration of the generated video in seconds. Must be between 4 and 8. Ignored if `resultId` is provided.
-
-### `model`
-
-**Type:** `string` (Optional)
-Specify the underlying generative AI video model to use.
 
 ### `version`
 

@@ -34,7 +34,9 @@ function MyArticle() {
 
 ## Advanced Usage
 
-You can override variables, pass custom metadata at runtime, specify a model, and even override the default loading skeleton via the `loader` prop. `SlopText` automatically fetches the text from the `renderText` endpoint and renders it as Markdown.
+You can override variables, pass custom metadata at runtime, specify a model, and override the default loading skeleton and error state via the `fallback` and `errorFallback` props. `SlopText` automatically fetches the text from the `renderText` endpoint and renders it as Markdown.
+
+The generated Markdown is converted to HTML and sanitized with [DOMPurify](https://github.com/cure53/DOMPurify) before rendering, so scripts, event handlers, and `javascript:` links in model output are stripped. During server-side rendering, where no DOM is available, the text is rendered HTML-escaped instead.
 
 ```tsx
 import { SlopText } from "@slopmachine/react";
@@ -47,11 +49,12 @@ function BlogPost() {
       variables={{ topic: "cyberpunk", length: "long" }}
       metadata={{ authorId: "usr_42", department: "content" }}
       className="text-lg text-gray-800"
-      loader={
+      fallback={
         <div className="flex h-32 items-center justify-center text-blue-500">
           Generating post content...
         </div>
       }
+      errorFallback={<div>Failed to load post.</div>}
     />
   );
 }
@@ -70,7 +73,7 @@ preloadText({ bucketId: "my-unique-bucket-id" });
 
 ## Props Reference
 
-The `SlopText` component takes parameters to build the URL and fetch the Markdown text, adding a `loader` property and taking standard HTML `div` attributes for the wrapper.
+The `SlopText` component takes parameters to build the URL and fetch the Markdown text, adding `fallback` and `errorFallback` properties and taking standard HTML `div` attributes for the wrapper.
 
 ### `bucketId`
 
@@ -79,8 +82,8 @@ The unique identifier for the specific text generation session/bucket.
 
 ### `model`
 
-**Type:** `"gemini" | "gemini-flash" | "gemini-pro" | "imagen"` (Optional)
-Specify the underlying generative AI model to use.
+**Type:** `string` (Optional, e.g. `"gemini-pro"`)
+Overrides the AI model used for generation. Defaults to the bucket version's configured model. Ignored if `resultId` is provided.
 
 ### `version`
 
@@ -112,10 +115,15 @@ An array of string URLs representing temporary file attachments to be used by th
 **Type:** `string` (Optional)
 Override the default Slop Machine API URL if you are using a self-hosted or proxy backend.
 
-### `loader`
+### `fallback`
 
 **Type:** `React.ReactNode` (Optional)
 Replaces the default spinner and shimmer effect. Render a custom skeleton or text while the text is loading.
+
+### `errorFallback`
+
+**Type:** `React.ReactNode` (Optional)
+Rendered instead of the text if generation or fetching fails.
 
 ### HTML `<div>` Props
 

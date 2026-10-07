@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { buildTextUrl, type SlopTextOptions } from "@slopmachine/core";
-import { marked } from "marked";
+import {
+  buildTextUrl,
+  renderMarkdown,
+  type SlopTextOptions,
+} from "@slopmachine/core";
 
 export interface SlopTextProps
   extends
@@ -52,6 +55,7 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
       metadata,
       version,
       resultId,
+      model,
       variables,
       baseUrl,
       attachments,
@@ -75,6 +79,7 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
           metadata,
           version,
           resultId,
+          model,
           variables,
           baseUrl,
           attachments,
@@ -87,6 +92,7 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
         JSON.stringify(metadata),
         version,
         resultId,
+        model,
         JSON.stringify(variables),
         baseUrl,
         JSON.stringify(attachments),
@@ -260,7 +266,7 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
         ref={ref}
         {...props}
         dangerouslySetInnerHTML={{
-          __html: text ? (marked.parse(text) as string) : "",
+          __html: text ? renderMarkdown(text) : "",
         }}
       />
     );

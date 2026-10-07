@@ -19,9 +19,7 @@
     "url": "git+https://github.com/slopmachine-dev/slopmachine-sdk.git"
   },
   "dependencies": {
-    "@slopmachine/core": "^0.5.0",
-    "@types/marked": "^5.0.2",
-    "marked": "^17.0.4"
+    "@slopmachine/core": "^0.5.0"
   },
   "peerDependencies": {
     "svelte": "^5.0.0"

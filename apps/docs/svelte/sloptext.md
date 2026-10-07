@@ -32,7 +32,9 @@ The minimum required prop is `bucketId`. This ties the component to a specific A
 
 ## Advanced Usage
 
-You can override variables, pass custom metadata at runtime, pick a model, and even override the default loading skeleton via the `loader` snippet. `SlopText` automatically fetches the text from the `renderText` endpoint and renders it as Markdown.
+You can override variables, pass custom metadata at runtime, pick a model, and override the default loading skeleton and error state via the `fallback` and `errorFallback` snippets. `SlopText` automatically fetches the text from the `renderText` endpoint and renders it as Markdown.
+
+The generated Markdown is converted to HTML and sanitized with [DOMPurify](https://github.com/cure53/DOMPurify) before rendering, so scripts, event handlers, and `javascript:` links in model output are stripped. During server-side rendering, where no DOM is available, the text is rendered HTML-escaped instead.
 
 ```svelte
 <script>
@@ -46,10 +48,13 @@ You can override variables, pass custom metadata at runtime, pick a model, and e
   metadata={{ authorId: "usr_42", department: "content" }}
   class="text-lg text-gray-800"
 >
-  {#snippet loader()}
+  {#snippet fallback()}
     <div class="flex h-32 items-center justify-center text-blue-500">
       Generating post content...
     </div>
+  {/snippet}
+  {#snippet errorFallback({ error })}
+    <div>Failed to load post: {error.message}</div>
   {/snippet}
 </SlopText>
 ```
@@ -76,8 +81,8 @@ The unique identifier for the specific text generation session/bucket.
 
 ### `model`
 
-**Type:** `"gemini" | "gemini-flash" | "gemini-pro" | "imagen"` (Optional)
-Specify the underlying generative AI model to use.
+**Type:** `string` (Optional, e.g. `"gemini-pro"`)
+Overrides the AI model used for generation. Defaults to the bucket version's configured model. Ignored if `resultId` is provided.
 
 ### `version`
 
@@ -109,9 +114,13 @@ An array of string URLs representing temporary file attachments to be used by th
 **Type:** `string` (Optional)
 Override the default Slop Machine API URL if you are using a self-hosted or proxy backend.
 
-### `loader` (Snippet)
+### `fallback` (Snippet)
 
 Replaces the default spinner and shimmer effect. Pass a snippet to render a custom skeleton or text while the content is loading.
+
+### `errorFallback` (Snippet)
+
+Rendered instead of the text if generation or fetching fails. Receives `{ error }`, where `error` is an `Error`.
 
 ### HTML `<div>` Attributes
 

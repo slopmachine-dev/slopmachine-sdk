@@ -30,7 +30,7 @@ The minimum required prop is `bucketId`, which maps directly to your generation 
 
 ## Advanced Usage
 
-You can override variables, pass custom metadata at runtime, specify an aspect ratio, pick a model, and even override the default loading skeleton via the `loader` Svelte snippet. Standard `<video>` attributes are also supported via `...restProps`.
+You can override variables, pass custom metadata at runtime, specify an aspect ratio, and even override the default loading skeleton via the `loader` Svelte snippet. Standard `<video>` attributes are also supported via `...restProps`.
 
 ```svelte
 <script>
@@ -94,11 +94,6 @@ Sets the CSS aspect ratio of the wrapper element to prevent layout shifts. Examp
 
 **Type:** `number` (Optional, Default: bucket version duration or `4`)
 The duration of the generated video in seconds. Must be between 4 and 8. Ignored if `resultId` is provided.
-
-### `model`
-
-**Type:** `string` (Optional)
-Specify the underlying generative AI video model to use.
 
 ### `version`
 
