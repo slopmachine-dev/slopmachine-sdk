@@ -297,22 +297,73 @@ export async function checkRenderUrl(
   const response = await fetch(url, { method: "HEAD", signal: init?.signal });
   if (response.ok) return;
 
-  let message =
-    response.statusText || `Request failed with status ${response.status}`;
+  // HEAD responses have no body, so fetch again to read the error detail.
+  let message = statusMessage(response);
   try {
-    // HEAD responses have no body, so fetch again to read the error detail.
     const errorResponse = await fetch(url, { signal: init?.signal });
-    const errorData = JSON.parse(await errorResponse.text());
-    if (typeof errorData.error === "string") {
-      message = errorData.error;
-    } else if (typeof errorData.error?.message === "string") {
-      message = errorData.error.message;
-    }
+    message = await readErrorMessage(errorResponse, message);
   } catch (err) {
-    if (err instanceof Error && err.name === "AbortError") throw err;
+    if (isAbortError(err)) throw err;
     // Otherwise fall back to the status text
   }
   throw new SlopMachineError(message, response.status);
+}
+
+/**
+ * Fetches generated text from a URL produced by `buildTextUrl`.
+ *
+ * Bypasses the HTTP cache, so remounting always shows the latest result.
+ *
+ * @param url - A URL produced by `buildTextUrl`.
+ * @param init - Optional `AbortSignal` to cancel the request.
+ * @returns The generated text (usually Markdown; see `renderMarkdown`).
+ * @throws `SlopMachineError` with the API's message and HTTP `status` if generation
+ *   fails, or without a status if the request could not be made. Aborts are rethrown as-is.
+ */
+export async function fetchRenderedText(
+  url: string,
+  init?: { signal?: AbortSignal },
+): Promise<string> {
+  let response: Response;
+  try {
+    response = await fetch(url, { cache: "no-store", signal: init?.signal });
+  } catch (err) {
+    if (isAbortError(err)) throw err;
+    throw new SlopMachineError("Failed to load text");
+  }
+  if (!response.ok) {
+    throw new SlopMachineError(
+      await readErrorMessage(response, statusMessage(response)),
+      response.status,
+    );
+  }
+  return response.text();
+}
+
+function isAbortError(err: unknown): boolean {
+  return err instanceof Error && err.name === "AbortError";
+}
+
+function statusMessage(response: Response): string {
+  return response.statusText || `Request failed with status ${response.status}`;
+}
+
+// Reads `{ error: string }` or `{ error: { message } }` from an API error body
+async function readErrorMessage(
+  response: Response,
+  fallback: string,
+): Promise<string> {
+  try {
+    const errorData = JSON.parse(await response.text());
+    if (typeof errorData.error === "string") return errorData.error;
+    if (typeof errorData.error?.message === "string") {
+      return errorData.error.message;
+    }
+  } catch (err) {
+    if (isAbortError(err)) throw err;
+    // Not JSON: use the fallback
+  }
+  return fallback;
 }
 
 export interface RenderUrlMonitor {
@@ -426,8 +477,13 @@ export function interpolatePrompt(
  * @returns A string containing the fully constructed URL.
  */
 export function buildImageUrl(options: SlopImageOptions): string {
-  const { bucketId, pipelineId, resultId, aspectRatio = "1:1", baseUrl } =
-    options;
+  const {
+    bucketId,
+    pipelineId,
+    resultId,
+    aspectRatio = "1:1",
+    baseUrl,
+  } = options;
 
   if (pipelineId) {
     warnIgnoredPipelineOptions(options, [
@@ -551,8 +607,13 @@ export interface SlopVideoOptions {
  * @returns A string containing the fully constructed URL.
  */
 export function buildVideoUrl(options: SlopVideoOptions): string {
-  const { bucketId, pipelineId, resultId, aspectRatio = "16:9", baseUrl } =
-    options;
+  const {
+    bucketId,
+    pipelineId,
+    resultId,
+    aspectRatio = "16:9",
+    baseUrl,
+  } = options;
 
   if (pipelineId) {
     warnIgnoredPipelineOptions(options, [
@@ -779,14 +840,7 @@ export function buildPipelineUrl(options: SlopPipelineOptions): string {
 export async function executePipeline(
   options: ExecutePipelineOptions,
 ): Promise<PipelineResult> {
-  const {
-    pipelineId,
-    siloId,
-    prompt,
-    variables,
-    metadata,
-    baseUrl,
-  } = options;
+  const { pipelineId, siloId, prompt, variables, metadata, baseUrl } = options;
 
   const response = await fetch(endpoint("renderPipeline", baseUrl), {
     method: "POST",
@@ -832,16 +886,13 @@ export async function uploadTempAttachment(
   base64: string,
   mimeType: string,
 ): Promise<{ url: string }> {
-  const response = await fetch(
-    endpoint("uploadTempAttachment"),
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ data: { base64, mimeType } }),
+  const response = await fetch(endpoint("uploadTempAttachment"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({ data: { base64, mimeType } }),
+  });
   if (!response.ok) {
     throw new Error(`Failed to upload attachment: ${response.statusText}`);
   }
@@ -911,7 +962,9 @@ export async function rateResult(
     } catch {
       // Use statusText
     }
-    throw new Error(`Failed to rate result (${response.status}): ${errorDetail}`);
+    throw new Error(
+      `Failed to rate result (${response.status}): ${errorDetail}`,
+    );
   }
 
   return (await response.json()) as RateResultResponse;

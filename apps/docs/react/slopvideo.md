@@ -147,6 +147,11 @@ An array of string URLs representing temporary file attachments to be used by th
 **Type:** `string` (Optional)
 Full endpoint URL to send requests to instead of the default production `renderVideo` endpoint (or `renderPipeline` when using `pipelineId`).
 
+### `objectFit`
+
+**Type:** `React.CSSProperties["objectFit"]` (Optional, Default: `"cover"`)
+How the video should be resized to fit its container. Maps directly to the CSS `object-fit` property.
+
 ### `loader`
 
 **Type:** `React.ReactNode` (Optional)

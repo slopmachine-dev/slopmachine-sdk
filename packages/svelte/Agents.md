@@ -31,7 +31,7 @@ Components should follow a clear top-to-bottom structure:
 1.  **Block Comments**: A descriptive JSDoc/HTML block comment at the top of the file outlining the `@component`, its description, `@example`, and `@version`.
 2.  **Script Tag**: `<script lang="ts">` containing imports, type definitions, runes (`$props`, `$state`, etc.), and local functions.
 3.  **Markup**: The Svelte HTML template using Svelte 5 logic blocks (`{#if}`, `{@render snippet()}`).
-4.  **Styles**: A `<style>` tag scoped to the component. Use CSS variables with sensible fallbacks (e.g., `var(--muted, #f3f4f6)`) to allow consumer theming while maintaining a good default appearance.
+4.  **Styles**: A `<style>` tag scoped to the component. Use namespaced `--slop-*` CSS variables that fall back to the host theme and then a literal default (e.g., `var(--slop-muted, var(--muted, #f3f4f6))`), so consumers can theme the components independently while keeping a good default appearance. The variables are documented under "Theming" in `apps/docs/getting-started.md`.
 
 ## 5. Exporting Patterns
 

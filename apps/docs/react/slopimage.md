@@ -34,7 +34,7 @@ function MyGallery() {
 
 ## Advanced Usage
 
-You can override variables, pass custom metadata at runtime, specify an aspect ratio, pick a model, and even override the default loading skeleton via the `loader` prop. `SlopImage` also inherits standard `<img>` attributes (excluding `src` and `alt`, which are managed for you).
+You can override variables, pass custom metadata at runtime, specify an aspect ratio, pick a model, and even override the default loading skeleton via the `loader` prop. `SlopImage` also inherits standard `<img>` attributes (excluding `src`, which is managed for you).
 
 ```tsx
 import { SlopImage } from "@slopmachine/react";
@@ -163,6 +163,11 @@ Replaces the default error message shown when the image fails to generate or loa
 
 **Type:** `(error: SlopMachineError) => void` (Optional)
 Called once per URL when the image fails to generate or load. See [Error States](#error-states).
+
+### `alt`
+
+**Type:** `string` (Optional, Default: `"Image produced by Slop Machine (slopmachine.dev)"`)
+Alternative text for screen readers and for when the image can't be shown. Describe what the image shows (e.g. `alt={`Avatar for ${user.name}`}`), or pass `""` if the image is purely decorative.
 
 ### `objectFit`
 

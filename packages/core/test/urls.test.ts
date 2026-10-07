@@ -116,9 +116,9 @@ describe("buildVideoUrl", () => {
   });
 
   it("includes duration", () => {
-    expect(parse(buildVideoUrl({ bucketId: "b1", duration: 6 })).params).toEqual(
-      { bucketId: "b1", aspectRatio: "16:9", duration: "6" },
-    );
+    expect(
+      parse(buildVideoUrl({ bucketId: "b1", duration: 6 })).params,
+    ).toEqual({ bucketId: "b1", aspectRatio: "16:9", duration: "6" });
   });
 
   it("only sends bucketId and resultId when retrieving a result", () => {
@@ -131,12 +131,12 @@ describe("buildVideoUrl", () => {
 
 describe("buildTextUrl", () => {
   it("targets renderText without an aspect ratio", () => {
-    expect(parse(buildTextUrl({ bucketId: "b1", model: "gemini-pro" }))).toEqual(
-      {
-        endpoint: `${API}/renderText`,
-        params: { bucketId: "b1", model: "gemini-pro" },
-      },
-    );
+    expect(
+      parse(buildTextUrl({ bucketId: "b1", model: "gemini-pro" })),
+    ).toEqual({
+      endpoint: `${API}/renderText`,
+      params: { bucketId: "b1", model: "gemini-pro" },
+    });
   });
 
   it("only sends bucketId and resultId when retrieving a result", () => {
@@ -151,7 +151,11 @@ describe("buildTextUrl", () => {
       buildTextUrl({ pipelineId: "p1", prompt: "a haiku" }),
     );
     expect(endpoint).toBe(`${API}/renderPipeline`);
-    expect(params).toEqual({ pipelineId: "p1", sync: "true", prompt: "a haiku" });
+    expect(params).toEqual({
+      pipelineId: "p1",
+      sync: "true",
+      prompt: "a haiku",
+    });
   });
 });
 

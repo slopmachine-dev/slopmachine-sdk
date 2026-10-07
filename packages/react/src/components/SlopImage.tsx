@@ -11,6 +11,8 @@ import {
 } from "@slopmachine/core";
 import { ErrorOverlay, type SlopErrorFallback } from "./ErrorOverlay";
 
+const DEFAULT_ALT = "Image produced by Slop Machine (slopmachine.dev)";
+
 // Utility for Tailwind classes
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -18,12 +20,18 @@ function cn(...inputs: ClassValue[]) {
 
 export interface SlopImageProps
   extends
-    Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt">,
+    Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src">,
     Omit<SlopImageOptions, "aspectRatio"> {
   /**
    * The aspect ratio of the generated image. Defaults to "1:1".
    */
   aspectRatio?: ImageAspectRatio;
+  /**
+   * Alternative text describing the image, for screen readers and when the image
+   * can't be shown. Defaults to "Image produced by Slop Machine (slopmachine.dev)".
+   * Describe what the image shows, or pass `""` if it's purely decorative.
+   */
+  alt?: string;
   /**
    * Custom React node to display while the image is loading.
    * If not provided, a default spinner and shimmer effect will be shown.
@@ -86,6 +94,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   metadata,
   className,
   aspectRatio = "1:1",
+  alt = DEFAULT_ALT,
   model,
   version,
   resultId,
@@ -146,8 +155,6 @@ export const SlopImage: React.FC<SlopImageProps> = ({
     }, 100);
     return () => clearTimeout(timer);
   }, [rawSrc]);
-
-  const alt = "Image produced by Slop Machine (slopmachine.dev)";
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<SlopMachineError | null>(null);
@@ -255,7 +262,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: "var(--muted, #f3f4f6)",
+                  backgroundColor: "var(--slop-muted, var(--muted, #f3f4f6))",
                   opacity: isLoading ? 1 : 0,
                   pointerEvents: isLoading ? "auto" : "none",
                   transition: "opacity 300ms ease-in-out",
@@ -278,7 +285,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
                     style={{
                       width: "24px",
                       height: "24px",
-                      color: "var(--muted-foreground, #6b7280)",
+                      color:
+                        "var(--slop-muted-foreground, var(--muted-foreground, #6b7280))",
                       animation: "slop-spin 1s linear infinite",
                     }}
                   >
@@ -302,7 +310,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
                     className="text-xs text-muted-foreground"
                     style={{
                       fontSize: "0.75rem",
-                      color: "var(--muted-foreground, #6b7280)",
+                      color:
+                        "var(--slop-muted-foreground, var(--muted-foreground, #6b7280))",
                     }}
                   >
                     Loading...
@@ -323,7 +332,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
                   right: 0,
                   bottom: 0,
                   background:
-                    "linear-gradient(90deg, var(--muted, #f3f4f6) 0%, var(--muted-foreground, #e5e7eb) 50%, var(--muted, #f3f4f6) 100%)",
+                    "linear-gradient(90deg, var(--slop-muted, var(--muted, #f3f4f6)) 0%, var(--slop-shimmer, var(--muted-foreground, #e5e7eb)) 50%, var(--slop-muted, var(--muted, #f3f4f6)) 100%)",
                   backgroundSize: "200% 100%",
                   animation: "slop-shimmer 2s ease-in-out infinite",
                   opacity: isLoading ? 1 : 0,

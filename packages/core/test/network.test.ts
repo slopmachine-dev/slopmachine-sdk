@@ -3,6 +3,7 @@ import {
   checkRenderUrl,
   createRenderUrlMonitor,
   executePipeline,
+  fetchRenderedText,
   rateResult,
   SlopMachineError,
   uploadTempAttachment,
@@ -88,11 +89,12 @@ describe("checkRenderUrl", () => {
   });
 
   it("falls back to the status text when the body is not JSON", async () => {
-    mockFetch(async () =>
-      new Response("<html>oops</html>", {
-        status: 502,
-        statusText: "Bad Gateway",
-      }),
+    mockFetch(
+      async () =>
+        new Response("<html>oops</html>", {
+          status: 502,
+          statusText: "Bad Gateway",
+        }),
     );
     await expect(checkRenderUrl("https://api/x")).rejects.toMatchObject({
       message: "Bad Gateway",
@@ -113,6 +115,67 @@ describe("checkRenderUrl", () => {
     const controller = new AbortController();
     await checkRenderUrl("https://api/x", { signal: controller.signal });
     expect(fetchMock.mock.calls[0][1]?.signal).toBe(controller.signal);
+  });
+});
+
+describe("fetchRenderedText", () => {
+  it("returns the text, bypassing the HTTP cache", async () => {
+    mockFetch(async () => new Response("# Hello", { status: 200 }));
+    const controller = new AbortController();
+    await expect(
+      fetchRenderedText("https://api/t", { signal: controller.signal }),
+    ).resolves.toBe("# Hello");
+    const init = fetchMock.mock.calls[0][1];
+    expect(init?.cache).toBe("no-store");
+    expect(init?.signal).toBe(controller.signal);
+    // One request: the error body is only read on failure
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("throws the API's error message and status", async () => {
+    mockFetch(async () =>
+      json({ error: "Missing required variable 'topic'" }, 400),
+    );
+    const err = await fetchRenderedText("https://api/t").catch((e) => e);
+    expect(err).toBeInstanceOf(SlopMachineError);
+    expect(err).toMatchObject({
+      message: "Missing required variable 'topic'",
+      status: 400,
+    });
+  });
+
+  it("falls back to the status text for non-JSON errors", async () => {
+    mockFetch(
+      async () =>
+        new Response("oops", {
+          status: 503,
+          statusText: "Service Unavailable",
+        }),
+    );
+    await expect(fetchRenderedText("https://api/t")).rejects.toMatchObject({
+      message: "Service Unavailable",
+      status: 503,
+    });
+  });
+
+  it("wraps network failures in a SlopMachineError without a status", async () => {
+    mockFetch(async () => {
+      throw new TypeError("Failed to fetch");
+    });
+    const err = await fetchRenderedText("https://api/t").catch((e) => e);
+    expect(err).toBeInstanceOf(SlopMachineError);
+    expect(err).toMatchObject({
+      message: "Failed to load text",
+      status: undefined,
+    });
+  });
+
+  it("rethrows aborts as-is", async () => {
+    const abort = new DOMException("Aborted", "AbortError");
+    mockFetch(async () => {
+      throw abort;
+    });
+    await expect(fetchRenderedText("https://api/t")).rejects.toBe(abort);
   });
 });
 
@@ -141,7 +204,9 @@ describe("createRenderUrlMonitor", () => {
   it("prefers the API's error detail when the media element fails first", async () => {
     const head = deferred<Response>();
     mockFetch(async (_url, init) =>
-      init?.method === "HEAD" ? head.promise : json({ error: "bad input" }, 400),
+      init?.method === "HEAD"
+        ? head.promise
+        : json({ error: "bad input" }, 400),
     );
     const onError = vi.fn();
     const monitor = createRenderUrlMonitor(onError);
@@ -220,7 +285,8 @@ describe("createRenderUrlMonitor", () => {
   it("drops results for a URL that is no longer watched", async () => {
     const headA = deferred<Response>();
     mockFetch(async (url, init) => {
-      if (url === "https://api/a" && init?.method === "HEAD") return headA.promise;
+      if (url === "https://api/a" && init?.method === "HEAD")
+        return headA.promise;
       if (url === "https://api/a") return json({ error: "stale" }, 400);
       return new Response(null, { status: 200 });
     });
@@ -258,7 +324,8 @@ describe("createRenderUrlMonitor", () => {
 
   it("reports again after switching away from a failed URL and back", async () => {
     mockFetch(async (url, init) => {
-      if (url === "https://api/bad") return apiError("bad input", 400)(url, init);
+      if (url === "https://api/bad")
+        return apiError("bad input", 400)(url, init);
       return new Response(null, { status: 200 });
     });
     const onError = vi.fn();
@@ -306,7 +373,9 @@ describe("executePipeline", () => {
 
 describe("rateResult", () => {
   it("requires a resultId", async () => {
-    await expect(rateResult("", "good")).rejects.toThrow("resultId is required");
+    await expect(rateResult("", "good")).rejects.toThrow(
+      "resultId is required",
+    );
   });
 
   it("POSTs the rating and returns the response", async () => {

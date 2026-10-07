@@ -157,6 +157,11 @@ Full endpoint URL to send requests to instead of the default production `renderI
 **Type:** `string` (Optional)
 Sets the class string on the outer wrapper element.
 
+### `alt`
+
+**Type:** `string` (Optional, Default: `"Image produced by Slop Machine (slopmachine.dev)"`)
+Alternative text for screen readers and for when the image can't be shown. Describe what the image shows (e.g. `alt={`Avatar for ${user.name}`}`), or pass `""` if the image is purely decorative.
+
 ### `objectFit`
 
 **Type:** `"fill" | "contain" | "cover" | "none" | "scale-down"` (Optional, Default: `"cover"`)
@@ -184,4 +189,4 @@ Called once per URL when the image fails to generate or load. See [Error States]
 
 ### HTML Props
 
-You can pass standard attributes like `alt`, `loading`, etc. The component applies the `class` property to the outer wrapper `div`, while spreading `...restProps` onto the underlying `<img>` tag where applicable. Use `imageClass` if you need to pass classes directly to the inner image element.
+You can pass standard attributes like `loading`, `decoding`, etc. The component applies the `class` property to the outer wrapper `div`, while spreading `...restProps` onto the underlying `<img>` tag where applicable. Use `imageClass` if you need to pass classes directly to the inner image element.

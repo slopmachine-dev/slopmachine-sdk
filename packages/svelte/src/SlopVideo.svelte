@@ -28,7 +28,7 @@
     type SlopVideoOptions,
     type VideoAspectRatio,
   } from "@slopmachine/core";
-  import type { Snippet } from "svelte";
+  import { untrack, type Snippet } from "svelte";
   import ErrorOverlay from "./ErrorOverlay.svelte";
 
   export interface SlopVideoProps extends Omit<
@@ -48,6 +48,10 @@
      * If not provided, a default spinner and shimmer effect will be shown.
      */
     loader?: Snippet;
+    /**
+     * How the video should be resized to fit its container. Defaults to "cover".
+     */
+    objectFit?: "fill" | "contain" | "cover" | "none" | "scale-down";
     /**
      * Custom Svelte snippet to display if the video fails to generate or load.
      * Receives `{ error }`, a `SlopMachineError`.
@@ -83,6 +87,7 @@
     attachments = undefined,
     class: className = "",
     loader,
+    objectFit = "cover",
     errorFallback,
     onGenerationError,
     autoplay = true,
@@ -114,16 +119,18 @@
       attachments,
     }),
   );
-  let src = $state("");
-  let prevSrc = $state("");
+  // Use the URL straight away (also when server-rendering); only later changes are debounced
+  let src = $state(untrack(() => computedSrc));
+  let prevSrc = $state(untrack(() => computedSrc));
 
   $effect(() => {
+    // Debounce rapid prop changes (same delay as the React components)
     const currentComputedSrc = computedSrc;
     const timeout = setTimeout(() => {
       if (src !== currentComputedSrc) {
         src = currentComputedSrc;
       }
-    }, 50);
+    }, 100);
 
     return () => clearTimeout(timeout);
   });
@@ -207,6 +214,7 @@
     <!-- svelte-ignore a11y_media_has_caption -->
     <video
       src={src || undefined}
+      style="object-fit: {objectFit};"
       {autoplay}
       {loop}
       {muted}
@@ -243,7 +251,7 @@
   }
 
   .loading-overlay {
-    background-color: var(--muted, #f3f4f6);
+    background-color: var(--slop-muted, var(--muted, #f3f4f6));
   }
 
   .spinner-container {
@@ -256,7 +264,7 @@
   .spinner {
     width: 24px;
     height: 24px;
-    color: var(--muted-foreground, #6b7280);
+    color: var(--slop-muted-foreground, var(--muted-foreground, #6b7280));
     animation: slop-spin 1s linear infinite;
   }
   .spinner circle {
@@ -268,7 +276,7 @@
 
   .spinner-container span {
     font-size: 0.75rem;
-    color: var(--muted-foreground, #6b7280);
+    color: var(--slop-muted-foreground, var(--muted-foreground, #6b7280));
   }
 
   .shimmer-effect {
@@ -279,9 +287,9 @@
     bottom: 0;
     background: linear-gradient(
       90deg,
-      var(--muted, #f3f4f6) 0%,
-      var(--muted-foreground, #e5e7eb) 50%,
-      var(--muted, #f3f4f6) 100%
+      var(--slop-muted, var(--muted, #f3f4f6)) 0%,
+      var(--slop-shimmer, var(--muted-foreground, #e5e7eb)) 50%,
+      var(--slop-muted, var(--muted, #f3f4f6)) 100%
     );
     background-size: 200% 100%;
     animation: slop-shimmer 2s ease-in-out infinite;
@@ -290,7 +298,6 @@
   video {
     height: 100%;
     width: 100%;
-    object-fit: cover;
     transition: opacity 500ms;
     opacity: 0;
   }
