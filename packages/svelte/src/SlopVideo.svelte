@@ -18,7 +18,7 @@
   />
   ```
 
-  @version 0.8.1
+  @version 0.9.0
 -->
 <script lang="ts">
   import {
