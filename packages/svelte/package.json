@@ -24,5 +24,13 @@
   "peerDependencies": {
     "svelte": "^5.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "svelte": "^5.57.2",
+    "svelte-check": "^4.7.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings"
+  }
 }

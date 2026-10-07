@@ -9,6 +9,16 @@ npm install
 npm run build
 ```
 
+## Tests & Type Checks
+
+Unit tests (Vitest) live in `packages/core/test`. Type checks cover all three packages (`tsc` for core and React, `svelte-check` for Svelte). CI runs both after the build:
+
+```bash
+npm run build:packages   # React/Svelte type-check against core's built .d.ts
+npm run typecheck
+npm test
+```
+
 ## React Demo
 
 ```bash

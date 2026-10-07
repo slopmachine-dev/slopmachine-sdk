@@ -17,15 +17,19 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/slopmachine-dev/slopmachine-sdk.git"
   },
   "devDependencies": {
+    "jsdom": "^30.1.2",
     "tsup": "^8.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^5.0.3"
   },
   "dependencies": {
     "@pixerate/schemas": "^1.1.0",
