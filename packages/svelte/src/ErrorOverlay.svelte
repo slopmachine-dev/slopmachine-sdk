@@ -59,7 +59,7 @@
   }
 
   .overlay.default {
-    background-color: var(--muted, #f3f4f6);
+    background-color: var(--slop-muted, var(--muted, #f3f4f6));
   }
 
   .content {
@@ -67,7 +67,7 @@
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
-    color: var(--muted-foreground, #6b7280);
+    color: var(--slop-muted-foreground, var(--muted-foreground, #6b7280));
   }
 
   svg {

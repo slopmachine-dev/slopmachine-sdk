@@ -25,7 +25,7 @@
     type SlopImageOptions,
     type ImageAspectRatio,
   } from "@slopmachine/core";
-  import type { Snippet } from "svelte";
+  import { untrack, type Snippet } from "svelte";
   import ErrorOverlay from "./ErrorOverlay.svelte";
 
   export interface SlopImageProps extends Omit<
@@ -36,6 +36,12 @@
      * The aspect ratio of the generated image. Defaults to "1:1".
      */
     aspectRatio?: ImageAspectRatio;
+    /**
+     * Alternative text describing the image, for screen readers and when the image
+     * can't be shown. Defaults to "Image produced by Slop Machine (slopmachine.dev)".
+     * Describe what the image shows, or pass `""` if it's purely decorative.
+     */
+    alt?: string;
     /**
      * Additional CSS classes to apply to the wrapper element.
      */
@@ -74,6 +80,7 @@
     prompt = undefined,
     metadata = undefined,
     aspectRatio = "1:1",
+    alt = "Image produced by Slop Machine (slopmachine.dev)",
     model = undefined,
     version = undefined,
     resultId = undefined,
@@ -112,17 +119,18 @@
       attachments,
     }),
   );
-  let src = $state("");
-  let prevSrc = $state("");
-  const alt = "Image produced by Slop Machine (slopmachine.dev)";
+  // Use the URL straight away (also when server-rendering); only later changes are debounced
+  let src = $state(untrack(() => computedSrc));
+  let prevSrc = $state(untrack(() => computedSrc));
 
   $effect(() => {
+    // Debounce rapid prop changes (same delay as the React components)
     const currentComputedSrc = computedSrc;
     const timeout = setTimeout(() => {
       if (src !== currentComputedSrc) {
         src = currentComputedSrc;
       }
-    }, 50);
+    }, 100);
 
     return () => clearTimeout(timeout);
   });
@@ -239,7 +247,7 @@
   }
 
   .loading-overlay {
-    background-color: var(--muted, #f3f4f6);
+    background-color: var(--slop-muted, var(--muted, #f3f4f6));
   }
 
   .spinner-container {
@@ -252,7 +260,7 @@
   .spinner {
     width: 24px;
     height: 24px;
-    color: var(--muted-foreground, #6b7280);
+    color: var(--slop-muted-foreground, var(--muted-foreground, #6b7280));
     animation: slop-spin 1s linear infinite;
   }
   .spinner circle {
@@ -264,7 +272,7 @@
 
   .spinner-container span {
     font-size: 0.75rem;
-    color: var(--muted-foreground, #6b7280);
+    color: var(--slop-muted-foreground, var(--muted-foreground, #6b7280));
   }
 
   .shimmer-effect {
@@ -275,9 +283,9 @@
     bottom: 0;
     background: linear-gradient(
       90deg,
-      var(--muted, #f3f4f6) 0%,
-      var(--muted-foreground, #e5e7eb) 50%,
-      var(--muted, #f3f4f6) 100%
+      var(--slop-muted, var(--muted, #f3f4f6)) 0%,
+      var(--slop-shimmer, var(--muted-foreground, #e5e7eb)) 50%,
+      var(--slop-muted, var(--muted, #f3f4f6)) 100%
     );
     background-size: 200% 100%;
     animation: slop-shimmer 2s ease-in-out infinite;

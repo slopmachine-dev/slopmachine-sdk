@@ -157,6 +157,11 @@ Full endpoint URL to send requests to instead of the default production `renderV
 **Type:** `string` (Optional)
 Sets the class string on the outer wrapper element.
 
+### `objectFit`
+
+**Type:** `"fill" | "contain" | "cover" | "none" | "scale-down"` (Optional, Default: `"cover"`)
+How the video should be resized to fit its container. Maps directly to the CSS `object-fit` property.
+
 ### `loader` Snippet
 
 **Type:** Svelte `Snippet` (Optional)

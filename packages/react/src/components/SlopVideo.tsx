@@ -30,6 +30,10 @@ export interface SlopVideoProps
    */
   loader?: React.ReactNode;
   /**
+   * How the video should be resized to fit its container. Defaults to "cover".
+   */
+  objectFit?: React.CSSProperties["objectFit"];
+  /**
    * Content to display if the video fails to generate or load.
    * Pass a node, or a function that receives the `SlopMachineError` and returns a node.
    * If not provided, a default error message is shown in place of the video.
@@ -88,6 +92,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
   original,
   attachments,
   loader,
+  objectFit = "cover",
   errorFallback,
   onGenerationError,
   autoPlay = true,
@@ -249,7 +254,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: "var(--muted, #f3f4f6)",
+                  backgroundColor: "var(--slop-muted, var(--muted, #f3f4f6))",
                   opacity: isLoading ? 1 : 0,
                   pointerEvents: isLoading ? "auto" : "none",
                   transition: "opacity 300ms ease-in-out",
@@ -272,7 +277,8 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
                     style={{
                       width: "24px",
                       height: "24px",
-                      color: "var(--muted-foreground, #6b7280)",
+                      color:
+                        "var(--slop-muted-foreground, var(--muted-foreground, #6b7280))",
                       animation: "slop-spin 1s linear infinite",
                     }}
                   >
@@ -296,7 +302,8 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
                     className="text-xs text-muted-foreground"
                     style={{
                       fontSize: "0.75rem",
-                      color: "var(--muted-foreground, #6b7280)",
+                      color:
+                        "var(--slop-muted-foreground, var(--muted-foreground, #6b7280))",
                     }}
                   >
                     Loading...
@@ -317,7 +324,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
                   right: 0,
                   bottom: 0,
                   background:
-                    "linear-gradient(90deg, var(--muted, #f3f4f6) 0%, var(--muted-foreground, #e5e7eb) 50%, var(--muted, #f3f4f6) 100%)",
+                    "linear-gradient(90deg, var(--slop-muted, var(--muted, #f3f4f6)) 0%, var(--slop-shimmer, var(--muted-foreground, #e5e7eb)) 50%, var(--slop-muted, var(--muted, #f3f4f6)) 100%)",
                   backgroundSize: "200% 100%",
                   animation: "slop-shimmer 2s ease-in-out infinite",
                   opacity: isLoading ? 1 : 0,
@@ -355,13 +362,13 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
             }}
             aria-hidden={error ? true : props["aria-hidden"]}
             className={cn(
-              "h-full w-full object-cover transition-opacity duration-500",
+              "h-full w-full transition-opacity duration-500",
               isLoading || error ? "opacity-0" : "opacity-100",
             )}
             style={{
               height: "100%",
               width: "100%",
-              objectFit: "cover",
+              objectFit,
               transition: "opacity 500ms",
               opacity: isLoading || error ? 0 : 1,
             }}

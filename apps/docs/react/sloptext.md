@@ -122,8 +122,13 @@ Replaces the default spinner and shimmer effect. Render a custom skeleton or tex
 
 ### `errorFallback`
 
-**Type:** `React.ReactNode` (Optional)
-Rendered instead of the text if generation or fetching fails.
+**Type:** `React.ReactNode | ((error: SlopMachineError) => React.ReactNode)` (Optional)
+Rendered instead of the text if generation or fetching fails. Pass a node, or a function that receives the error. If not provided, a default "Failed to load text" message is shown.
+
+### `onGenerationError`
+
+**Type:** `(error: SlopMachineError) => void` (Optional)
+Called once per URL when the text fails to generate or load. `error.status` holds the HTTP status (e.g. `400` for a missing variable) when the API reported the failure, and `error.message` holds the API's error message.
 
 ### HTML `<div>` Props
 

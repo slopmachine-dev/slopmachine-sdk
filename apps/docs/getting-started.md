@@ -49,6 +49,32 @@ Under the hood, `SlopImage`, `SlopVideo`, and `SlopText` handle:
 - Exposing a `loader` / `fallback` prop to let you fully customize the loading state if desired.
 - Smoothly transitioning to the media once it has finished loading.
 
+## Theming
+
+The built-in loading and error states use your app's `--muted` and `--muted-foreground` CSS variables when they're defined (as in shadcn/ui themes), with neutral grey fallbacks. To style the components independently of your theme, set these variables, which take precedence:
+
+| Variable | Used for | Default |
+| :------- | :------- | :------ |
+| `--slop-muted` | Loader and error background | `var(--muted, #f3f4f6)` |
+| `--slop-muted-foreground` | Spinner, icon and message colour | `var(--muted-foreground, #6b7280)` |
+| `--slop-shimmer` | Highlight of the loading shimmer | `var(--muted-foreground, #e5e7eb)` |
+
+```css
+:root {
+  --slop-muted: #eef2ff;
+  --slop-shimmer: #ffffff;
+}
+```
+
+If your theme stores colours as bare channel values (e.g. shadcn/ui's older `--muted: 210 40% 96.1%` format), wrap them so they're valid colours:
+
+```css
+:root {
+  --slop-muted: hsl(var(--muted));
+  --slop-muted-foreground: hsl(var(--muted-foreground));
+}
+```
+
 ### Next Steps
 
 Head over to the specific documentation for your framework to see usage examples and detailed API references:

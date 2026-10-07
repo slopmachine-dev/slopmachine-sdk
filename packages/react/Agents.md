@@ -8,7 +8,7 @@ This document outlines the coding conventions and patterns used in the `@slopmac
 
 - **Class Merging:** Use `clsx` and `tailwind-merge` to construct and merge Tailwind CSS classes. A utility function `cn(...inputs: ClassValue[])` is typically used for this purpose.
 - **Styling Approach:** Components use Tailwind CSS classes for styling. However, to ensure components remain robust even if the consumer's environment doesn't perfectly process all Tailwind classes, always include equivalent inline `style` properties as a fallback.
-- **CSS Variables:** Use standard CSS variables for theme-related colors (e.g., `var(--muted, #f3f4f6)`).
+- **CSS Variables:** Use namespaced `--slop-*` variables that fall back to the host theme and then a literal default (e.g., `var(--slop-muted, var(--muted, #f3f4f6))`), so consumers can theme the components independently. The variables are documented under "Theming" in `apps/docs/getting-started.md`.
 - **Custom Animations/Styles:** If complex animations or specific scoped styles are needed that go beyond Tailwind utility classes, inject them using a scoped `<style>` block within the component.
 - **Core Logic:** Import shared logic, utilities, and base types from `@slopmachine/core`.
 
@@ -21,7 +21,7 @@ This document outlines the coding conventions and patterns used in the `@slopmac
 
 - **Interfaces:** Define an explicit `Props` interface for each component.
 - **Extending Standard Attributes:** Extend the appropriate React HTML attributes interface (e.g., `React.ImgHTMLAttributes<HTMLImageElement>`).
-- **Overriding Attributes:** Use `Omit` to exclude standard attributes that are managed internally by the component or replaced by custom SDK options (e.g., `Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt">`).
+- **Overriding Attributes:** Use `Omit` to exclude standard attributes that are managed internally by the component or replaced by custom SDK options (e.g., `Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src">`).
 - **Shared Types:** Extend or incorporate types from `@slopmachine/core` (like `SlopImageOptions`).
 
 ## IntelliSense and Documentation

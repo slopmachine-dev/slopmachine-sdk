@@ -1,22 +1,33 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   buildTextUrl,
+  fetchRenderedText,
   renderMarkdown,
+  SlopMachineError,
   type SlopTextOptions,
 } from "@slopmachine/core";
+import { ErrorOverlay, type SlopErrorFallback } from "./ErrorOverlay";
 
 export interface SlopTextProps
   extends
     Omit<React.HTMLAttributes<HTMLDivElement>, "children">,
     SlopTextOptions {
   /**
-   * Optional loading component to show while the text is being generated
+   * Optional loading component to show while the text is being generated.
+   * If not provided, a default spinner and shimmer effect will be shown.
    */
   fallback?: React.ReactNode;
   /**
-   * Optional error component to show if the text generation fails
+   * Content to display if the text fails to generate or load.
+   * Pass a node, or a function that receives the `SlopMachineError` and returns a node.
+   * If not provided, a default error message is shown.
    */
-  errorFallback?: React.ReactNode;
+  errorFallback?: SlopErrorFallback;
+  /**
+   * Called once per URL when the text fails to generate or load.
+   * `error.status` holds the HTTP status when the API reported the failure.
+   */
+  onGenerationError?: (error: SlopMachineError) => void;
 }
 
 /**
@@ -31,7 +42,7 @@ export interface SlopTextProps
  * <SlopText
  *   bucketId="my-text-bucket"
  *   fallback={<div>Loading story...</div>}
- *   errorFallback={<div>Failed to load story</div>}
+ *   errorFallback={(error) => <div>Failed to load story: {error.message}</div>}
  *   className="text-lg text-gray-800"
  * />
  *
@@ -61,13 +72,14 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
       attachments,
       fallback,
       errorFallback,
+      onGenerationError,
       ...props
     },
     ref,
   ) => {
     const [text, setText] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+    const [error, setError] = useState<SlopMachineError | null>(null);
 
     const rawUrl = useMemo(
       () =>
@@ -99,56 +111,68 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
       ],
     );
 
+    // Keep the latest callback without re-running the fetch when it changes identity
+    const onGenerationErrorRef = useRef(onGenerationError);
     useEffect(() => {
-      let isMounted = true;
+      onGenerationErrorRef.current = onGenerationError;
+    });
 
-      const fetchText = async () => {
-        try {
-          setLoading(true);
-          setError(null);
+    useEffect(() => {
+      // Cancels the request if the URL changes or the component unmounts,
+      // so a slow response for an old URL can never replace newer text
+      const controller = new AbortController();
+      setLoading(true);
+      setError(null);
 
-          // Fetch the URL to get the content, following redirects automatically
-          const response = await fetch(rawUrl, { cache: "no-store" });
-          if (!response.ok) {
-            let errorMessage = response.statusText;
-            try {
-              const errorText = await response.text();
-              const errorData = JSON.parse(errorText);
-              if (errorData.error) {
-                errorMessage = errorData.error;
-              }
-            } catch (e) {
-              // Ignore JSON parse errors if the response isn't JSON
-            }
-            throw new Error(`Failed to fetch text: ${errorMessage}`);
-          }
-          const content = await response.text();
-          if (isMounted) {
-            setText(content);
-          }
-        } catch (err) {
-          if (isMounted) {
-            const finalError =
-              err instanceof Error ? err : new Error("Failed to generate text");
-            console.error(finalError);
-            setError(finalError);
-          }
-        } finally {
-          if (isMounted) {
-            setLoading(false);
-          }
-        }
-      };
+      fetchRenderedText(rawUrl, { signal: controller.signal })
+        .then((content) => {
+          setText(content);
+          setLoading(false);
+        })
+        .catch((err) => {
+          if (controller.signal.aborted) return;
+          const finalError =
+            err instanceof SlopMachineError
+              ? err
+              : new SlopMachineError("Failed to load text");
+          console.error(
+            "SlopText error:",
+            finalError.status ?? "",
+            finalError.message,
+          );
+          setError(finalError);
+          setLoading(false);
+          onGenerationErrorRef.current?.(finalError);
+        });
 
-      fetchText();
-
-      return () => {
-        isMounted = false;
-      };
+      return () => controller.abort();
     }, [rawUrl]);
 
-    if (error && errorFallback) {
-      return <>{errorFallback}</>;
+    if (error) {
+      if (errorFallback !== undefined) {
+        return (
+          <>
+            {typeof errorFallback === "function"
+              ? errorFallback(error)
+              : errorFallback}
+          </>
+        );
+      }
+      return (
+        <div ref={ref} {...props}>
+          <div
+            className="slop-wrapper relative overflow-hidden w-full"
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              width: "100%",
+              minHeight: "100px",
+            }}
+          >
+            <ErrorOverlay error={error} label="Failed to load text" />
+          </div>
+        </div>
+      );
     }
 
     if (loading) {
@@ -189,7 +213,7 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "var(--muted, #f3f4f6)",
+                backgroundColor: "var(--slop-muted, var(--muted, #f3f4f6))",
               }}
             >
               <div
@@ -209,7 +233,8 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
                   style={{
                     width: "24px",
                     height: "24px",
-                    color: "var(--muted-foreground, #6b7280)",
+                    color:
+                      "var(--slop-muted-foreground, var(--muted-foreground, #6b7280))",
                     animation: "slop-spin 1s linear infinite",
                   }}
                 >
@@ -233,7 +258,8 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
                   className="text-xs text-muted-foreground"
                   style={{
                     fontSize: "0.75rem",
-                    color: "var(--muted-foreground, #6b7280)",
+                    color:
+                      "var(--slop-muted-foreground, var(--muted-foreground, #6b7280))",
                   }}
                 >
                   Loading...
@@ -251,7 +277,7 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
                 right: 0,
                 bottom: 0,
                 background:
-                  "linear-gradient(90deg, var(--muted, #f3f4f6) 0%, var(--muted-foreground, #e5e7eb) 50%, var(--muted, #f3f4f6) 100%)",
+                  "linear-gradient(90deg, var(--slop-muted, var(--muted, #f3f4f6)) 0%, var(--slop-shimmer, var(--muted-foreground, #e5e7eb)) 50%, var(--slop-muted, var(--muted, #f3f4f6)) 100%)",
                 backgroundSize: "200% 100%",
                 animation: "slop-shimmer 2s ease-in-out infinite",
               }}

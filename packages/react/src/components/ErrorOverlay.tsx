@@ -54,7 +54,10 @@ export const ErrorOverlay: React.FC<ErrorOverlayProps> = ({
   return (
     <div
       className="absolute inset-0 z-10 flex items-center justify-center bg-muted"
-      style={{ ...overlayStyle, backgroundColor: "var(--muted, #f3f4f6)" }}
+      style={{
+        ...overlayStyle,
+        backgroundColor: "var(--slop-muted, var(--muted, #f3f4f6))",
+      }}
       title={error.message}
     >
       <div
@@ -64,7 +67,8 @@ export const ErrorOverlay: React.FC<ErrorOverlayProps> = ({
           flexDirection: "column",
           alignItems: "center",
           gap: "0.5rem",
-          color: "var(--muted-foreground, #6b7280)",
+          color:
+            "var(--slop-muted-foreground, var(--muted-foreground, #6b7280))",
         }}
       >
         <svg

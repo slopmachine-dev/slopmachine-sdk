@@ -3,6 +3,7 @@ import {
   checkRenderUrl,
   createRenderUrlMonitor,
   executePipeline,
+  fetchRenderedText,
   rateResult,
   SlopMachineError,
   uploadTempAttachment,
@@ -114,6 +115,67 @@ describe("checkRenderUrl", () => {
     const controller = new AbortController();
     await checkRenderUrl("https://api/x", { signal: controller.signal });
     expect(fetchMock.mock.calls[0][1]?.signal).toBe(controller.signal);
+  });
+});
+
+describe("fetchRenderedText", () => {
+  it("returns the text, bypassing the HTTP cache", async () => {
+    mockFetch(async () => new Response("# Hello", { status: 200 }));
+    const controller = new AbortController();
+    await expect(
+      fetchRenderedText("https://api/t", { signal: controller.signal }),
+    ).resolves.toBe("# Hello");
+    const init = fetchMock.mock.calls[0][1];
+    expect(init?.cache).toBe("no-store");
+    expect(init?.signal).toBe(controller.signal);
+    // One request: the error body is only read on failure
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("throws the API's error message and status", async () => {
+    mockFetch(async () =>
+      json({ error: "Missing required variable 'topic'" }, 400),
+    );
+    const err = await fetchRenderedText("https://api/t").catch((e) => e);
+    expect(err).toBeInstanceOf(SlopMachineError);
+    expect(err).toMatchObject({
+      message: "Missing required variable 'topic'",
+      status: 400,
+    });
+  });
+
+  it("falls back to the status text for non-JSON errors", async () => {
+    mockFetch(
+      async () =>
+        new Response("oops", {
+          status: 503,
+          statusText: "Service Unavailable",
+        }),
+    );
+    await expect(fetchRenderedText("https://api/t")).rejects.toMatchObject({
+      message: "Service Unavailable",
+      status: 503,
+    });
+  });
+
+  it("wraps network failures in a SlopMachineError without a status", async () => {
+    mockFetch(async () => {
+      throw new TypeError("Failed to fetch");
+    });
+    const err = await fetchRenderedText("https://api/t").catch((e) => e);
+    expect(err).toBeInstanceOf(SlopMachineError);
+    expect(err).toMatchObject({
+      message: "Failed to load text",
+      status: undefined,
+    });
+  });
+
+  it("rethrows aborts as-is", async () => {
+    const abort = new DOMException("Aborted", "AbortError");
+    mockFetch(async () => {
+      throw abort;
+    });
+    await expect(fetchRenderedText("https://api/t")).rejects.toBe(abort);
   });
 });
 
