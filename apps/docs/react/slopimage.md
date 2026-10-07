@@ -64,6 +64,8 @@ To detect when the generation and loading is complete, you can pass standard HTM
 
 You can also completely customize the loading UI by providing a custom `loader` prop.
 
+Generation starts as soon as the component mounts. It sends a lightweight `HEAD` request so the backend can begin generating straight away, because generation can take a while. Passing `loading="lazy"` only defers downloading the finished image until it's near the viewport; it does not defer generation. Results are cached, so the early request never causes a duplicate generation.
+
 ## Error States
 
 If the image fails to generate or load, the component replaces it with a default error message in the same space, so the layout doesn't shift. Use `errorFallback` to render your own UI, and `onGenerationError` to log or report the failure.

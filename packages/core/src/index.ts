@@ -183,6 +183,11 @@ export class SlopMachineError extends Error {
 /**
  * Checks that a render URL resolves successfully, without downloading the media body.
  *
+ * The `HEAD` request is also a deliberate warm-up: it tells the backend a result
+ * is about to be requested, so generation starts immediately even if the media
+ * element defers its own `GET` (e.g. `loading="lazy"`). Results are cached by
+ * input, so the HEAD and the later GET never produce duplicate generations.
+ *
  * Sends a `HEAD` request. If the API responds with an error status, the error
  * detail is read from the JSON response body and thrown as a `SlopMachineError`.
  * Network-level failures (offline, CORS, aborted) are rethrown as-is, so callers

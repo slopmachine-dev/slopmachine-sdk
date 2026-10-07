@@ -37,3 +37,10 @@ jobs:
 
       - name: Build all workspace packages
         run: npm run build
+
+      # Runs after the build: react/svelte type-check against core's emitted .d.ts
+      - name: Type-check packages (tsc + svelte-check)
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test

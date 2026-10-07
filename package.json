@@ -20,7 +20,9 @@
     "version-packages": "changeset version && npm run sync-version",
     "version:packages": "changeset version && npm run sync-version",
     "bump-version": "node scripts/bump-version.mjs && npm run sync-version",
-    "release": "npm run build:packages && changeset publish"
+    "release": "npm run build:packages && changeset publish",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.1",
