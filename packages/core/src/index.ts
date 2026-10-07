@@ -1,4 +1,6 @@
 import { AspectRatio as ImageAspectRatio, VideoAspectRatio } from "@pixerate/schemas";
+import DOMPurify from "dompurify";
+import { marked } from "marked";
 export type { ImageAspectRatio, VideoAspectRatio };
 
 export interface PipelineStepResult {
@@ -135,6 +137,11 @@ export interface SlopImageOptions {
    */
   aspectRatio?: ImageAspectRatio;
   /**
+   * Overrides the AI model used for generation (e.g. "gemini-flash").
+   * If omitted, the bucket version's configured model is used.
+   */
+  model?: string;
+  /**
    * Dynamic variables to interpolate into the prompt.
    * E.g., if prompt is "A photo of a {color} dog", pass { color: "brown" }.
    */
@@ -190,6 +197,7 @@ export function buildImageUrl(options: SlopImageOptions): string {
     version,
     resultId,
     aspectRatio = "1:1",
+    model,
     variables = {},
     baseUrl,
     original,
@@ -229,6 +237,9 @@ export function buildImageUrl(options: SlopImageOptions): string {
   if (!resultId) {
     if (aspectRatio) {
       params.set("aspectRatio", aspectRatio);
+    }
+    if (model) {
+      params.set("model", model);
     }
     if (version) {
       params.set("version", String(version));
@@ -482,6 +493,11 @@ export interface SlopTextOptions {
    */
   resultId?: string;
   /**
+   * Overrides the AI model used for generation (e.g. "gemini-pro").
+   * If omitted, the bucket version's configured model is used.
+   */
+  model?: string;
+  /**
    * Dynamic variables to interpolate into the prompt.
    * E.g., if prompt is "A story about a {color} dog", pass { color: "brown" }.
    */
@@ -514,6 +530,7 @@ export function buildTextUrl(options: SlopTextOptions): string {
     metadata,
     version,
     resultId,
+    model,
     variables = {},
     baseUrl,
     attachments,
@@ -550,6 +567,9 @@ export function buildTextUrl(options: SlopTextOptions): string {
   }
 
   if (!resultId) {
+    if (model) {
+      params.set("model", model);
+    }
     if (version) {
       params.set("version", String(version));
     }
@@ -587,6 +607,46 @@ export function preloadText(options: SlopTextOptions): Promise<void> {
       .then(() => resolve())
       .catch((err) => reject(err));
   });
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * Converts generated Markdown into sanitized HTML that is safe to inject into the DOM.
+ *
+ * Generated text can be steered by user-supplied prompts and variables, so the
+ * HTML produced by `marked` is always passed through DOMPurify to strip scripts,
+ * event handlers, and other active content.
+ *
+ * Without a DOM (e.g. during SSR) DOMPurify cannot sanitize and would return its
+ * input unchanged, so the Markdown is returned HTML-escaped instead.
+ *
+ * @param markdown - The Markdown text returned by the renderText endpoint.
+ * @returns A sanitized HTML string.
+ */
+export function renderMarkdown(markdown: string): string {
+  if (!markdown) return "";
+  const purifier = getPurifier();
+  if (!purifier) return escapeHtml(markdown);
+  const html = marked.parse(markdown, { async: false });
+  return purifier.sanitize(html);
+}
+
+let purifierInstance: ReturnType<typeof DOMPurify> | undefined;
+
+// Bind DOMPurify to `window` lazily: the default export is initialised at import
+// time and stays unsupported forever if no DOM existed yet (e.g. jsdom set up later).
+function getPurifier() {
+  if (typeof window === "undefined") return undefined;
+  purifierInstance ??= DOMPurify(window);
+  return purifierInstance.isSupported ? purifierInstance : undefined;
 }
 
 /**

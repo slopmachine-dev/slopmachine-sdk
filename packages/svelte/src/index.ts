@@ -12,4 +12,9 @@ export type {
   RateResultResponse,
 } from "@slopmachine/core";
 
-export { preloadImage, rateResult } from "@slopmachine/core";
+export {
+  preloadImage,
+  preloadVideo,
+  preloadText,
+  rateResult,
+} from "@slopmachine/core";

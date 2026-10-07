@@ -90,8 +90,8 @@ Sets the CSS aspect ratio of the wrapper element to prevent layout shifts. Examp
 
 ### `model`
 
-**Type:** `"gemini" | "gemini-flash" | "gemini-pro" | "imagen"` (Optional)
-Specify the underlying generative AI model to use.
+**Type:** `string` (Optional, e.g. `"gemini-flash"`)
+Overrides the AI model used for generation. Defaults to the bucket version's configured model. Ignored if `resultId` is provided.
 
 ### `version`
 
