@@ -56,7 +56,7 @@ export interface SlopVideoProps
  * />
  * ```
  *
- * @version 0.5.0
+ * @version 0.6.0
  */
 export const SlopVideo: React.FC<SlopVideoProps> = ({
   bucketId,
