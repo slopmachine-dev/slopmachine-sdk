@@ -8,16 +8,16 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@radix-ui/react-label": "^2.1.15",
-    "@radix-ui/react-select": "^2.3.7",
+    "@radix-ui/react-label": "^2.1.17",
+    "@radix-ui/react-select": "^2.4.1",
     "@radix-ui/react-slot": "^1.2.4",
     "@slopmachine/demo-shared": "*",
     "@slopmachine/react": "*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.563.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "shiki": "^3.21.0",
     "tailwind-merge": "^3.7.0",
     "tailwindcss-animate": "^1.0.7"
@@ -29,7 +29,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.6.1",
-    "postcss": "^8.5.28",
+    "postcss": "^8.5.30",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
