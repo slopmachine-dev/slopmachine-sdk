@@ -47,7 +47,7 @@
     "tailwindcss": "^4.3.3",
     "tsup": "^9.0.0",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1"
+    "vite": "^8.3.5"
   },
   "dependencies": {
     "@slopmachine/core": "^0.9.0",
