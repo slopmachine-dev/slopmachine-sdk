@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "dompurify": "^3.4.17",
-    "marked": "^18.1.1"
+    "marked": "^18.1.2"
   },
   "license": "MIT",
   "files": [
