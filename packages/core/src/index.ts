@@ -229,7 +229,7 @@ export interface SlopImageOptions {
    */
   aspectRatio?: ImageAspectRatio;
   /**
-   * Overrides the AI model used for generation (e.g. "gemini-flash").
+   * Overrides the AI model used for generation.
    * If omitted, the bucket version's configured model is used.
    */
   model?: string;
@@ -697,7 +697,7 @@ export interface SlopTextOptions {
    */
   resultId?: string;
   /**
-   * Overrides the AI model used for generation (e.g. "gemini-pro").
+   * Overrides the AI model used for generation.
    * If omitted, the bucket version's configured model is used.
    */
   model?: string;
