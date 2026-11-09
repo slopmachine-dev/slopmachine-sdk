@@ -907,12 +907,18 @@ export async function uploadTempAttachment(
 
 export type ResultRating = "good" | "bad" | null;
 
+const DEFAULT_API_BASE_URL = "https://slopmachine.dev";
+
 export interface RateResultOptions {
   /**
-   * Full endpoint URL to send this request to instead of the default
-   * production `rateResult` endpoint.
+   * API key (`x-api-key`) used to authenticate the rating request.
+   * Must only be used on the server — never expose your API key in browser code.
    */
-  baseUrl?: string;
+  apiKey: string;
+  /**
+   * Base URL of the Slop Machine web API (defaults to `https://slopmachine.dev`).
+   */
+  apiBaseUrl?: string;
 }
 
 export interface RateResultResponse {
@@ -924,30 +930,40 @@ export interface RateResultResponse {
 /**
  * Rates a previously generated result as "good", "bad", or clears its rating (null).
  *
- * The rating change is applied on the backend only if the request originates
- * from an authorized domain (or if no domain whitelist is configured for the parent bucket/pipeline).
+ * **Server-side use only:** This function requires a Slop Machine API key (`apiKey`),
+ * which grants write access to your silos and must never be used in browser code.
  *
  * @param resultId - The unique ID of the result to rate.
  * @param rating - The rating to apply ("good", "bad", or null to clear).
- * @param options - Optional configuration options including baseUrl.
+ * @param options - Configuration options including the required `apiKey` and optional `apiBaseUrl`.
  * @returns A promise resolving to the rating update response.
  */
 export async function rateResult(
   resultId: string,
   rating: ResultRating,
-  options?: RateResultOptions,
+  options: RateResultOptions,
 ): Promise<RateResultResponse> {
   if (!resultId) {
     throw new Error("resultId is required");
   }
+  const apiKey = options?.apiKey?.trim();
+  if (!apiKey) {
+    throw new Error("apiKey is required to rate a result");
+  }
 
-  const response = await fetch(endpoint("rateResult", options?.baseUrl), {
+  const baseUrl = (options.apiBaseUrl || DEFAULT_API_BASE_URL).replace(
+    /\/+$/,
+    "",
+  );
+  const url = `${baseUrl}/api/results/${encodeURIComponent(resultId)}/rating`;
+
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "x-api-key": apiKey,
     },
     body: JSON.stringify({
-      resultId,
       rating,
     }),
   });

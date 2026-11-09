@@ -9,15 +9,11 @@ export type {
   SlopImageOptions,
   SlopVideoOptions,
   SlopTextOptions,
-  ResultRating,
-  RateResultOptions,
-  RateResultResponse,
 } from "@slopmachine/core";
 
 export {
   preloadImage,
   preloadVideo,
   preloadText,
-  rateResult,
   SlopMachineError,
 } from "@slopmachine/core";

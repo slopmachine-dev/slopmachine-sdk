@@ -373,30 +373,69 @@ describe("executePipeline", () => {
 
 describe("rateResult", () => {
   it("requires a resultId", async () => {
-    await expect(rateResult("", "good")).rejects.toThrow(
-      "resultId is required",
-    );
+    await expect(
+      rateResult("", "good", { apiKey: "sm_test_key" }),
+    ).rejects.toThrow("resultId is required");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("POSTs the rating and returns the response", async () => {
+  it("throws without sending a request when apiKey is missing", async () => {
+    await expect(
+      rateResult("r1", "good", { apiKey: "" }),
+    ).rejects.toThrow("apiKey is required to rate a result");
+    await expect(
+      rateResult("r1", "good", {} as any),
+    ).rejects.toThrow("apiKey is required to rate a result");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("POSTs the rating to the authenticated endpoint with x-api-key and returns the response", async () => {
     mockFetch(async () =>
       json({ success: true, resultId: "r1", rating: "good" }, 200),
     );
-    await expect(rateResult("r1", "good")).resolves.toEqual({
+    await expect(
+      rateResult("r1", "good", { apiKey: "sm_test_key" }),
+    ).resolves.toEqual({
       success: true,
       resultId: "r1",
       rating: "good",
     });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://slopmachine.dev/api/results/r1/rating",
+      expect.objectContaining({
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": "sm_test_key",
+        },
+      }),
+    );
     expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({
-      resultId: "r1",
       rating: "good",
     });
   });
 
+  it("supports a custom apiBaseUrl", async () => {
+    mockFetch(async () =>
+      json({ success: true, resultId: "r1", rating: null }, 200),
+    );
+    await rateResult("r1", null, {
+      apiKey: "sm_test_key",
+      apiBaseUrl: "https://staging.slopmachine.dev/",
+    });
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      "https://staging.slopmachine.dev/api/results/r1/rating",
+    );
+  });
+
   it("throws with the API's error detail", async () => {
-    mockFetch(async () => json({ error: "Domain not allowed" }, 403));
-    await expect(rateResult("r1", null)).rejects.toThrow(
-      "Failed to rate result (403): Domain not allowed",
+    mockFetch(async () =>
+      json({ error: "Forbidden: write access required to rate results" }, 403),
+    );
+    await expect(
+      rateResult("r1", null, { apiKey: "sm_test_key" }),
+    ).rejects.toThrow(
+      "Failed to rate result (403): Forbidden: write access required to rate results",
     );
   });
 });
