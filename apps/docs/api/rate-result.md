@@ -8,15 +8,12 @@ The Rate Result API and SDK utility allow rating previously generated results fr
 
 Ratings allow you to filter outputs and guide feedback loops in your pipelines and buckets. Results rated `"bad"` are automatically excluded from public cache resolution and subsequent requests.
 
-## Domain Whitelisting
-
-To protect against unauthorized rating manipulation, the backend verifies the requesting domain against the result's parent bucket or pipeline:
-- If the parent bucket or pipeline defines **Whitelisted Domains**, rating requests must include an `Origin` or `Referer` matching one of the whitelisted hostnames. Requests from non-whitelisted domains or requests lacking an origin/referer header will receive a `403 Forbidden` (`Domain not authorized`).
-- If no domain whitelist is set for the parent bucket or pipeline, ratings can be submitted freely.
+> [!WARNING]
+> **Server-side use only:** Rating a result requires a Slop Machine API key with write access to the owning silo. Never expose your API key in browser code.
 
 ## Using the SDK
 
-The `rateResult` function is exported by `@slopmachine/core`, `@slopmachine/react`, and `@slopmachine/svelte`.
+The `rateResult` function is exported by `@slopmachine/core` for server-side environments.
 
 ### Signature
 
@@ -24,38 +21,37 @@ The `rateResult` function is exported by `@slopmachine/core`, `@slopmachine/reac
 function rateResult(
   resultId: string,
   rating: "good" | "bad" | null,
-  options?: { baseUrl?: string }
+  options: { apiKey: string; apiBaseUrl?: string }
 ): Promise<{ success: boolean; resultId: string; rating: "good" | "bad" | null }>;
 ```
 
-### Example: Rating a Result
+### Example: Rating a Result (Server-Side)
 
 ```typescript
 import { rateResult } from "@slopmachine/core";
-// or: import { rateResult } from "@slopmachine/react";
-// or: import { rateResult } from "@slopmachine/svelte";
+
+const apiKey = process.env.SLOPMACHINE_API_KEY!;
 
 // Rate a result positively
-await rateResult("res_123456", "good");
+await rateResult("res_123456", "good", { apiKey });
 
 // Rate a result negatively (hides it from public cache)
-await rateResult("res_123456", "bad");
+await rateResult("res_123456", "bad", { apiKey });
 
 // Clear/reset an existing rating
-await rateResult("res_123456", null);
+await rateResult("res_123456", null, { apiKey });
 ```
 
 ## HTTP Endpoint Details
 
-- **Method**: `POST` (or `PATCH`)
-- **Base URL**: `https://us-central1-slopmachine-12bfb.cloudfunctions.net/rateResult`
+- **Method**: `POST`
+- **URL**: `https://slopmachine.dev/api/results/{resultId}/rating`
 - **Headers**:
   - `Content-Type: application/json`
-  - `Origin` or `Referer`: Required if the parent entity has whitelisted domains configured.
+  - `x-api-key: <your-api-key>` (or `Authorization: Bearer <id-token>`)
 - **Body**:
   ```json
   {
-    "resultId": "res_123456",
     "rating": "good"
   }
   ```
@@ -74,6 +70,6 @@ await rateResult("res_123456", null);
 ### Errors
 
 - `400 Bad Request`: Missing `resultId` or invalid `rating` value.
-- `403 Forbidden`: `Domain not authorized` (request does not originate from an allowed domain).
+- `401 Unauthorized`: Missing or invalid credentials.
+- `403 Forbidden`: Authenticated caller does not have write access to the result's silo.
 - `404 Not Found`: Result not found.
-- `405 Method Not Allowed`: HTTP method is not `POST` or `PATCH`.
