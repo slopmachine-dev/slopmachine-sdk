@@ -1,5 +1,16 @@
 # @slopmachine/svelte
 
+## 1.0.0
+
+### Major Changes
+
+- 2c939d3: Require `apiKey` in `rateResult` options (`POST /api/results/{resultId}/rating` with `x-api-key`, optional `apiBaseUrl`) and remove `rateResult` re-exports from `@slopmachine/react` and `@slopmachine/svelte` since rating is for server-side use only.
+
+### Patch Changes
+
+- Updated dependencies [2c939d3]
+  - @slopmachine/core@1.0.0
+
 ## 0.9.0
 
 ### Minor Changes

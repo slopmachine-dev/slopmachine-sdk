@@ -84,7 +84,7 @@ export interface SlopImageProps
  * />
  * ```
  *
- * @version 0.9.0
+ * @version 1.0.0
  */
 export const SlopImage: React.FC<SlopImageProps> = ({
   bucketId,
