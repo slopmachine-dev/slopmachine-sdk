@@ -64,6 +64,7 @@ export default defineConfig({
         target: "_self",
       },
       { text: "Getting Started", link: "/getting-started" },
+      { text: "Agent Skill & MCP", link: "/agent-skill" },
       { text: "Documentation", link: "/docs" },
       {
         text: "React Demo",

@@ -7,6 +7,10 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "bin": {
+    "core": "./dist/cli.js",
+    "slopmachine": "./dist/cli.js"
+  },
   "exports": {
     ".": {
       "import": {
@@ -18,6 +22,17 @@
         "default": "./dist/index.js"
       },
       "default": "./dist/index.js"
+    },
+    "./cli": {
+      "import": {
+        "types": "./dist/cli.d.mts",
+        "default": "./dist/cli.mjs"
+      },
+      "require": {
+        "types": "./dist/cli.d.ts",
+        "default": "./dist/cli.js"
+      },
+      "default": "./dist/cli.js"
     }
   },
   "scripts": {
