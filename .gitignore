@@ -19,3 +19,10 @@ package
 apps/docs/.vitepress/dist
 apps/docs/.vitepress/cache
 
+# Swift Package Manager
+.build/
+.swiftpm/
+*.xcodeproj
+*.xcworkspace
+
+

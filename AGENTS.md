@@ -21,6 +21,7 @@ Before starting any task and whenever troubleshooting an issue:
 - `packages/core`: Base types, URL generators, and shared logic.
 - `packages/react`: React SDK (`@slopmachine/react`). Follow [packages/react/Agents.md](./packages/react/Agents.md) for React-specific coding conventions.
 - `packages/svelte`: Svelte 5 SDK (`@slopmachine/svelte`). Follow [packages/svelte/Agents.md](./packages/svelte/Agents.md) for Svelte-specific coding conventions.
+- `packages/swift`: Native Swift 6 / SwiftUI SDK (`SlopMachine`), exposed at the repo root via `Package.swift` for Swift Package Manager (`swift build`, `swift test`).
 - `packages/demo-shared`: Shared demo data, constants, and utilities.
 - `apps/demo-react`: React demo application.
 - `apps/demo-svelte`: Svelte demo application.
