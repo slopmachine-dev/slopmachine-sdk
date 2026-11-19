@@ -12,6 +12,8 @@ Welcome to the Slop Machine documentation. Here you will find guides, API refere
 
 - **[Getting Started](/getting-started)**  
   Introduction to the Slop Machine SDK, installation instructions for React and Svelte, and core architectural concepts (**Buckets** vs **Pipelines**).
+- **[Agent Skill & MCP Setup](/agent-skill)**  
+  One-line installation (`npx skills add slopmachine-dev/slopmachine-sdk`), CLI onboarding (`npx @slopmachine/core init`), `/connect` device-code handshake, remote MCP configuration, and zero-UI pipeline playbooks.
 
 ---
 

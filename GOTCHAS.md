@@ -110,3 +110,12 @@ When adding a new entry, use the following structure:
 - **Symptoms / Error:** After a harmless-looking refactor, every image and video re-downloads (and may re-request generation) for all users, even though the backend returns the same cached result.
 - **Root Cause:** Browsers and CDNs cache by the exact URL string. Reordering query parameters, changing how values are encoded, or adding a parameter with a default value produces a new URL for identical inputs.
 - **Solution / Workaround:** Keep the order of entries passed to `toQuery` as-is, and only add parameters that are omitted when unset. `packages/core/test/url-stability.test.ts` pins exact URL strings; if it fails, treat that as a cache-busting change, not a test to update.
+
+---
+
+### Keep CLI / Node built-ins out of `packages/core/src/index.ts` and enable `shims: true` in tsup
+
+- **Affected Area:** `packages/core` (`src/cli.ts`, `tsup.config.ts`)
+- **Symptoms / Error:** Importing `node:fs` or `node:path` in `src/index.ts` breaks browser builds in VitePress, React, and Svelte demos; using `import.meta.url` in `src/cli.ts` triggers a `tsup` `[empty-import-meta]` warning on the CJS build and breaks path resolution when invoked via `dist/cli.js`.
+- **Root Cause:** `src/index.ts` is imported directly by client-side browser bundles, whereas `src/cli.ts` is a Node CLI entry point compiled to both CJS (`dist/cli.js`) and ESM (`dist/cli.mjs`).
+- **Solution / Workaround:** Keep all Node-specific CLI logic in `src/cli.ts` (exposed via `"bin"` and `"./cli"` in `package.json`), keep `shims: true` in `packages/core/tsup.config.ts`, and copy `skills/slopmachine` into `dist/skills/slopmachine` in `onSuccess` so `npx @slopmachine/core init` can locate bundled skill files when installed from npm.
