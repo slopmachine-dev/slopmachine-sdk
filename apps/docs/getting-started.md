@@ -26,6 +26,24 @@ npm install @slopmachine/react @slopmachine/core
 npm install @slopmachine/svelte @slopmachine/core
 ```
 
+### Swift / SwiftUI (Swift Package Manager)
+
+Add `slopmachine-sdk` to your `Package.swift` or via Xcode (**File &rarr; Add Package Dependencies...**):
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/slopmachine-dev/slopmachine-sdk.git", from: "1.0.0")
+],
+targets: [
+    .target(
+        name: "MyApp",
+        dependencies: [
+            .product(name: "SlopMachine", package: "slopmachine-sdk")
+        ]
+    )
+]
+```
+
 ## Core Concepts: Buckets vs Pipelines
 
 Slop Machine provides two powerful paradigms for AI generation:
@@ -89,3 +107,6 @@ Head over to the specific documentation for your framework to see usage examples
 - [Svelte `SlopImage` Component](/svelte/slopimage)
 - [Svelte `SlopVideo` Component](/svelte/slopvideo)
 - [Svelte `SlopText` Component](/svelte/sloptext)
+- [SwiftUI `SlopImage` View](/swift/slopimage)
+- [SwiftUI `SlopVideo` View](/swift/slopvideo)
+- [SwiftUI `SlopText` View & Core Utilities](/swift/sloptext)

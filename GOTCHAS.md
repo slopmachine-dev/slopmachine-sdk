@@ -110,3 +110,13 @@ When adding a new entry, use the following structure:
 - **Symptoms / Error:** After a harmless-looking refactor, every image and video re-downloads (and may re-request generation) for all users, even though the backend returns the same cached result.
 - **Root Cause:** Browsers and CDNs cache by the exact URL string. Reordering query parameters, changing how values are encoded, or adding a parameter with a default value produces a new URL for identical inputs.
 - **Solution / Workaround:** Keep the order of entries passed to `toQuery` as-is, and only add parameters that are omitted when unset. `packages/core/test/url-stability.test.ts` pins exact URL strings; if it fails, treat that as a cache-busting change, not a test to update.
+
+---
+
+### Swift `Dictionary` hash seed randomization and `URLComponents` query encoding break CDN cache parity
+
+- **Affected Area:** `packages/swift` (`SlopURLBuilder`, `SlopVariables`, `SlopMetadata`)
+- **Symptoms / Error:** Serializing a standard Swift `[String: Any]` with `JSONSerialization` randomizes key order across process launches, and `URLComponents.queryItems` leaves `:` and `/` unescaped while encoding spaces as `%20` instead of `+`, producing URLs that differ from `@slopmachine/core`'s `URLSearchParams` output.
+- **Root Cause:** Swift randomizes `Dictionary` iteration order per launch and Foundation's `URLQueryItem` uses RFC 3986 query allowed characters rather than WHATWG `application/x-www-form-urlencoded` (`URLSearchParams`).
+- **Solution / Workaround:** Always use `SlopVariables` and `SlopMetadata` (which preserve insertion order for dictionary literals and sort keys lexicographically when initialized from a standard Swift `Dictionary`) together with `encodeURLSearchParam` and `encodeJSONStringLiteral` in `SlopURLBuilder.swift`. Verify changes with `swift test` against `URLStabilityTests.swift`.
+

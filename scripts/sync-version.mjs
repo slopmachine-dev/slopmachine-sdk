@@ -26,29 +26,40 @@ const targets = [
       "src/SlopVideo.svelte",
     ],
   },
+  {
+    package: "packages/swift",
+    versionFromCore: true,
+    files: [
+      "Sources/SlopMachine/Views/SlopImage.swift",
+      "Sources/SlopMachine/Views/SlopText.swift",
+      "Sources/SlopMachine/Views/SlopVideo.swift",
+    ],
+  },
 ];
 
 for (const target of targets) {
   const pkgPath = path.join(root, target.package, "package.json");
-  if (!fs.existsSync(pkgPath)) continue;
+  let version = coreVersion;
+  if (!target.versionFromCore) {
+    if (!fs.existsSync(pkgPath)) continue;
+    const pkgJson = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+    version = pkgJson.version;
 
-  const pkgJson = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
-  const version = pkgJson.version;
-
-  let pkgUpdated = false;
-  if (pkgJson.dependencies && pkgJson.dependencies["@slopmachine/core"]) {
-    const newDependencyVersion = `^${coreVersion}`;
-    if (pkgJson.dependencies["@slopmachine/core"] !== newDependencyVersion) {
-      pkgJson.dependencies["@slopmachine/core"] = newDependencyVersion;
-      pkgUpdated = true;
+    let pkgUpdated = false;
+    if (pkgJson.dependencies && pkgJson.dependencies["@slopmachine/core"]) {
+      const newDependencyVersion = `^${coreVersion}`;
+      if (pkgJson.dependencies["@slopmachine/core"] !== newDependencyVersion) {
+        pkgJson.dependencies["@slopmachine/core"] = newDependencyVersion;
+        pkgUpdated = true;
+      }
     }
-  }
 
-  if (pkgUpdated) {
-    fs.writeFileSync(pkgPath, JSON.stringify(pkgJson, null, 2) + "\n", "utf8");
-    console.log(
-      `Updated @slopmachine/core dependency in ${target.package} to ^${coreVersion}`,
-    );
+    if (pkgUpdated) {
+      fs.writeFileSync(pkgPath, JSON.stringify(pkgJson, null, 2) + "\n", "utf8");
+      console.log(
+        `Updated @slopmachine/core dependency in ${target.package} to ^${coreVersion}`,
+      );
+    }
   }
 
   for (const file of target.files) {
