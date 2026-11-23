@@ -21,6 +21,7 @@
   import {
     buildImageUrl,
     createRenderUrlMonitor,
+    type AspectRatio,
     type SlopMachineError,
     type SlopImageOptions,
     type ImageAspectRatio,
@@ -28,14 +29,33 @@
   import { untrack, type Snippet } from "svelte";
   import ErrorOverlay from "./ErrorOverlay.svelte";
 
+  function resolveCssAspectRatio(
+    ratio: ImageAspectRatio | Record<string, AspectRatio> | undefined,
+    fallback: string,
+  ): string {
+    if (typeof ratio === "string") {
+      return ratio.replace(":", "/");
+    }
+    if (ratio && typeof ratio === "object") {
+      const values = Object.values(ratio).filter(
+        (v): v is AspectRatio => typeof v === "string" && v.length > 0,
+      );
+      if (values.length > 0) {
+        return values[values.length - 1].replace(":", "/");
+      }
+    }
+    return fallback.replace(":", "/");
+  }
+
   export interface SlopImageProps extends Omit<
     SlopImageOptions,
     "aspectRatio"
   > {
     /**
-     * The aspect ratio of the generated image. Defaults to "1:1".
+     * The aspect ratio of the generated image (or a `Record<stepId, AspectRatio>` map for pipelines).
+     * Defaults to "1:1".
      */
-    aspectRatio?: ImageAspectRatio;
+    aspectRatio?: ImageAspectRatio | Record<string, AspectRatio>;
     /**
      * Alternative text describing the image, for screen readers and when the image
      * can't be shown. Defaults to "Image produced by Slop Machine (slopmachine.dev)".
@@ -79,7 +99,8 @@
     siloId = undefined,
     prompt = undefined,
     metadata = undefined,
-    aspectRatio = "1:1",
+    aspectRatio = undefined,
+    duration = undefined,
     alt = "Image produced by Slop Machine (slopmachine.dev)",
     model = undefined,
     version = undefined,
@@ -102,6 +123,8 @@
   let isLoading = $state(true);
   let error = $state<SlopMachineError | null>(null);
 
+  let cssAspectRatio = $derived(resolveCssAspectRatio(aspectRatio, "1:1"));
+
   let computedSrc = $derived(
     buildImageUrl({
       bucketId,
@@ -110,6 +133,7 @@
       prompt,
       metadata,
       aspectRatio,
+      duration,
       model,
       version,
       resultId,
@@ -172,7 +196,7 @@
 <div class={className}>
   <div
     class="slop-wrapper"
-    style="aspect-ratio: {aspectRatio?.replace(':', '/')};"
+    style="aspect-ratio: {cssAspectRatio};"
   >
     {#if isLoading}
       {#if loader}

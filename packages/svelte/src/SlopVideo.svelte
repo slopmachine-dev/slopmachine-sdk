@@ -24,6 +24,7 @@
   import {
     buildVideoUrl,
     createRenderUrlMonitor,
+    type AspectRatio,
     type SlopMachineError,
     type SlopVideoOptions,
     type VideoAspectRatio,
@@ -31,14 +32,33 @@
   import { untrack, type Snippet } from "svelte";
   import ErrorOverlay from "./ErrorOverlay.svelte";
 
+  function resolveCssAspectRatio(
+    ratio: VideoAspectRatio | Record<string, AspectRatio> | undefined,
+    fallback: string,
+  ): string {
+    if (typeof ratio === "string") {
+      return ratio.replace(":", "/");
+    }
+    if (ratio && typeof ratio === "object") {
+      const values = Object.values(ratio).filter(
+        (v): v is AspectRatio => typeof v === "string" && v.length > 0,
+      );
+      if (values.length > 0) {
+        return values[values.length - 1].replace(":", "/");
+      }
+    }
+    return fallback.replace(":", "/");
+  }
+
   export interface SlopVideoProps extends Omit<
     SlopVideoOptions,
     "aspectRatio"
   > {
     /**
-     * The aspect ratio of the generated video. Defaults to "16:9".
+     * The aspect ratio of the generated video (or a `Record<stepId, AspectRatio>` map for pipelines).
+     * Defaults to "16:9".
      */
-    aspectRatio?: VideoAspectRatio;
+    aspectRatio?: VideoAspectRatio | Record<string, AspectRatio>;
     /**
      * Additional CSS classes to apply to the wrapper element.
      */
@@ -76,7 +96,7 @@
     siloId = undefined,
     prompt = undefined,
     metadata = undefined,
-    aspectRatio = "16:9",
+    aspectRatio = undefined,
     version = undefined,
     resultId = undefined,
     model,
@@ -101,6 +121,8 @@
 
   let isLoading = $state(true);
   let error = $state<SlopMachineError | null>(null);
+
+  let cssAspectRatio = $derived(resolveCssAspectRatio(aspectRatio, "16:9"));
 
   let computedSrc = $derived(
     buildVideoUrl({
@@ -172,7 +194,7 @@
 <div class={className}>
   <div
     class="slop-wrapper"
-    style="aspect-ratio: {aspectRatio?.replace(':', '/')};"
+    style="aspect-ratio: {cssAspectRatio};"
   >
     {#if isLoading}
       {#if loader}

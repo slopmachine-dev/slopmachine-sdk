@@ -21,6 +21,7 @@
   "scripts": {
     "build": "svelte-package -i src -o dist",
     "dev": "svelte-package -i src -o dist -w",
+    "test": "vitest run",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings"
   },
   "repository": {

@@ -102,25 +102,25 @@ You can import and use `preloadVideo` from `@slopmachine/svelte` to cache the as
 
 The `SlopVideo` component inherits from `SlopVideoOptions`. It also implements Svelte-specific properties.
 
-### `bucketId`
+### `bucketId` / `pipelineId`
 
-**Type:** `string` (Required)
-The unique identifier for the specific video generation session/bucket.
+**Type:** `string` (One of `bucketId` or `pipelineId` is required)
+The unique identifier for the specific video generation bucket (`bucketId`) or multi-step pipeline (`pipelineId`).
 
 ### `aspectRatio`
 
-**Type:** `"9:16" | "16:9"` (Optional, Default: `"16:9"`)
-Sets the CSS aspect ratio of the wrapper element to prevent layout shifts. Examples: `"16:9"`, `"9:16"`.
+**Type:** `VideoAspectRatio | Record<string, AspectRatio>` (Optional, Default: `"16:9"`)
+Sets the CSS aspect ratio of the wrapper element to prevent layout shifts, and forwards the ratio override to `renderVideo` or `renderPipeline`.
 
 ### `duration`
 
-**Type:** `number` (Optional, Default: bucket version duration or `4`)
-The duration of the generated video in seconds. Must be between 4 and 8. Ignored if `resultId` is provided.
+**Type:** `number | Record<string, number>` (Optional, Default: bucket/pipeline version duration or `4`)
+The duration of the generated video in seconds (or a per-step `Record<stepId, number>` map for pipelines).
 
 ### `version`
 
 **Type:** `number` (Optional)
-Useful for cache-busting or fetching a specific generation iteration.
+Pins execution or retrieval to a specific immutable bucket or pipeline version.
 
 ### `resultId`
 
@@ -130,7 +130,7 @@ If a specific result ID is known, it can be fetched directly.
 ### `original`
 
 **Type:** `boolean` (Optional, Default: `false`)
-If `true`, bypasses the optimized media and returns the original generated file.
+If `true`, bypasses the optimized media and returns the original generated file (buckets only).
 
 ### `variables`
 
@@ -144,8 +144,8 @@ Arbitrary custom metadata to attach to the generation request and resulting docu
 
 ### `attachments`
 
-**Type:** `string[]` (Optional)
-An array of string URLs representing temporary file attachments to be used by the generative AI model.
+**Type:** `string[] | Record<string, string[]>` (Optional)
+Temporary file attachment URLs to be used by the generative AI model (or a `Record<stepId, string[]>` map when targeting a multi-step pipeline).
 
 ### `baseUrl`
 

@@ -110,3 +110,12 @@ When adding a new entry, use the following structure:
 - **Symptoms / Error:** After a harmless-looking refactor, every image and video re-downloads (and may re-request generation) for all users, even though the backend returns the same cached result.
 - **Root Cause:** Browsers and CDNs cache by the exact URL string. Reordering query parameters, changing how values are encoded, or adding a parameter with a default value produces a new URL for identical inputs.
 - **Solution / Workaround:** Keep the order of entries passed to `toQuery` as-is, and only add parameters that are omitted when unset. `packages/core/test/url-stability.test.ts` pins exact URL strings; if it fails, treat that as a cache-busting change, not a test to update.
+
+---
+
+### Svelte 5 `.svelte.ts` modules built with `@sveltejs/package`
+
+- **Affected Area:** `packages/svelte` (`createSlopPipeline.svelte.ts`, `src/index.ts`, Vitest tests)
+- **Symptoms / Error:** Re-exporting a `.svelte.ts` module from `src/index.ts` without the `.svelte.js` extension produces `from "./module.svelte"` in `dist/index.js` while the emitted file is `dist/module.svelte.js`. In addition, calling `$effect` in a Vitest environment without `resolve.conditions: ["browser"]` compiles `$effect` to a server no-op (`$.noop`), and mutating `$state` or reading it to notify store subscribers inside `$effect` without `untrack` registers those `$state` fields as dependencies of the effect itself.
+- **Root Cause:** `@sveltejs/package` strips `.ts` from `.svelte.ts` to emit `.svelte.js`, Vite resolves `svelte` to its SSR bundle unless `"browser"` is in `resolve.conditions`, and Svelte 5 tracks all `$state` reads during synchronous `$effect` execution.
+- **Solution / Workaround:** Re-export `.svelte.ts` modules using the `.svelte.js` specifier in `src/index.ts`, wrap side-effectful state mutations/notifications inside `$effect` with `untrack(() => ...)`, fall back to direct execution when `$effect` does not run synchronously on initialization, and configure `resolve: { conditions: ["browser"] }` in `packages/svelte/vitest.config.ts`.

@@ -74,20 +74,20 @@ You can import and use `preloadText` from `@slopmachine/svelte` to cache the ass
 
 ## Props Reference
 
-### `bucketId`
+### `bucketId` / `pipelineId`
 
-**Type:** `string` (Required)
-The unique identifier for the specific text generation session/bucket.
+**Type:** `string` (One of `bucketId` or `pipelineId` is required)
+The unique identifier for the specific text generation bucket (`bucketId`) or multi-step pipeline (`pipelineId`).
 
 ### `model`
 
 **Type:** `string` (Optional, e.g. `"gemini-pro"`)
-Overrides the AI model used for generation. Defaults to the bucket version's configured model. Ignored if `resultId` is provided.
+Overrides the AI model used for generation (buckets only). Defaults to the bucket version's configured model. Ignored if `resultId` or `pipelineId` is provided.
 
 ### `version`
 
 **Type:** `number` (Optional)
-Useful for cache-busting or fetching a specific generation iteration.
+Pins execution or retrieval to a specific immutable bucket or pipeline version.
 
 ### `resultId`
 
@@ -106,8 +106,8 @@ Arbitrary custom metadata to attach to the generation request and resulting docu
 
 ### `attachments`
 
-**Type:** `string[]` (Optional)
-An array of string URLs representing temporary file attachments to be used by the generative AI model.
+**Type:** `string[] | Record<string, string[]>` (Optional)
+Temporary file attachment URLs to be used by the generative AI model (or a `Record<stepId, string[]>` map when targeting a multi-step pipeline).
 
 ### `baseUrl`
 

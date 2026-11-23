@@ -4,6 +4,7 @@ import {
   createRenderUrlMonitor,
   executePipeline,
   fetchRenderedText,
+  mapStepResults,
   rateResult,
   SlopMachineError,
   uploadTempAttachment,
@@ -343,31 +344,111 @@ describe("createRenderUrlMonitor", () => {
 });
 
 describe("executePipeline", () => {
-  it("POSTs a synchronous run and returns the result", async () => {
-    mockFetch(async () => json({ id: "res1", status: "completed" }, 200));
+  it("POSTs a synchronous run, forwards pipeline overrides, and maps stepResults by stepId and outputKey", async () => {
+    mockFetch(async () =>
+      json(
+        {
+          id: "res1",
+          pipelineId: "p1",
+          siloId: "s1",
+          status: "completed",
+          resultType: "video",
+          stepResults: [
+            {
+              stepId: "step_brief",
+              outputKey: "brief",
+              type: "json_generation",
+              outputData: { headline: "Hello World" },
+            },
+            {
+              stepId: "step_video",
+              outputKey: "heroVideo",
+              type: "video_generation",
+              outputUrl: "https://cdn/hero.mp4",
+            },
+          ],
+          totalComputeTimeMs: 1200,
+          totalFuelCost: 10,
+          timestamp: 123,
+        },
+        200,
+      ),
+    );
     const result = await executePipeline({
       pipelineId: "p1",
+      siloId: "s1",
       prompt: "go",
+      resultId: "r1",
+      version: 3,
+      aspectRatio: { step_video: "16:9" },
+      duration: { step_video: 6 },
+      attachments: { step_video: ["https://cdn/ref.png"] },
       variables: { a: 1 },
+      metadata: { campaign: "launch" },
       baseUrl: "https://api/pipe",
     });
     expect(result).toMatchObject({ id: "res1", status: "completed" });
+    expect(result.steps?.brief?.outputData).toEqual({
+      headline: "Hello World",
+    });
+    expect(result.steps?.step_brief?.outputData).toEqual({
+      headline: "Hello World",
+    });
+    expect(result.steps?.heroVideo?.outputUrl).toBe("https://cdn/hero.mp4");
+    expect(result.steps?.step_video?.outputUrl).toBe("https://cdn/hero.mp4");
+
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("https://api/pipe");
     expect(init?.method).toBe("POST");
     expect(JSON.parse(init?.body as string)).toEqual({
       pipelineId: "p1",
+      siloId: "s1",
       prompt: "go",
+      resultId: "r1",
+      version: 3,
+      aspectRatio: { step_video: "16:9" },
+      duration: { step_video: 6 },
+      attachments: { step_video: ["https://cdn/ref.png"] },
       variables: { a: 1 },
+      metadata: { campaign: "launch" },
       sync: true,
     });
   });
 
-  it("throws with the API's error detail", async () => {
+  it("throws a SlopMachineError with the API's error detail and HTTP status", async () => {
     mockFetch(async () => json({ error: "Pipeline not found" }, 404));
-    await expect(executePipeline({ pipelineId: "nope" })).rejects.toThrow(
+    const err = await executePipeline({ pipelineId: "nope" }).catch((e) => e);
+    expect(err).toBeInstanceOf(SlopMachineError);
+    expect(err.status).toBe(404);
+    expect(err.message).toBe(
       "Pipeline execution failed (404): Pipeline not found",
     );
+  });
+});
+
+describe("mapStepResults", () => {
+  it("indexes stepResults by both stepId and outputKey", () => {
+    const steps = mapStepResults([
+      {
+        stepId: "s1",
+        outputKey: "brief",
+        type: "json_generation",
+        outputData: { title: "Hi" },
+      },
+      {
+        stepId: "s2",
+        type: "image_generation",
+        outputUrl: "https://cdn/poster.webp",
+      },
+    ]);
+    expect(steps.s1?.outputData).toEqual({ title: "Hi" });
+    expect(steps.brief?.outputData).toEqual({ title: "Hi" });
+    expect(steps.s2?.outputUrl).toBe("https://cdn/poster.webp");
+  });
+
+  it("returns an empty object for null or undefined input", () => {
+    expect(mapStepResults(null)).toEqual({});
+    expect(mapStepResults(undefined)).toEqual({});
   });
 });
 

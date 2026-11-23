@@ -102,25 +102,25 @@ You can import and use `preloadImage` from `@slopmachine/svelte` to cache the as
 
 The `SlopImage` component inherits from `SlopImageOptions`. It also implements Svelte-specific properties.
 
-### `bucketId`
+### `bucketId` / `pipelineId`
 
-**Type:** `string` (Required)
-The unique identifier for the specific image generation session/bucket.
+**Type:** `string` (One of `bucketId` or `pipelineId` is required)
+The unique identifier for the specific image generation bucket (`bucketId`) or multi-step pipeline (`pipelineId`).
 
 ### `aspectRatio`
 
-**Type:** `"1:1" | "2:3" | "3:2" | "3:4" | "4:3" | "4:5" | "5:4" | "9:16" | "16:9" | "21:9"` (Optional, Default: `"1:1"`)
-Sets the CSS aspect ratio of the wrapper element to prevent layout shifts. Examples: `"16:9"`, `"4:3"`.
+**Type:** `ImageAspectRatio | Record<string, AspectRatio>` (Optional, Default: `"1:1"`)
+Sets the CSS aspect ratio of the wrapper element to prevent layout shifts, and forwards the ratio override to `renderImage` or `renderPipeline`.
 
 ### `model`
 
 **Type:** `string` (Optional, e.g. `"gemini-flash"`)
-Overrides the AI model used for generation. Defaults to the bucket version's configured model. Ignored if `resultId` is provided.
+Overrides the AI model used for generation (buckets only). Defaults to the bucket version's configured model. Ignored if `resultId` or `pipelineId` is provided.
 
 ### `version`
 
 **Type:** `number` (Optional)
-Useful for cache-busting or fetching a specific generation iteration.
+Pins execution or retrieval to a specific immutable bucket or pipeline version.
 
 ### `resultId`
 
@@ -130,7 +130,7 @@ If a specific result ID is known, it can be fetched directly.
 ### `original`
 
 **Type:** `boolean` (Optional, Default: `false`)
-If `true`, bypasses the WebP optimized media and returns the original generated file (e.g., PNG/JPEG).
+If `true`, bypasses the WebP optimized media and returns the original generated file (e.g., PNG/JPEG). Supported for buckets only.
 
 ### `variables`
 
@@ -144,8 +144,8 @@ Arbitrary custom metadata to attach to the generation request and resulting docu
 
 ### `attachments`
 
-**Type:** `string[]` (Optional)
-An array of string URLs representing temporary file attachments to be used by the generative AI model.
+**Type:** `string[] | Record<string, string[]>` (Optional)
+Temporary file attachment URLs to be used by the generative AI model (or a `Record<stepId, string[]>` map when targeting a multi-step pipeline).
 
 ### `baseUrl`
 
