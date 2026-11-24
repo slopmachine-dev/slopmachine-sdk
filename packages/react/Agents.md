@@ -8,29 +8,27 @@ This document outlines the coding conventions and patterns used in the `@slopmac
 
 - **Class Merging:** Use `clsx` and `tailwind-merge` to construct and merge Tailwind CSS classes. A utility function `cn(...inputs: ClassValue[])` is typically used for this purpose.
 - **Styling Approach:** Components use Tailwind CSS classes for styling. However, to ensure components remain robust even if the consumer's environment doesn't perfectly process all Tailwind classes, always include equivalent inline `style` properties as a fallback.
-- **CSS Variables:** Use namespaced `--slop-*` variables that fall back to the host theme and then a literal default (e.g., `var(--slop-muted, var(--muted, #f3f4f6))`), so consumers can theme the components independently. The variables are documented under "Theming" in `apps/docs/getting-started.md`.
+- **CSS Variables:** Use namespaced `--slop-*` variables with a fallback (e.g., `var(--slop-muted, var(--muted, #f3f4f6))`, enforced by `npm run lint`). The variables are documented under "Theming" in `apps/docs/getting-started.md`.
 - **Custom Animations/Styles:** If complex animations or specific scoped styles are needed that go beyond Tailwind utility classes, inject them using a scoped `<style>` block within the component.
-- **Core Logic:** Import shared logic, utilities, and base types from `@slopmachine/core`.
+- **Core Logic:** Import shared logic, utilities, and base types from `@slopmachine/core` (deep/relative imports are blocked by `npm run lint`).
 
 ## Component Structure
 
-- **Functional Components:** Define components as Functional Components (e.g., `React.FC<Props>`).
+- **Functional Components:** Define components as Functional Components (enforced by `npm run lint`), not classes.
 - **Prop Forwarding:** Spread the remaining props (`...props`) onto the primary underlying DOM element to allow consumers to pass standard HTML attributes (like `aria-` attributes, data attributes, etc.).
 
 ## Prop Typing
 
-- **Interfaces:** Define an explicit `Props` interface for each component.
+- **Interfaces:** Define an explicit `Props` interface (not a `type` alias, enforced by `npm run lint`) for each component.
 - **Extending Standard Attributes:** Extend the appropriate React HTML attributes interface (e.g., `React.ImgHTMLAttributes<HTMLImageElement>`).
 - **Overriding Attributes:** Use `Omit` to exclude standard attributes that are managed internally by the component or replaced by custom SDK options (e.g., `Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src">`).
 - **Shared Types:** Extend or incorporate types from `@slopmachine/core` (like `SlopImageOptions`).
 
 ## IntelliSense and Documentation
 
-- **JSDoc Comments:** Always include descriptive JSDoc comments for components and their props to provide rich IntelliSense in IDEs.
-- **Component Documentation:** Component JSDoc blocks should describe what the component does and include a clear `@example` block demonstrating usage, and optionally a `@version` tag if applicable.
-- **Prop Documentation:** Every custom prop in a component's interface should have a JSDoc comment explaining its purpose, default behavior, and any edge cases. This is crucial for developer experience when consuming the SDK.
+- **JSDoc Comments:** Component JSDoc (`@example` required on exported `Slop*` components) and prop JSDoc on `export interface *Props` are enforced by `npm run lint`.
 
 ## Exporting Patterns
 
-- **Named Exports:** Use named exports for components and interfaces (e.g., `export const ComponentName = ...`). Avoid default exports.
+- **Named Exports:** Use named exports only (default exports are blocked by `npm run lint`).
 - **Entry Point:** Ensure components and their prop types are exported from the package's main entry point if they are meant for public consumption.
