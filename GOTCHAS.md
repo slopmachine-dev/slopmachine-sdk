@@ -113,9 +113,18 @@ When adding a new entry, use the following structure:
 
 ---
 
-### Keep CLI / Node built-ins out of `packages/core/src/index.ts` and enable `shims: true` in tsup
+### Keep CLI / Node built-ins out of `packages/core/src/index.ts`, and keep `src/cli.ts` side-effect free
 
-- **Affected Area:** `packages/core` (`src/cli.ts`, `tsup.config.ts`)
-- **Symptoms / Error:** Importing `node:fs` or `node:path` in `src/index.ts` breaks browser builds in VitePress, React, and Svelte demos; using `import.meta.url` in `src/cli.ts` triggers a `tsup` `[empty-import-meta]` warning on the CJS build and breaks path resolution when invoked via `dist/cli.js`.
-- **Root Cause:** `src/index.ts` is imported directly by client-side browser bundles, whereas `src/cli.ts` is a Node CLI entry point compiled to both CJS (`dist/cli.js`) and ESM (`dist/cli.mjs`).
-- **Solution / Workaround:** Keep all Node-specific CLI logic in `src/cli.ts` (exposed via `"bin"` and `"./cli"` in `package.json`), keep `shims: true` in `packages/core/tsup.config.ts`, and copy `skills/slopmachine` into `dist/skills/slopmachine` in `onSuccess` so `npx @slopmachine/core init` can locate bundled skill files when installed from npm.
+- **Affected Area:** `packages/core` (`src/cli.ts`, `src/bin.ts`, `tsup.config.ts`, `package.json` `bin`)
+- **Symptoms / Error:** Importing `node:fs` or `node:path` in `src/index.ts` breaks browser builds in VitePress, React, and Svelte demos. Using `import.meta.url` in CLI code triggers a `tsup` `[empty-import-meta]` warning on the CJS build. An earlier version auto-ran the CLI when `process.argv[1]` was named `cli.*`, so any user script called `cli.js` that imported the module started the onboarding flow.
+- **Root Cause:** `src/index.ts` is imported directly by client-side browser bundles. "Is this the main module?" checks based on file names are unreliable once code is bundled or imported by someone else.
+- **Solution / Workaround:** Keep all Node-specific CLI logic in `src/cli.ts`, with no top-level side effects. The executable is `src/bin.ts` (shebang plus `runCli()`), built to `dist/bin.js` and exposed only as the `slopmachine` bin. `cli.ts` is not a package export and gets no `.d.ts` (`dts.entry` is `src/index.ts` only). Keep `shims: true` in `packages/core/tsup.config.ts`, and keep the `onSuccess` copy of `skills/slopmachine` into `dist/skills/slopmachine` so the bin can find the bundled skill when installed from npm.
+
+---
+
+### CLI `--symlink` must never delete real files
+
+- **Affected Area:** `packages/core` (`installSkillFiles` / `planSkillInstall` in `src/cli.ts`)
+- **Symptoms / Error:** `npx @slopmachine/core init --symlink --skills-dir src` deleted the user's `src/` directory and replaced it with a symlink. Separately, symlinks created by `npx` pointed into `~/.npm/_npx/...` and broke when the npx cache was cleared.
+- **Root Cause:** The installer called `fs.rmSync(dest, { recursive: true, force: true })` before linking, `--skills-dir` wasn't confined to the project, and the npx cache is temporary.
+- **Solution / Workaround:** Check targets with `fs.lstatSync` before doing anything (including before the browser handshake): only an existing symlink may be removed, and anything else makes the CLI refuse with an error. `--skills-dir` must resolve (also after `realpath`) to a subdirectory of the project. `--symlink` is refused when the bundled skill lives in an `_npx` cache directory. In copy mode, unlink a previous symlink first instead of copying through it into the package.

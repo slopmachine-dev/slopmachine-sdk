@@ -28,20 +28,23 @@ To authenticate with Slop Machine, configure the remote MCP server in your works
 npx @slopmachine/core init
 ```
 
-If you already have a `slop_live_...` API key, pass it via `--api-key` (or `SLOPMACHINE_API_KEY`):
+If you already have a `slop_live_...` API key, set the `SLOPMACHINE_API_KEY` environment variable and the CLI uses it instead of the browser flow. Prefer this to `--api-key`, which leaves the key in your shell history:
 
 ```bash
-npx @slopmachine/core init --api-key slop_live_YOUR_API_KEY
+export SLOPMACHINE_API_KEY=slop_live_YOUR_API_KEY   # e.g. in your shell profile
+npx @slopmachine/core init
 ```
+
+The MCP config files the CLI writes never contain your key. They reference the `SLOPMACHINE_API_KEY` environment variable instead (`${SLOPMACHINE_API_KEY}` in `.mcp.json`, `${env:SLOPMACHINE_API_KEY}` in `.cursor/mcp.json`), so they're safe to commit. Make sure the variable is set in the environment your agent runs in. If the CLI mints a new key through the browser flow, it prints the key once so you can store it.
 
 #### CLI Options
 
 | Flag | Description |
 | :--- | :--- |
-| `--api-key, -k <key>` | Use an existing `slop_live_...` API key instead of opening the browser `/connect` flow |
-| `--client, -c <name>` | Target a specific agent host: `cursor`, `claude-code`, `claude-desktop`, `antigravity`, or `all` |
-| `--skills-dir <path>` | Custom target directory for `SKILL.md` installation |
-| `--symlink` | Symlink the skill directory instead of copying files |
+| `--api-key, -k <key>` | Use an existing `slop_live_...` API key instead of opening the browser `/connect` flow (prefer `SLOPMACHINE_API_KEY`) |
+| `--client, -c <name>` | Target a specific agent host: `cursor`, `claude-code`, `antigravity`, or `all` |
+| `--skills-dir <path>` | Custom target directory for `SKILL.md` installation (must be inside the project) |
+| `--symlink` | Symlink the skill directory instead of copying files. Requires `@slopmachine/core` installed in the project (a link into the temporary `npx` cache would break), and never replaces an existing file or directory that isn't a symlink |
 | `--no-skill` | Skip installing `skills/slopmachine/SKILL.md` |
 | `--no-mcp` | Skip writing MCP configuration files |
 
@@ -54,7 +57,7 @@ If you don't have a Slop Machine account or API key yet, your agent (or `npx @sl
 1. **Agent requests a handshake code**:
    `POST https://slopmachine.dev/api/auth/agent-handshake` returns a `deviceCode`, a short human-readable `userCode` (e.g. `SLOP-4829`), and a `verificationUri` (`https://slopmachine.dev/connect?code=SLOP-4829`).
 2. **One-click browser approval**:
-   Open the `verificationUri` link, sign in with Google if needed, and click **Approve & Connect Agent**. New accounts automatically receive a default workspace and `200` free monthly Fuel credits.
+   Open the `verificationUri` link, sign in with Google if needed, and click **Approve & Connect Agent**. New accounts automatically receive a default workspace on the free plan (`200` Fuel / month).
 3. **Automatic key redemption**:
    The polling agent calls `POST https://slopmachine.dev/api/auth/agent-handshake/redeem` with `deviceCode` and receives a freshly minted `slop_live_...` API key.
 
@@ -70,21 +73,16 @@ https://slopmachine.dev/api/mcp
 
 Authenticate using the `Authorization: Bearer slop_live_...` header (or `x-api-key: slop_live_...`).
 
+The examples below read the key from the `SLOPMACHINE_API_KEY` environment variable rather than pasting it into a command or a project file.
+
 ### Claude Code
 
 ```bash
 claude mcp add --transport http slopmachine "https://slopmachine.dev/api/mcp" \
-  --header "Authorization: Bearer slop_live_YOUR_API_KEY"
+  --header "Authorization: Bearer $SLOPMACHINE_API_KEY"
 ```
 
-### Antigravity (`agy`)
-
-```bash
-agy mcp add --transport http slopmachine "https://slopmachine.dev/api/mcp" \
-  --header "Authorization: Bearer slop_live_YOUR_API_KEY"
-```
-
-### Cursor (`.cursor/mcp.json`) / Workspace (`.mcp.json`)
+Or in a project `.mcp.json` (Claude Code expands `${VAR}`):
 
 ```json
 {
@@ -93,27 +91,41 @@ agy mcp add --transport http slopmachine "https://slopmachine.dev/api/mcp" \
       "type": "http",
       "url": "https://slopmachine.dev/api/mcp",
       "headers": {
-        "Authorization": "Bearer slop_live_YOUR_API_KEY"
+        "Authorization": "Bearer ${SLOPMACHINE_API_KEY}"
       }
     }
   }
 }
 ```
 
-### Claude Desktop (`claude_desktop_config.json`)
+### Antigravity (`agy`)
+
+```bash
+agy mcp add --transport http slopmachine "https://slopmachine.dev/api/mcp" \
+  --header "Authorization: Bearer $SLOPMACHINE_API_KEY"
+```
+
+### Cursor (`.cursor/mcp.json`)
+
+Cursor expands `${env:VAR}`:
 
 ```json
 {
   "mcpServers": {
     "slopmachine": {
+      "type": "http",
       "url": "https://slopmachine.dev/api/mcp",
       "headers": {
-        "Authorization": "Bearer slop_live_YOUR_API_KEY"
+        "Authorization": "Bearer ${env:SLOPMACHINE_API_KEY}"
       }
     }
   }
 }
 ```
+
+### Claude Desktop
+
+Claude Desktop doesn't load remote (HTTP) MCP servers from `claude_desktop_config.json`, which is for local servers only. Add Slop Machine as a custom connector under **Settings → Connectors** with the URL `https://slopmachine.dev/api/mcp`.
 
 ---
 

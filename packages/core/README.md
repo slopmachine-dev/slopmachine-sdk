@@ -27,8 +27,9 @@ pnpm add @slopmachine/core
 # Interactive device-code login (/connect), MCP setup, and skill installation
 npx @slopmachine/core init
 
-# Non-interactive setup with an existing API key
-npx @slopmachine/core init --api-key slop_live_YOUR_API_KEY
+# Non-interactive setup with an existing API key (read from the environment)
+export SLOPMACHINE_API_KEY=slop_live_YOUR_API_KEY
+npx @slopmachine/core init
 ```
 
 ## Programmatic Pipeline Execution

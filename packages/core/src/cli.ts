@@ -1,15 +1,12 @@
-#!/usr/bin/env node
+// Side-effect-free CLI implementation. The executable entry point is
+// `src/bin.ts`, which calls `runCli()`. Nothing in this module runs on import,
+// and it isn't exported from the package (internal to the `slopmachine` bin).
 import fs from "node:fs";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-export type AgentClient =
-  | "cursor"
-  | "claude-code"
-  | "claude-desktop"
-  | "antigravity"
-  | "all";
+export type AgentClient = "cursor" | "claude-code" | "antigravity" | "all";
 
 export type CliCommand = "init" | "login" | "help" | "version";
 
@@ -17,7 +14,6 @@ export interface CliOptions {
   command: CliCommand;
   apiKey?: string;
   client?: AgentClient;
-  baseUrl: string;
   agentName: string;
   skillsDir?: string;
   symlink: boolean;
@@ -40,19 +36,13 @@ export interface HandshakeRedeemResponse {
 }
 
 export interface McpServerConfigEntry {
-  type?: "http";
+  type: "http";
   url: string;
   headers: Record<string, string>;
 }
 
-export interface McpConfigResult {
-  serverName: string;
-  mcpUrl: string;
-  mcpServers: Record<string, McpServerConfigEntry>;
-  jsonString: string;
-  claudeCodeCommand: string;
-  antigravityCommand: string;
-}
+/** Which env-var interpolation syntax the target config file understands. */
+export type McpConfigFlavor = "claude-code" | "cursor";
 
 export interface CliDependencies {
   fetch?: typeof globalThis.fetch;
@@ -64,6 +54,8 @@ export interface CliDependencies {
   openBrowser?: (url: string) => void;
   pollIntervalMs?: number;
   pollTimeoutMs?: number;
+  /** Overrides the bundled skill directory (tests). */
+  sourceSkillDir?: string;
 }
 
 export interface CliResult {
@@ -73,18 +65,37 @@ export interface CliResult {
   skillPathsInstalled: string[];
 }
 
-const DEFAULT_BASE_URL = "https://slopmachine.dev";
+/** The canonical Slop Machine origin. Deliberately not configurable. */
+export const SLOPMACHINE_ORIGIN = "https://slopmachine.dev";
+export const MCP_URL = `${SLOPMACHINE_ORIGIN}/api/mcp`;
+export const API_KEY_ENV_VAR = "SLOPMACHINE_API_KEY";
+const MCP_SERVER_NAME = "slopmachine";
 const DEFAULT_AGENT_NAME = "Slop Machine CLI";
 const VALID_CLIENTS: readonly AgentClient[] = [
   "cursor",
   "claude-code",
-  "claude-desktop",
   "antigravity",
   "all",
 ];
 
+function takeValue(argv: string[], i: number, flag: string): string {
+  const val = argv[i];
+  if (val === undefined || val.startsWith("-")) {
+    throw new Error(`${flag} requires a value`);
+  }
+  return val.trim();
+}
+
+function parseClient(val: string | undefined): AgentClient {
+  if (!val || !VALID_CLIENTS.includes(val as AgentClient)) {
+    throw new Error(`--client must be one of: ${VALID_CLIENTS.join(", ")}`);
+  }
+  return val as AgentClient;
+}
+
 /**
  * Parses CLI arguments for `npx @slopmachine/core init` / `login`.
+ * Throws on unknown commands, unknown flags and unexpected arguments.
  */
 export function parseCliArgs(
   argv: string[],
@@ -93,8 +104,7 @@ export function parseCliArgs(
 ): CliOptions {
   const options: CliOptions = {
     command: "init",
-    apiKey: env.SLOPMACHINE_API_KEY?.trim() || undefined,
-    baseUrl: (env.SLOPMACHINE_BASE_URL || DEFAULT_BASE_URL).replace(/\/+$/, ""),
+    apiKey: env[API_KEY_ENV_VAR]?.trim() || undefined,
     agentName: DEFAULT_AGENT_NAME,
     symlink: false,
     skipSkill: false,
@@ -116,144 +126,135 @@ export function parseCliArgs(
       return options;
     }
 
-    if (!arg.startsWith("-") && !commandSet) {
-      if (arg === "init" || arg === "login") {
+    if (!arg.startsWith("-")) {
+      if (!commandSet && (arg === "init" || arg === "login")) {
         options.command = arg;
         commandSet = true;
         continue;
       }
       throw new Error(
-        `Unknown command "${arg}". Expected "init" or "login" (run with --help for usage).`,
+        commandSet
+          ? `Unexpected argument "${arg}" (run with --help for usage).`
+          : `Unknown command "${arg}". Expected "init" or "login" (run with --help for usage).`,
       );
     }
 
-    if (arg === "--api-key" || arg === "-k") {
-      const val = argv[++i];
-      if (!val || val.startsWith("-")) {
-        throw new Error("--api-key requires a value (e.g. --api-key slop_live_...)");
+    const eq = arg.indexOf("=");
+    const flag = eq === -1 ? arg : arg.slice(0, eq);
+    const inline = eq === -1 ? undefined : arg.slice(eq + 1).trim();
+    const value = () => {
+      if (inline !== undefined) {
+        if (!inline) throw new Error(`${flag} requires a value`);
+        return inline;
       }
-      options.apiKey = val.trim();
-      continue;
-    }
-    if (arg.startsWith("--api-key=")) {
-      options.apiKey = arg.slice("--api-key=".length).trim();
-      continue;
-    }
+      return takeValue(argv, ++i, flag);
+    };
+    const noValue = () => {
+      if (inline !== undefined) {
+        throw new Error(`${flag} doesn't take a value`);
+      }
+    };
 
-    if (arg === "--client" || arg === "-c") {
-      const val = argv[++i] as AgentClient | undefined;
-      if (!val || !VALID_CLIENTS.includes(val)) {
+    switch (flag) {
+      case "--api-key":
+      case "-k":
+        options.apiKey = value();
+        break;
+      case "--client":
+      case "-c":
+        options.client = parseClient(value());
+        break;
+      case "--agent-name":
+        options.agentName = value();
+        break;
+      case "--skills-dir":
+        options.skillsDir = value();
+        break;
+      case "--symlink":
+        noValue();
+        options.symlink = true;
+        break;
+      case "--no-skill":
+        noValue();
+        options.skipSkill = true;
+        break;
+      case "--no-mcp":
+        noValue();
+        options.skipMcp = true;
+        break;
+      default:
         throw new Error(
-          `--client must be one of: ${VALID_CLIENTS.join(", ")}`,
+          `Unknown option "${flag}" (run with --help for usage).`,
         );
-      }
-      options.client = val;
-      continue;
-    }
-    if (arg.startsWith("--client=")) {
-      const val = arg.slice("--client=".length).trim() as AgentClient;
-      if (!VALID_CLIENTS.includes(val)) {
-        throw new Error(
-          `--client must be one of: ${VALID_CLIENTS.join(", ")}`,
-        );
-      }
-      options.client = val;
-      continue;
-    }
-
-    if (arg === "--base-url") {
-      const val = argv[++i];
-      if (!val) throw new Error("--base-url requires a URL");
-      options.baseUrl = val.trim().replace(/\/+$/, "");
-      continue;
-    }
-    if (arg.startsWith("--base-url=")) {
-      options.baseUrl = arg
-        .slice("--base-url=".length)
-        .trim()
-        .replace(/\/+$/, "");
-      continue;
-    }
-
-    if (arg === "--agent-name") {
-      const val = argv[++i];
-      if (!val) throw new Error("--agent-name requires a value");
-      options.agentName = val.trim();
-      continue;
-    }
-    if (arg.startsWith("--agent-name=")) {
-      options.agentName = arg.slice("--agent-name=".length).trim();
-      continue;
-    }
-
-    if (arg === "--skills-dir") {
-      const val = argv[++i];
-      if (!val) throw new Error("--skills-dir requires a path");
-      options.skillsDir = val.trim();
-      continue;
-    }
-    if (arg.startsWith("--skills-dir=")) {
-      options.skillsDir = arg.slice("--skills-dir=".length).trim();
-      continue;
-    }
-
-    if (arg === "--symlink") {
-      options.symlink = true;
-      continue;
-    }
-    if (arg === "--no-skill") {
-      options.skipSkill = true;
-      continue;
-    }
-    if (arg === "--no-mcp") {
-      options.skipMcp = true;
-      continue;
     }
   }
 
   return options;
 }
 
+async function readErrorDetail(response: Response): Promise<string> {
+  let detail = response.statusText;
+  try {
+    const errBody = await response.json();
+    if (errBody?.error) {
+      detail =
+        typeof errBody.error === "string"
+          ? errBody.error
+          : errBody.error.message || detail;
+    }
+  } catch {
+    // fall back to statusText
+  }
+  return detail;
+}
+
+/**
+ * Checks that a verification URL supplied by the server points at the
+ * canonical Slop Machine origin over HTTPS, and returns it normalised.
+ * Throws otherwise, so the CLI never opens an arbitrary URL or scheme.
+ */
+export function validateVerificationUri(uri: string): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(uri);
+  } catch {
+    throw new Error("Server returned an invalid verification URL.");
+  }
+  if (parsed.protocol !== "https:" || parsed.origin !== SLOPMACHINE_ORIGIN) {
+    throw new Error(
+      `Server returned an unexpected verification URL (expected ${SLOPMACHINE_ORIGIN}).`,
+    );
+  }
+  return parsed.href;
+}
+
 /**
  * Starts the device-code agent authentication handshake at `/api/auth/agent-handshake`.
  */
 export async function initiateAgentHandshake(options: {
-  baseUrl?: string;
   agentName?: string;
   clientSource?: string;
   scopes?: string[];
   fetchImpl?: typeof globalThis.fetch;
 }): Promise<HandshakeInitResponse> {
-  const baseUrl = (options.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, "");
   const fetchFn = options.fetchImpl || globalThis.fetch;
 
-  const response = await fetchFn(`${baseUrl}/api/auth/agent-handshake`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetchFn(
+    `${SLOPMACHINE_ORIGIN}/api/auth/agent-handshake`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        agentName: options.agentName || DEFAULT_AGENT_NAME,
+        clientSource: options.clientSource || "cli",
+        scopes: options.scopes || ["mcp", "pipelines:read", "pipelines:write"],
+      }),
     },
-    body: JSON.stringify({
-      agentName: options.agentName || DEFAULT_AGENT_NAME,
-      clientSource: options.clientSource || "cli",
-      scopes: options.scopes || ["mcp", "pipelines:read", "pipelines:write"],
-    }),
-  });
+  );
 
   if (!response.ok) {
-    let detail = response.statusText;
-    try {
-      const errBody = await response.json();
-      if (errBody?.error) {
-        detail =
-          typeof errBody.error === "string"
-            ? errBody.error
-            : errBody.error.message || detail;
-      }
-    } catch {
-      // fallback to statusText
-    }
     throw new Error(
-      `Failed to start Slop Machine handshake (${response.status}): ${detail}`,
+      `Failed to start Slop Machine handshake (${response.status}): ${await readErrorDetail(response)}`,
     );
   }
 
@@ -262,9 +263,10 @@ export async function initiateAgentHandshake(options: {
     throw new Error("Invalid handshake response from server");
   }
 
-  const verificationUri =
+  const verificationUri = validateVerificationUri(
     data.verificationUri ||
-    `${baseUrl}/connect?code=${encodeURIComponent(data.userCode)}`;
+      `${SLOPMACHINE_ORIGIN}/connect?code=${encodeURIComponent(data.userCode)}`,
+  );
 
   return {
     deviceCode: data.deviceCode,
@@ -280,13 +282,11 @@ export async function initiateAgentHandshake(options: {
  */
 export async function pollAgentHandshake(options: {
   deviceCode: string;
-  baseUrl?: string;
   intervalMs?: number;
   timeoutMs?: number;
   fetchImpl?: typeof globalThis.fetch;
   sleepImpl?: (ms: number) => Promise<void>;
 }): Promise<{ rawKey: string; apiKeyId?: string }> {
-  const baseUrl = (options.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, "");
   const intervalMs = options.intervalMs ?? 3000;
   const timeoutMs = options.timeoutMs ?? 10 * 60 * 1000;
   const fetchFn = options.fetchImpl || globalThis.fetch;
@@ -298,53 +298,33 @@ export async function pollAgentHandshake(options: {
 
   while (Date.now() < deadline) {
     const response = await fetchFn(
-      `${baseUrl}/api/auth/agent-handshake/redeem`,
+      `${SLOPMACHINE_ORIGIN}/api/auth/agent-handshake/redeem`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ deviceCode: options.deviceCode }),
       },
     );
 
     if (!response.ok) {
-      let detail = response.statusText;
-      try {
-        const errBody = await response.json();
-        if (errBody?.error) {
-          detail =
-            typeof errBody.error === "string"
-              ? errBody.error
-              : errBody.error.message || detail;
-        }
-      } catch {
-        // ignore
-      }
       throw new Error(
-        `Handshake redemption failed (${response.status}): ${detail}`,
+        `Handshake redemption failed (${response.status}): ${await readErrorDetail(response)}`,
       );
     }
 
     const result = (await response.json()) as HandshakeRedeemResponse;
 
     if (result.status === "approved" && result.rawKey) {
-      return {
-        rawKey: result.rawKey,
-        apiKeyId: result.apiKeyId,
-      };
+      return { rawKey: result.rawKey, apiKeyId: result.apiKeyId };
     }
-
     if (result.status === "denied") {
       throw new Error("Handshake was denied by the user.");
     }
-
     if (result.status === "expired") {
       throw new Error(
         "Handshake code expired before approval. Please run `npx @slopmachine/core init` again.",
       );
     }
-
     if (result.status === "redeemed") {
       throw new Error("Handshake code has already been redeemed.");
     }
@@ -358,45 +338,39 @@ export async function pollAgentHandshake(options: {
 }
 
 /**
- * Builds MCP configuration snippets and CLI commands for Slop Machine.
+ * Builds the MCP server entry for a project config file. The API key is never
+ * written: the `Authorization` header references the `SLOPMACHINE_API_KEY`
+ * environment variable using the interpolation syntax of the target tool
+ * (`${VAR}` for Claude Code's `.mcp.json`, `${env:VAR}` for Cursor).
  */
-export function buildMcpConfig(
-  apiKey: string,
-  options?: { baseUrl?: string; client?: AgentClient },
-): McpConfigResult {
-  const trimmedKey = apiKey?.trim();
-  if (!trimmedKey) {
-    throw new Error("API key is required to build MCP configuration");
-  }
-
-  const baseUrl = (options?.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, "");
-  const mcpUrl = `${baseUrl}/api/mcp`;
-  const serverName = "slopmachine";
-  const includeType = options?.client !== "claude-desktop";
-
-  const entry: McpServerConfigEntry = {
-    ...(includeType ? { type: "http" } : {}),
-    url: mcpUrl,
-    headers: {
-      Authorization: `Bearer ${trimmedKey}`,
-    },
-  };
-
-  const mcpServers = { [serverName]: entry };
-
+export function buildMcpServerEntry(
+  flavor: McpConfigFlavor,
+): McpServerConfigEntry {
+  const ref =
+    flavor === "cursor" ? `\${env:${API_KEY_ENV_VAR}}` : `\${${API_KEY_ENV_VAR}}`;
   return {
-    serverName,
-    mcpUrl,
-    mcpServers,
-    jsonString: JSON.stringify({ mcpServers }, null, 2),
-    claudeCodeCommand: `claude mcp add --transport http ${serverName} "${mcpUrl}" --header "Authorization: Bearer ${trimmedKey}"`,
-    antigravityCommand: `agy mcp add --transport http ${serverName} "${mcpUrl}" --header "Authorization: Bearer ${trimmedKey}"`,
+    type: "http",
+    url: MCP_URL,
+    headers: { Authorization: `Bearer ${ref}` },
+  };
+}
+
+/**
+ * CLI registration commands, with an env-var placeholder instead of the key.
+ */
+export function buildRegistrationCommands(): {
+  claudeCode: string;
+  antigravity: string;
+} {
+  const header = `--header "Authorization: Bearer $${API_KEY_ENV_VAR}"`;
+  return {
+    claudeCode: `claude mcp add --transport http ${MCP_SERVER_NAME} "${MCP_URL}" ${header}`,
+    antigravity: `agy mcp add --transport http ${MCP_SERVER_NAME} "${MCP_URL}" ${header}`,
   };
 }
 
 function mergeMcpJsonFile(
   filePath: string,
-  serverName: string,
   entry: McpServerConfigEntry,
 ): void {
   let existing: Record<string, any> = {};
@@ -410,7 +384,7 @@ function mergeMcpJsonFile(
         }
       }
     } catch {
-      // If existing file is malformed JSON, preserve a backup before writing
+      // If the existing file is malformed JSON, keep a backup before writing
       try {
         fs.copyFileSync(filePath, `${filePath}.bak`);
       } catch {
@@ -428,10 +402,7 @@ function mergeMcpJsonFile(
 
   const updated = {
     ...existing,
-    mcpServers: {
-      ...currentServers,
-      [serverName]: entry,
-    },
+    mcpServers: { ...currentServers, [MCP_SERVER_NAME]: entry },
   };
 
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -439,57 +410,53 @@ function mergeMcpJsonFile(
 }
 
 /**
- * Writes or merges the Slop Machine remote MCP configuration into workspace config files.
+ * Writes or merges the Slop Machine remote MCP server into workspace config
+ * files (`.mcp.json` and/or `.cursor/mcp.json`). The API key itself is never
+ * written; see {@link buildMcpServerEntry}.
  */
 export function configureWorkspaceMcp(
   cwd: string,
-  apiKey: string,
-  options?: { baseUrl?: string; client?: AgentClient },
+  options?: { client?: AgentClient },
 ): string[] {
   const client = options?.client;
-  const config = buildMcpConfig(apiKey, options);
-  const entry = config.mcpServers[config.serverName];
-
-  const targetFiles: string[] = [];
+  const claudeFile = path.join(cwd, ".mcp.json");
+  const cursorFile = path.join(cwd, ".cursor", "mcp.json");
+  const targets: Array<[string, McpConfigFlavor]> = [];
 
   if (client === "cursor") {
-    targetFiles.push(path.join(cwd, ".cursor", "mcp.json"));
+    targets.push([cursorFile, "cursor"]);
   } else if (client === "claude-code" || client === "antigravity") {
-    targetFiles.push(path.join(cwd, ".mcp.json"));
-  } else if (client === "claude-desktop") {
-    targetFiles.push(path.join(cwd, "claude_desktop_config.json"));
+    targets.push([claudeFile, "claude-code"]);
   } else if (client === "all") {
-    targetFiles.push(
-      path.join(cwd, ".mcp.json"),
-      path.join(cwd, ".cursor", "mcp.json"),
-    );
+    targets.push([claudeFile, "claude-code"], [cursorFile, "cursor"]);
   } else {
     // Auto-detect based on workspace directories
     const hasCursorDir = fs.existsSync(path.join(cwd, ".cursor"));
-    const hasMcpJson = fs.existsSync(path.join(cwd, ".mcp.json"));
+    const hasMcpJson = fs.existsSync(claudeFile);
     const hasClaudeDir = fs.existsSync(path.join(cwd, ".claude"));
 
-    if (hasCursorDir) {
-      targetFiles.push(path.join(cwd, ".cursor", "mcp.json"));
-    }
+    if (hasCursorDir) targets.push([cursorFile, "cursor"]);
     if (hasMcpJson || hasClaudeDir || !hasCursorDir) {
-      targetFiles.push(path.join(cwd, ".mcp.json"));
+      targets.push([claudeFile, "claude-code"]);
     }
   }
 
-  for (const filePath of targetFiles) {
-    mergeMcpJsonFile(filePath, config.serverName, entry);
+  for (const [filePath, flavor] of targets) {
+    mergeMcpJsonFile(filePath, buildMcpServerEntry(flavor));
   }
 
-  return targetFiles;
+  return targets.map(([filePath]) => filePath);
+}
+
+function moduleDir(): string {
+  return path.dirname(fileURLToPath(import.meta.url));
 }
 
 /**
  * Resolves the directory containing the bundled `skills/slopmachine` files.
  */
 export function resolveBundledSkillDir(): string {
-  const currentFile = fileURLToPath(import.meta.url);
-  const currentDir = path.dirname(currentFile);
+  const currentDir = moduleDir();
 
   const candidates = [
     // Packaged inside packages/core/dist/skills/slopmachine
@@ -511,33 +478,130 @@ export function resolveBundledSkillDir(): string {
 }
 
 /**
- * Copies or symlinks `skills/slopmachine` (`SKILL.md` and `references/`) into the target workspace.
+ * Reads the CLI version from `@slopmachine/core`'s package.json, which sits one
+ * level above both `src/` and `dist/`.
  */
-export function installSkillFiles(
+export function readCliVersion(): string {
+  try {
+    const pkgPath = path.resolve(moduleDir(), "../package.json");
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+    if (pkg?.name === "@slopmachine/core" && typeof pkg.version === "string") {
+      return pkg.version;
+    }
+  } catch {
+    // fall through
+  }
+  return "unknown";
+}
+
+function isWithin(parent: string, child: string): boolean {
+  const rel = path.relative(parent, child);
+  return rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel);
+}
+
+/** Realpath of `p`, or of its deepest existing ancestor joined with the rest. */
+function realpathLenient(p: string): string {
+  const missing: string[] = [];
+  let current = p;
+  for (;;) {
+    try {
+      return path.join(fs.realpathSync(current), ...missing.reverse());
+    } catch {
+      const parent = path.dirname(current);
+      if (parent === current) return p;
+      missing.push(path.basename(current));
+      current = parent;
+    }
+  }
+}
+
+/** True when `p` is inside npm's temporary `npx` cache (`~/.npm/_npx/...`). */
+export function isInNpxCache(p: string): boolean {
+  return path.resolve(p).split(/[\\/]+/).includes("_npx");
+}
+
+export interface SkillInstallOptions {
+  client?: AgentClient;
+  skillsDir?: string;
+  symlink?: boolean;
+  sourceSkillDir?: string;
+}
+
+/**
+ * Works out where the skill would be installed and checks it is safe to do so,
+ * without touching the filesystem. Throws when:
+ * - `--skills-dir` resolves to the project root or outside it,
+ * - `--symlink` would replace an existing file or directory that isn't a symlink,
+ * - `--symlink` would point into the temporary npx cache.
+ */
+export function planSkillInstall(
   cwd: string,
-  options?: {
-    client?: AgentClient;
-    skillsDir?: string;
-    symlink?: boolean;
-    sourceSkillDir?: string;
-  },
-): string[] {
-  const sourceDir = options?.sourceSkillDir || resolveBundledSkillDir();
+  options: SkillInstallOptions = {},
+): { sourceDir: string; targetDirs: string[] } {
+  const sourceDir = options.sourceSkillDir || resolveBundledSkillDir();
+  const root = path.resolve(cwd);
   const targetDirs: string[] = [];
 
-  if (options?.skillsDir) {
-    targetDirs.push(path.resolve(cwd, options.skillsDir));
-  } else {
-    targetDirs.push(path.join(cwd, ".agents", "skills", "slopmachine"));
+  if (options.skillsDir) {
+    const dest = path.resolve(root, options.skillsDir);
     if (
-      options?.client === "claude-code" ||
-      options?.client === "all" ||
-      fs.existsSync(path.join(cwd, ".claude"))
+      !isWithin(root, dest) ||
+      !isWithin(realpathLenient(root), realpathLenient(dest))
     ) {
-      targetDirs.push(path.join(cwd, ".claude", "skills", "slopmachine"));
+      throw new Error(
+        `--skills-dir must be a subdirectory of the current project (${root}); got "${options.skillsDir}".`,
+      );
+    }
+    targetDirs.push(dest);
+  } else {
+    targetDirs.push(path.join(root, ".agents", "skills", "slopmachine"));
+    if (
+      options.client === "claude-code" ||
+      options.client === "all" ||
+      fs.existsSync(path.join(root, ".claude"))
+    ) {
+      targetDirs.push(path.join(root, ".claude", "skills", "slopmachine"));
     }
   }
 
+  if (options.symlink) {
+    if (isInNpxCache(realpathLenient(sourceDir))) {
+      throw new Error(
+        "--symlink needs @slopmachine/core installed in this project (npm install -D @slopmachine/core). " +
+          "This copy is running from the temporary npx cache, so a symlink to it would break when the cache is cleared. " +
+          "Install the package locally, or run without --symlink to copy the files.",
+      );
+    }
+    for (const dest of targetDirs) {
+      if (path.resolve(dest) === path.resolve(sourceDir)) continue;
+      let stat: fs.Stats;
+      try {
+        stat = fs.lstatSync(dest);
+      } catch {
+        continue; // doesn't exist yet
+      }
+      if (!stat.isSymbolicLink()) {
+        throw new Error(
+          `Refusing to replace ${dest} with a symlink: it already exists and isn't a symlink. ` +
+            "Remove it yourself, choose another --skills-dir, or run without --symlink.",
+        );
+      }
+    }
+  }
+
+  return { sourceDir, targetDirs };
+}
+
+/**
+ * Copies or symlinks `skills/slopmachine` (`SKILL.md` and `references/`) into
+ * the target workspace. Never deletes anything except an existing symlink at
+ * the destination.
+ */
+export function installSkillFiles(
+  cwd: string,
+  options: SkillInstallOptions = {},
+): string[] {
+  const { sourceDir, targetDirs } = planSkillInstall(cwd, options);
   const installed: string[] = [];
 
   for (const destDir of targetDirs) {
@@ -546,11 +610,24 @@ export function installSkillFiles(
       continue;
     }
 
-    if (options?.symlink) {
+    let existing: fs.Stats | undefined;
+    try {
+      existing = fs.lstatSync(destDir);
+    } catch {
+      existing = undefined;
+    }
+
+    // An existing symlink (from an earlier --symlink run) is removed, never
+    // followed: copying through it would write into the package itself.
+    if (existing?.isSymbolicLink()) {
+      fs.unlinkSync(destDir);
+    } else if (existing && options.symlink) {
+      // planSkillInstall already refuses this; never delete real files.
+      throw new Error(`Refusing to replace ${destDir}: it isn't a symlink.`);
+    }
+
+    if (options.symlink) {
       fs.mkdirSync(path.dirname(destDir), { recursive: true });
-      if (fs.existsSync(destDir)) {
-        fs.rmSync(destDir, { recursive: true, force: true });
-      }
       fs.symlinkSync(sourceDir, destDir, "dir");
     } else {
       fs.mkdirSync(destDir, { recursive: true });
@@ -562,16 +639,31 @@ export function installSkillFiles(
   return installed;
 }
 
+/**
+ * Returns the command and arguments used to open `url` in a browser. Each is
+ * run with `execFile` (no shell). On Windows `rundll32 url.dll` is used rather
+ * than `cmd /c start`, which would let cmd interpret characters in the URL.
+ */
+export function browserCommandFor(
+  platform: NodeJS.Platform,
+  url: string,
+): [string, string[]] {
+  if (platform === "darwin") return ["open", [url]];
+  if (platform === "win32") {
+    return ["rundll32", ["url.dll,FileProtocolHandler", url]];
+  }
+  return ["xdg-open", [url]];
+}
+
 function defaultOpenBrowser(url: string): void {
   if (process.env.CI || process.env.NODE_ENV === "test") return;
-  const platform = process.platform;
-  const cmd =
-    platform === "darwin"
-      ? "open"
-      : platform === "win32"
-        ? "cmd"
-        : "xdg-open";
-  const args = platform === "win32" ? ["/c", "start", "", url] : [url];
+  let safeUrl: string;
+  try {
+    safeUrl = validateVerificationUri(url);
+  } catch {
+    return;
+  }
+  const [cmd, args] = browserCommandFor(process.platform, safeUrl);
   try {
     execFile(cmd, args, () => {
       // Ignore browser launch errors in headless shells
@@ -591,19 +683,23 @@ Usage:
 
 Commands:
   init                  Authenticate, configure MCP server, and install Agent Skill (default)
-  login                 Authenticate via /connect (or --api-key) and configure MCP server
+  login                 Authenticate via /connect (or an API key) and configure MCP server
 
 Options:
   --api-key, -k <key>   Use an existing slop_live_... API key instead of browser login
-  --client, -c <name>   Target agent client: cursor | claude-code | claude-desktop | antigravity | all
-  --skills-dir <path>   Custom target directory for SKILL.md installation
-  --symlink             Symlink skill directory instead of copying files
+                        (prefer setting ${API_KEY_ENV_VAR}, which is read automatically)
+  --client, -c <name>   Target agent client: cursor | claude-code | antigravity | all
+  --skills-dir <path>   Custom skill install directory (must be inside the project)
+  --symlink             Symlink the skill instead of copying it (needs @slopmachine/core
+                        installed in the project, and never replaces non-symlinks)
   --no-skill            Skip installing skills/slopmachine/SKILL.md
   --no-mcp              Skip writing MCP configuration files
-  --base-url <url>      Override Slop Machine base URL (default: https://slopmachine.dev)
   --agent-name <name>   Display name shown on the /connect approval screen
   --help, -h            Show this help message
   --version, -v         Print CLI version
+
+MCP config files reference the ${API_KEY_ENV_VAR} environment variable; the API key
+itself is never written to them.
 `.trim();
 }
 
@@ -619,13 +715,16 @@ export async function runCli(
   const cwd = deps.cwd || process.cwd();
   const env = deps.env || process.env;
   const openBrowser = deps.openBrowser || defaultOpenBrowser;
+  const fail = (err: unknown): CliResult => {
+    stderr(`Error: ${(err as Error)?.message || String(err)}`);
+    return { exitCode: 1, mcpFilesWritten: [], skillPathsInstalled: [] };
+  };
 
   let options: CliOptions;
   try {
     options = parseCliArgs(argv, cwd, env);
-  } catch (err: any) {
-    stderr(`Error: ${err?.message || String(err)}`);
-    return { exitCode: 1, mcpFilesWritten: [], skillPathsInstalled: [] };
+  } catch (err) {
+    return fail(err);
   }
 
   if (options.command === "help") {
@@ -634,17 +733,28 @@ export async function runCli(
   }
 
   if (options.command === "version") {
-    stdout("1.0.0");
+    stdout(readCliVersion());
     return { exitCode: 0, mcpFilesWritten: [], skillPathsInstalled: [] };
   }
 
-  let apiKey = options.apiKey;
+  const installSkill = options.command === "init" && !options.skipSkill;
+  const skillOptions: SkillInstallOptions = {
+    client: options.client,
+    skillsDir: options.skillsDir,
+    symlink: options.symlink,
+    sourceSkillDir: deps.sourceSkillDir,
+  };
 
   try {
+    // Check the skill target before asking the user to approve anything.
+    if (installSkill) planSkillInstall(cwd, skillOptions);
+
+    let apiKey = options.apiKey;
+    let mintedKey = false;
+
     if (!apiKey && (!options.skipMcp || options.command === "login")) {
       stdout("Initiating Slop Machine agent authentication handshake...");
       const handshake = await initiateAgentHandshake({
-        baseUrl: options.baseUrl,
         agentName: options.agentName,
         clientSource: options.client || "cli",
         fetchImpl: deps.fetch,
@@ -660,7 +770,6 @@ export async function runCli(
 
       const redeemed = await pollAgentHandshake({
         deviceCode: handshake.deviceCode,
-        baseUrl: options.baseUrl,
         intervalMs: deps.pollIntervalMs,
         timeoutMs: deps.pollTimeoutMs,
         fetchImpl: deps.fetch,
@@ -668,37 +777,43 @@ export async function runCli(
       });
 
       apiKey = redeemed.rawKey;
+      mintedKey = true;
       stdout("Authentication approved!");
     }
 
     const mcpFilesWritten: string[] = [];
     if (apiKey && !options.skipMcp) {
-      const files = configureWorkspaceMcp(cwd, apiKey, {
-        baseUrl: options.baseUrl,
-        client: options.client,
-      });
+      const files = configureWorkspaceMcp(cwd, { client: options.client });
       mcpFilesWritten.push(...files);
       for (const file of files) {
         stdout(`Configured MCP server in ${path.relative(cwd, file) || file}`);
       }
 
-      const snippets = buildMcpConfig(apiKey, {
-        baseUrl: options.baseUrl,
-        client: options.client,
-      });
+      const commands = buildRegistrationCommands();
       stdout("");
       stdout("CLI Registration Commands (optional):");
-      stdout(`  Claude Code:  ${snippets.claudeCodeCommand}`);
-      stdout(`  Antigravity:  ${snippets.antigravityCommand}`);
+      stdout(`  Claude Code:  ${commands.claudeCode}`);
+      stdout(`  Antigravity:  ${commands.antigravity}`);
+    }
+
+    if (mintedKey && apiKey) {
+      stdout("");
+      stdout("Your new Slop Machine API key (shown once, store it securely):");
+      stdout(`  ${apiKey}`);
+    }
+    if (apiKey && !options.skipMcp && !env[API_KEY_ENV_VAR]?.trim()) {
+      stdout("");
+      stdout(
+        `The MCP config reads your key from the ${API_KEY_ENV_VAR} environment variable; it isn't written to any file.`,
+      );
+      stdout(
+        `Set ${API_KEY_ENV_VAR} in the environment your agent runs in (e.g. your shell profile), then restart the agent.`,
+      );
     }
 
     const skillPathsInstalled: string[] = [];
-    if (options.command === "init" && !options.skipSkill) {
-      const installed = installSkillFiles(cwd, {
-        client: options.client,
-        skillsDir: options.skillsDir,
-        symlink: options.symlink,
-      });
+    if (installSkill) {
+      const installed = installSkillFiles(cwd, skillOptions);
       skillPathsInstalled.push(...installed);
       for (const dir of installed) {
         stdout(
@@ -709,39 +824,8 @@ export async function runCli(
 
     stdout("");
     stdout("Slop Machine setup complete!");
-    return {
-      exitCode: 0,
-      apiKey,
-      mcpFilesWritten,
-      skillPathsInstalled,
-    };
-  } catch (err: any) {
-    stderr(`Error: ${err?.message || String(err)}`);
-    return { exitCode: 1, mcpFilesWritten: [], skillPathsInstalled: [] };
+    return { exitCode: 0, apiKey, mcpFilesWritten, skillPathsInstalled };
+  } catch (err) {
+    return fail(err);
   }
-}
-
-// Run automatically when invoked directly as a CLI binary
-const isMainModule = (() => {
-  try {
-    if (!process.argv[1]) return false;
-    const entryPath = fs.realpathSync(path.resolve(process.argv[1]));
-    const modulePath = fs.realpathSync(fileURLToPath(import.meta.url));
-    return (
-      entryPath === modulePath ||
-      path.basename(entryPath, path.extname(entryPath)) === "cli" ||
-      path.basename(process.argv[1]) === "slopmachine" ||
-      path.basename(process.argv[1]) === "core"
-    );
-  } catch {
-    return false;
-  }
-})();
-
-if (isMainModule && !process.env.VITEST) {
-  runCli().then((res) => {
-    if (res.exitCode !== 0) {
-      process.exitCode = res.exitCode;
-    }
-  });
 }

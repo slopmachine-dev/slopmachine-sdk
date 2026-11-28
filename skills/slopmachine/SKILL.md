@@ -23,9 +23,12 @@ Run the built-in CLI helper to authenticate (via device-code browser claim or `-
 # Interactive device-code login + MCP config + skill install
 npx @slopmachine/core init
 
-# Or pass an existing API key non-interactively
-npx @slopmachine/core init --api-key slop_live_YOUR_API_KEY
+# Or use an existing API key non-interactively (read from the environment)
+export SLOPMACHINE_API_KEY=slop_live_YOUR_API_KEY
+npx @slopmachine/core init
 ```
+
+The MCP config files it writes reference `SLOPMACHINE_API_KEY` instead of containing the key, so the variable must be set wherever the agent runs. Never write a raw `slop_live_...` key into a project file.
 
 You can also install the skill directly via the `skills` CLI:
 
@@ -58,7 +61,7 @@ If the user does not have a Slop Machine account or API key yet, **initiate the 
    ```
 
 2. **Present the claim link to the user**:
-   Show the user `verificationUri` (`https://slopmachine.dev/connect?code=SLOP-4829`) and `userCode`. When the user opens the link and clicks **Approve & Connect Agent** (signing in with Google if needed), Slop Machine automatically provisions their user profile, default team workspace, and initial free Fuel allocation (`200` Fuel), and mints a `slop_live_...` API key.
+   Show the user `verificationUri` (`https://slopmachine.dev/connect?code=SLOP-4829`) and `userCode`. When the user opens the link and clicks **Approve & Connect Agent** (signing in with Google if needed), Slop Machine automatically provisions their user profile, default team workspace on the free plan (`200` Fuel / month), and mints a `slop_live_...` API key.
 
 3. **Poll for redemption** every 3–5 seconds until approved:
    ```bash
@@ -79,19 +82,19 @@ If the user does not have a Slop Machine account or API key yet, **initiate the 
 
 ### C. Remote MCP Server Configuration (`https://slopmachine.dev/api/mcp`)
 
-Slop Machine hosts a streamable HTTP MCP server at `https://slopmachine.dev/api/mcp`. Authenticate with `Authorization: Bearer slop_live_...` (or `x-api-key: slop_live_...`).
+Slop Machine hosts a streamable HTTP MCP server at `https://slopmachine.dev/api/mcp`. Authenticate with `Authorization: Bearer slop_live_...` (or `x-api-key: slop_live_...`). Keep the key in the `SLOPMACHINE_API_KEY` environment variable and reference it, rather than pasting it into commands or project files.
 
 - **Claude Code**:
   ```bash
   claude mcp add --transport http slopmachine "https://slopmachine.dev/api/mcp" \
-    --header "Authorization: Bearer slop_live_YOUR_API_KEY"
+    --header "Authorization: Bearer $SLOPMACHINE_API_KEY"
   ```
 - **Antigravity (`agy`)**:
   ```bash
   agy mcp add --transport http slopmachine "https://slopmachine.dev/api/mcp" \
-    --header "Authorization: Bearer slop_live_YOUR_API_KEY"
+    --header "Authorization: Bearer $SLOPMACHINE_API_KEY"
   ```
-- **Cursor (`.cursor/mcp.json`) / Workspace (`.mcp.json`)**:
+- **Workspace `.mcp.json` (Claude Code)**, which expands `${VAR}`:
   ```json
   {
     "mcpServers": {
@@ -99,25 +102,14 @@ Slop Machine hosts a streamable HTTP MCP server at `https://slopmachine.dev/api/
         "type": "http",
         "url": "https://slopmachine.dev/api/mcp",
         "headers": {
-          "Authorization": "Bearer slop_live_YOUR_API_KEY"
+          "Authorization": "Bearer ${SLOPMACHINE_API_KEY}"
         }
       }
     }
   }
   ```
-- **Claude Desktop (`claude_desktop_config.json`)**:
-  ```json
-  {
-    "mcpServers": {
-      "slopmachine": {
-        "url": "https://slopmachine.dev/api/mcp",
-        "headers": {
-          "Authorization": "Bearer slop_live_YOUR_API_KEY"
-        }
-      }
-    }
-  }
-  ```
+- **Cursor (`.cursor/mcp.json`)**: same shape, but Cursor's syntax is `"Authorization": "Bearer ${env:SLOPMACHINE_API_KEY}"`.
+- **Claude Desktop**: remote servers aren't configured in `claude_desktop_config.json` (that file is for local servers only). Add `https://slopmachine.dev/api/mcp` as a custom connector under **Settings → Connectors**.
 
 ### D. In-Browser WebMCP (`document.modelContext`)
 
@@ -327,13 +319,7 @@ npm install @slopmachine/react @slopmachine/core
 Render a Pipeline or Bucket with built-in shimmer loader, zero layout shift (CLS), and error fallback:
 
 ```tsx
-import { SlopImage, SlopVideo, SlopText, preloadImage } from "@slopmachine/react";
-
-// Optional: warm cache in route loader or parent effect
-preloadImage({
-  pipelineId: "pipe_abc123",
-  variables: { city: "Tokyo", theme: "cyberpunk" },
-});
+import { SlopImage, SlopVideo, SlopText } from "@slopmachine/react";
 
 export function HeroMedia() {
   return (
@@ -371,7 +357,7 @@ export function HeroMedia() {
 ```
 
 > **Note on Pipeline vs. Bucket Props in SDK Components**:
-> When `pipelineId` is passed to `<SlopImage />`, `<SlopVideo />`, or `<SlopText />`, the SDK routes requests to `renderPipeline` (`redirect=true` for media, `sync=true` for text). Bucket-only URL parameters (`model`, `version`, `original`, `attachments`, and top-level `duration`) are ignored on `pipelineId` component URLs—configure models and step durations on the pipeline steps via MCP instead.
+> When `pipelineId` is passed to `<SlopImage />`, `<SlopVideo />`, or `<SlopText />`, the SDK routes requests to `renderPipeline` (`redirect=true` for media, `sync=true` for text). Bucket-only URL parameters (`model`, `version`, `original`, `attachments`, and top-level `duration`) are ignored on `pipelineId` component URLs—configure models and step durations on the pipeline steps via MCP instead. With `pipelineId`, `aspectRatio` only sizes the component's container (to avoid layout shift); it isn't sent to the API, so set the output aspect ratio on the pipeline step.
 
 ### Playbook 3: Integrate into Svelte 5 (`@slopmachine/svelte`)
 
