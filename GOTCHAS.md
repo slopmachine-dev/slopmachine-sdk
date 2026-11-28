@@ -86,12 +86,12 @@ When adding a new entry, use the following structure:
 
 ---
 
-### `@sveltejs/package` 3.x silently upgrades the repo to TypeScript 6
+### TypeScript 6: no `baseUrl`, and `@types/*` are no longer auto-included
 
-- **Affected Area:** `packages/svelte`, every package's build and type-check
-- **Symptoms / Error:** After installing or upgrading `@sveltejs/package`, every `tsup` DTS build and `tsc` run fails with `TS5101: Option 'baseUrl' is deprecated and will stop functioning in TypeScript 7.0`, and the downstream packages then can't find core's types (`TS7016`). `npm ls typescript` shows `typescript@6.x … invalid`.
-- **Root Cause:** `@sveltejs/package` 3.x has a `typescript: ^6.0.0` peer dependency, so npm hoists TypeScript 6 to the root `node_modules`, replacing the 5.9 that the other workspaces use.
-- **Solution / Workaround:** Keep `@sveltejs/package` on `^2.5.x` until the repo deliberately moves to TypeScript 6. If it happens, restore `package-lock.json` from `main`, then run `npm install` so TypeScript resolves back to 5.9.
+- **Affected Area:** every workspace's `tsconfig*.json`, `packages/core` (`src/cli.ts`, `src/bin.ts`), `typescript` / `@sveltejs/package` / `typescript-eslint` versions
+- **Symptoms / Error:** Adding `baseUrl` to a tsconfig fails every `tsup` DTS build and `tsc` run with `TS5101: Option 'baseUrl' is deprecated`. Core's type-check fails with `TS2591: Cannot find name 'process'` / `'node:fs'` and `TS2503: Cannot find namespace 'NodeJS'` if its `types` entry is removed. Bumping TypeScript to 6.1+ breaks linting.
+- **Root Cause:** The repo is on TypeScript 6.0 (required by `@sveltejs/package` 3.x). TS 6 deprecates `baseUrl` (TS 7 removes it) and no longer loads every `@types/*` package by default; before, core silently picked up the `@types/node` hoisted from `apps/demo-svelte`. `typescript-eslint` 8 only supports `typescript <6.1.0`.
+- **Solution / Workaround:** Write `paths` without `baseUrl`, using `./`-relative targets (they resolve relative to the tsconfig). Declare the ambient types a workspace needs explicitly: core has `"types": ["node"]` and its own `@types/node` (pinned to the Node 24 runtime so the CLI doesn't use newer APIs). Keep `typescript` on `~6.0.x` until `typescript-eslint` supports a newer minor.
 
 ---
 
