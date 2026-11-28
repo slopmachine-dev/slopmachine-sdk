@@ -1,5 +1,12 @@
 # @slopmachine/svelte
 
+## 1.2.0
+
+### Patch Changes
+
+- Updated dependencies [886444c]
+  - @slopmachine/core@1.2.0
+
 ## 1.1.0
 
 ### Minor Changes

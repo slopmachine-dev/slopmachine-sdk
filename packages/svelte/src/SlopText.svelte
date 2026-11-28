@@ -18,7 +18,7 @@
   </SlopText>
   ```
 
-  @version 1.1.0
+  @version 1.2.0
 -->
 <script lang="ts">
   import {
