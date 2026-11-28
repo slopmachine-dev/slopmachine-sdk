@@ -94,6 +94,16 @@ Pins execution or retrieval to a specific immutable bucket or pipeline version.
 **Type:** `string` (Optional)
 If a specific result ID is known, it can be fetched directly.
 
+### `aspectRatio`
+
+**Type:** `AspectRatio | Record<string, AspectRatio>` (Optional, pipelines only)
+Runtime aspect ratio override forwarded to `renderPipeline` when `pipelineId` is set, either a single ratio or a per-step map such as `{ step_1: "16:9" }`. Text has no layout box, so this only affects what the pipeline generates. Ignored (with a one-time console warning) for buckets.
+
+### `duration`
+
+**Type:** `number | Record<string, number>` (Optional, pipelines only)
+Runtime duration override in seconds forwarded to `renderPipeline` when `pipelineId` is set, either a single number or a per-step map such as `{ step_1: 6 }`. Ignored (with a one-time console warning) for buckets.
+
 ### `variables`
 
 **Type:** `Record<string, string | number | undefined | null>` (Optional)
@@ -107,7 +117,7 @@ Arbitrary custom metadata to attach to the generation request and resulting docu
 ### `attachments`
 
 **Type:** `string[] | Record<string, string[]>` (Optional)
-Temporary file attachment URLs to be used by the generative AI model (or a `Record<stepId, string[]>` map when targeting a multi-step pipeline).
+Temporary file attachment URLs to be used by the generative AI model (or a `Record<stepId, string[]>` map when targeting a multi-step pipeline). A step map is ignored (with a one-time console warning) for buckets.
 
 ### `baseUrl`
 

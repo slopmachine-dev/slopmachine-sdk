@@ -110,7 +110,7 @@ The unique identifier for the specific image generation bucket (`bucketId`) or m
 ### `aspectRatio`
 
 **Type:** `ImageAspectRatio | Record<string, AspectRatio>` (Optional, Default: `"1:1"`)
-Sets the CSS aspect ratio of the wrapper element to prevent layout shifts, and forwards the ratio override to `renderImage` or `renderPipeline`.
+Sets the CSS aspect ratio of the wrapper element to prevent layout shifts, and forwards the ratio to `renderImage` (buckets) or `renderPipeline` (pipelines). When targeting a multi-step pipeline (`pipelineId`), you can also pass a step map such as `{ step_1: "16:9" }`; the wrapper then uses the map's last value. With `pipelineId`, the `"1:1"` default only sizes the wrapper and is not sent to the API. A step map is ignored (with a one-time console warning) for buckets.
 
 ### `model`
 
@@ -145,7 +145,7 @@ Arbitrary custom metadata to attach to the generation request and resulting docu
 ### `attachments`
 
 **Type:** `string[] | Record<string, string[]>` (Optional)
-Temporary file attachment URLs to be used by the generative AI model (or a `Record<stepId, string[]>` map when targeting a multi-step pipeline).
+Temporary file attachment URLs to be used by the generative AI model (or a `Record<stepId, string[]>` map when targeting a multi-step pipeline). A step map is ignored (with a one-time console warning) for buckets.
 
 ### `baseUrl`
 

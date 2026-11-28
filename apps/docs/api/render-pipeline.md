@@ -33,7 +33,7 @@ import { SlopImage } from "@slopmachine/react";
 
 When `pipelineId` is passed to `<SlopImage>` or `<SlopVideo>`, the SDK automatically appends `redirect=true`, allowing the media tag to transparently redirect to the final rendered asset URL.
 
-Pipelines support forwarding `version` (for git-tracked version pinning), `aspectRatio` (either a single aspect ratio string or a per-step `Record<stepId, AspectRatio>` map), `duration` (`number` or `Record<stepId, number>`), and `attachments` (`string[]` or `Record<stepId, string[]>`). Bucket-only options (`model` and `original`) aren't supported by the pipeline endpoint: they're left out of the request and the SDK logs a one-time console warning.
+Pipelines support forwarding `version` (for git-tracked version pinning), `aspectRatio` (either a single aspect ratio string or a per-step `Record<stepId, AspectRatio>` map), `duration` (`number` or `Record<stepId, number>`), and `attachments` (`string[]` or `Record<stepId, string[]>`). Bucket-only options (`model` and `original`) aren't supported by the pipeline endpoint: they're left out of the request and the SDK logs a one-time console warning. The reverse also holds: per-step `Record<stepId, …>` maps (and `aspectRatio`/`duration` on `SlopText`) only apply to pipelines, so with `bucketId` they're left out of the request with a one-time console warning.
 
 ## Multi-Output Pipelines (`useSlopPipeline` & `createSlopPipeline`)
 
@@ -106,6 +106,8 @@ function CampaignHero() {
   </section>
 {/if}
 ```
+
+`refetch()` re-runs the pipeline with the current options. Both helpers also accept partial overrides for a single run, e.g. `refetch({ prompt: "Try a winter reel" })`; the overrides are merged over the current options and don't persist. Requests always go to the production `renderPipeline` endpoint.
 
 ## Programmatic Execution (`executePipeline`)
 
