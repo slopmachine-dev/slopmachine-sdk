@@ -14,7 +14,7 @@ Add `slopmachine-sdk` to your `Package.swift` dependencies:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/slopmachine-dev/slopmachine-sdk.git", from: "1.0.0")
+    .package(url: "https://github.com/slopmachine-dev/slopmachine-sdk.git", branch: "main")
 ],
 targets: [
     .target(
@@ -25,6 +25,10 @@ targets: [
     )
 ]
 ```
+
+::: info
+The Swift package is not tagged with SwiftPM-compatible versions yet (the repository's tags are npm changesets tags such as `@slopmachine/core@0.9.0`), so depend on the `main` branch for now. Versioned tags will come later.
+:::
 
 Or in Xcode: **File &rarr; Add Package Dependencies...** and enter `https://github.com/slopmachine-dev/slopmachine-sdk.git`.
 

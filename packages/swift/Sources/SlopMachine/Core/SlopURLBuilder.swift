@@ -2,10 +2,10 @@ import Foundation
 import os
 
 /// Default production Cloud Functions base URL for Slop Machine rendering endpoints.
-public let defaultSlopMachineAPIURL = "https://us-central1-slopmachine-12bfb.cloudfunctions.net"
+internal let defaultSlopMachineAPIURL = "https://us-central1-slopmachine-12bfb.cloudfunctions.net"
 
 /// Default production web API base URL for authenticated Slop Machine endpoints (such as `rateResult`).
-public let defaultSlopMachineWebBaseURL = "https://slopmachine.dev"
+internal let defaultSlopMachineWebBaseURL = "https://slopmachine.dev"
 
 // Thread-safe tracker for one-time warnings when bucket-only options are passed with `pipelineId`.
 private final class WarnedPipelineOptionsTracker: @unchecked Sendable {
@@ -83,11 +83,72 @@ internal func encodeJSONStringLiteral(_ string: String) -> String {
     return result
 }
 
-internal func serializeNumber(_ double: Double) -> String {
-    if double.isFinite, double.rounded() == double, let exactInt = Int64(exactly: double) {
-        return String(exactInt)
+/// Formats a `Double` exactly like JavaScript's `Number.prototype.toString()` / `String(number)`
+/// (ECMAScript `Number::toString` with radix 10).
+///
+/// Swift's `description` already produces the shortest digit string that round-trips, which is the
+/// same digit selection JavaScript uses; only the layout differs (`1e-07` vs `1e-7`, `1e-05` vs
+/// `0.00001`, `1e+16` vs `10000000000000000`, `1.0` vs `1`). This re-lays those digits out with the
+/// ECMAScript rules: fixed notation when `1e-6 <= |x| < 1e21`, exponent notation otherwise.
+internal func formatJSNumber(_ double: Double) -> String {
+    if double.isNaN { return "NaN" }
+    if double.isInfinite { return double < 0 ? "-Infinity" : "Infinity" }
+    if double == 0 { return "0" } // covers -0, which JS prints as "0"
+
+    // Split Swift's shortest round-trip representation into significant digits and exponent.
+    let text = double.magnitude.description
+    let mantissa: Substring
+    var exponent = 0
+    if let eIndex = text.firstIndex(where: { $0 == "e" || $0 == "E" }) {
+        mantissa = text[..<eIndex]
+        exponent = Int(text[text.index(after: eIndex)...]) ?? 0
+    } else {
+        mantissa = Substring(text)
     }
-    return String(double)
+    let integerPart: Substring
+    let fractionPart: Substring
+    if let dot = mantissa.firstIndex(of: ".") {
+        integerPart = mantissa[..<dot]
+        fractionPart = mantissa[mantissa.index(after: dot)...]
+    } else {
+        integerPart = mantissa
+        fractionPart = ""
+    }
+    var digits = Array(integerPart) + Array(fractionPart)
+    // Decimal point position relative to `digits`: value = 0.digits * 10^n.
+    var n = integerPart.count + exponent
+    while let first = digits.first, first == "0" {
+        digits.removeFirst()
+        n -= 1
+    }
+    while let last = digits.last, last == "0" {
+        digits.removeLast()
+    }
+    let k = digits.count
+    let sign = double < 0 ? "-" : ""
+    let digitString = String(digits)
+
+    if k <= n && n <= 21 {
+        return sign + digitString + String(repeating: "0", count: n - k)
+    }
+    if 0 < n && n <= 21 {
+        return sign + String(digits[..<n]) + "." + String(digits[n...])
+    }
+    if -6 < n && n <= 0 {
+        return sign + "0." + String(repeating: "0", count: -n) + digitString
+    }
+    let e = n - 1
+    let exponentString = (e >= 0 ? "+" : "-") + String(abs(e))
+    if k == 1 {
+        return sign + digitString + "e" + exponentString
+    }
+    return sign + String(digits[0]) + "." + String(digits[1...]) + "e" + exponentString
+}
+
+/// Serializes a `Double` exactly like `JSON.stringify` (non-finite values become `null`).
+internal func serializeNumber(_ double: Double) -> String {
+    guard double.isFinite else { return "null" }
+    return formatJSNumber(double)
 }
 
 internal func serializeVariableValue(_ value: SlopVariableValue) -> String {

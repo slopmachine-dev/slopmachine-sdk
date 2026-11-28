@@ -382,6 +382,34 @@ struct NetworkAndMonitorTests {
         #expect(recorder.calls[0].url == "https://api/a")
     }
 
+    @Test("RenderUrlMonitor prunes finished listener tasks after flush() and stop()")
+    func monitorPrunesListenerTasks() async {
+        let suiteID = UUID().uuidString
+        defer { MockURLProtocol.unregister(suiteID: suiteID) }
+        let gate = AsyncGate()
+        let session = MockURLProtocol.makeSession(suiteID: suiteID) { req in
+            if req.url?.absoluteString == "https://api/slow" {
+                await gate.wait()
+            }
+            return (httpResponse(for: req, status: 200), Data())
+        }
+
+        let monitor = createRenderUrlMonitor(session: session) { _, _ in }
+        for index in 0..<5 {
+            monitor.watch("https://api/\(index)")
+            monitor.mediaFailed("https://api/\(index)", fallbackMessage: "Failed")
+        }
+        await monitor.flush()
+        #expect(monitor.pendingListenerCount == 0)
+
+        monitor.watch("https://api/slow")
+        monitor.mediaFailed("https://api/slow", fallbackMessage: "Failed")
+        #expect(monitor.pendingListenerCount == 2)
+        monitor.stop()
+        #expect(monitor.pendingListenerCount == 0)
+        await gate.open()
+    }
+
     @Test("RenderUrlMonitor prefers API error detail when media element fails first")
     func monitorPrefersAPIDetailWhenMediaFailsFirst() async {
         let suiteID = UUID().uuidString
@@ -635,6 +663,10 @@ struct NetworkAndMonitorTests {
         )
         #expect(uploaded == UploadedAttachment(url: "https://cdn/x.png"))
         let requests = MockURLProtocol.recordedRequests(suiteID: suiteID)
+        #expect(
+            requests[0].url?.absoluteString
+                == "https://us-central1-slopmachine-12bfb.cloudfunctions.net/uploadTempAttachment"
+        )
         #expect(
             String(data: requestBodyData(requests[0]), encoding: .utf8)
                 == "{\"data\":{\"base64\":\"AAAA\",\"mimeType\":\"image/png\"}}"

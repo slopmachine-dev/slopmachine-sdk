@@ -222,16 +222,14 @@ public func executePipeline(
 /// - Parameters:
 ///   - base64: Base64-encoded file data (without the `data:mime/type;base64,` prefix).
 ///   - mimeType: MIME type of the file (e.g. `"image/png"`).
-///   - baseUrl: Optional override endpoint URL.
 ///   - session: The `URLSession` to use (defaults to `.shared`).
 /// - Returns: An `UploadedAttachment` containing the temporary `url`.
 public func uploadTempAttachment(
     base64: String,
     mimeType: String,
-    baseUrl: String? = nil,
     session: URLSession = .shared
 ) async throws -> UploadedAttachment {
-    let endpointString = resolveSlopEndpoint("uploadTempAttachment", baseUrl: baseUrl)
+    let endpointString = resolveSlopEndpoint("uploadTempAttachment", baseUrl: nil)
     guard let url = URL(string: endpointString) else {
         throw SlopMachineError("Invalid uploadTempAttachment endpoint URL: \(endpointString)")
     }
@@ -292,19 +290,16 @@ public func uploadTempAttachment(
 /// - Parameters:
 ///   - data: Raw binary file data.
 ///   - mimeType: MIME type of the file (e.g. `"image/png"`).
-///   - baseUrl: Optional override endpoint URL.
 ///   - session: The `URLSession` to use (defaults to `.shared`).
 /// - Returns: An `UploadedAttachment` containing the temporary `url`.
 public func uploadTempAttachment(
     data: Data,
     mimeType: String,
-    baseUrl: String? = nil,
     session: URLSession = .shared
 ) async throws -> UploadedAttachment {
     try await uploadTempAttachment(
         base64: data.base64EncodedString(),
         mimeType: mimeType,
-        baseUrl: baseUrl,
         session: session
     )
 }

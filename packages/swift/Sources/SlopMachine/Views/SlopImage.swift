@@ -64,6 +64,8 @@ public struct SlopImage<LoaderView: View, FailureView: View>: View {
     @State private var loadedImage: Image?
     @State private var isLoading: Bool = true
     @State private var error: SlopMachineError?
+    // Identifies the load whose errors may still be applied; a newer load replaces it.
+    @State private var activeLoadId: UUID?
 
     /// Creates a `SlopImage` with custom `@ViewBuilder` loader and error fallback views.
     public init(
@@ -178,10 +180,17 @@ public struct SlopImage<LoaderView: View, FailureView: View>: View {
         isLoading = true
         error = nil
         loadedImage = nil
+        let loadId = UUID()
+        activeLoadId = loadId
 
         let errorCallback = onGenerationError
-        let monitor = RenderUrlMonitor { reportedError, _ in
+        let monitor = RenderUrlMonitor { reportedError, reportedUrl in
             Task { @MainActor in
+                // The hop to the main actor can land after the URL changed; drop stale errors.
+                guard self.activeLoadId == loadId,
+                      self.debouncedUrlString == urlString,
+                      reportedUrl == urlString
+                else { return }
                 self.isLoading = false
                 self.error = reportedError
                 errorCallback?(reportedError)

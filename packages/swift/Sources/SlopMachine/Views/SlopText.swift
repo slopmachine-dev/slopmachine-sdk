@@ -6,6 +6,11 @@ import SwiftUI
 /// Uses Foundation's native Markdown parser, which ignores raw HTML tags and active scripts,
 /// and falls back to a plain `AttributedString` if parsing fails.
 ///
+/// - Important: Parsing uses `.inlineOnlyPreservingWhitespace`, so only inline syntax (bold, italics,
+///   strikethrough, inline code, links) is styled. Block-level syntax such as headings, lists, block
+///   quotes, tables and fenced code blocks is shown as plain text, unlike the React and Svelte
+///   `SlopText`, which render full Markdown to sanitized HTML.
+///
 /// - Parameter markdown: The Markdown string returned by `fetchRenderedText`.
 /// - Returns: A parsed `AttributedString`.
 public func renderMarkdownAttributedString(_ markdown: String) -> AttributedString {
@@ -20,6 +25,9 @@ public func renderMarkdownAttributedString(_ markdown: String) -> AttributedStri
 }
 
 /// Renders AI-generated text (Markdown) from Slop Machine with automatic loading and error states.
+///
+/// Only inline Markdown is styled (see `renderMarkdownAttributedString(_:)`); headings, lists and
+/// code blocks are displayed as plain text.
 ///
 /// Supports both pre-templated Buckets (`bucketId`) and multi-step Pipelines (`pipelineId` + `prompt`).
 ///

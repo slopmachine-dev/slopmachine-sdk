@@ -120,3 +120,20 @@ When adding a new entry, use the following structure:
 - **Root Cause:** Swift randomizes `Dictionary` iteration order per launch and Foundation's `URLQueryItem` uses RFC 3986 query allowed characters rather than WHATWG `application/x-www-form-urlencoded` (`URLSearchParams`).
 - **Solution / Workaround:** Always use `SlopVariables` and `SlopMetadata` (which preserve insertion order for dictionary literals and sort keys lexicographically when initialized from a standard Swift `Dictionary`) together with `encodeURLSearchParam` and `encodeJSONStringLiteral` in `SlopURLBuilder.swift`. Verify changes with `swift test` against `URLStabilityTests.swift`.
 
+---
+
+### Swift Testing `#expect(cgFloat == 16.0 / 9.0)` always fails
+
+- **Affected Area:** `packages/swift` tests (Swift Testing `#expect`)
+- **Symptoms / Error:** `#expect(ImageAspectRatio.landscape16x9.cgFloatRatio == 16.0 / 9.0)` fails in CI (and locally) even though the values are equal; the failure shows the right-hand side as an `AnyHashable`-wrapped value.
+- **Root Cause:** The `#expect` macro expands the comparison into a generic expression, and the untyped floating-point literal division on the right-hand side is not inferred as `CGFloat`. It is typed as `AnyHashable` instead, so the `==` compares a `CGFloat` with an `AnyHashable(Double)`, which are never equal.
+- **Solution / Workaround:** Give the literal side an explicit type, e.g. `#expect(x.cgFloatRatio == CGFloat(16.0 / 9.0))` (or bind it to a typed `let` first).
+
+---
+
+### Swift `String(Double)` and dictionary key order don't match JavaScript
+
+- **Affected Area:** `packages/swift` (`SlopURLBuilder`, `SlopVariables`, `SlopMetadata`, `interpolatePrompt`)
+- **Symptoms / Error:** Swift-built URLs differ from `@slopmachine/core` for some inputs (busting CDN caches): `1e-7` becomes `1e-07`, `0.00001` becomes `1e-05`, `1e19` becomes `1e+19`, `2**60` prints all 19 exact digits, and keys like `"2"` or `"10"` stay where they were inserted.
+- **Root Cause:** Swift's `Double.description` uses different layout rules from ECMAScript `Number::toString` (two-digit exponents, exponent notation from `1e16` and below `1e-4`), and converting whole doubles through `Int` prints exact digits where JS prints the shortest round-trip digits padded with zeros. JavaScript objects also enumerate integer-like keys (`"0"`–`"4294967294"`, no leading zeros) first in ascending numeric order, before all other keys in insertion order.
+- **Solution / Workaround:** Format numbers only through `formatJSNumber` / `serializeNumber` in `SlopURLBuilder.swift` (never `String(double)`), and keep `jsPropertyOrder` applied in every `SlopVariables`/`SlopMetadata` initializer. `URLStabilityTests.swift` pins cases generated with node from the built core; regenerate them from `packages/core/dist/index.mjs` if you add more.

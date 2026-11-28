@@ -165,10 +165,8 @@ public enum SlopVariableValue: Sendable, Codable, Equatable, Hashable,
         case .int(let i):
             return String(i)
         case .double(let d):
-            if d.rounded() == d, let exactInt = Int(exactly: d) {
-                return String(exactInt)
-            }
-            return String(d)
+            // Matches JavaScript's `String(value)` so interpolated prompts are identical to @slopmachine/core
+            return formatJSNumber(d)
         case .null:
             return nil
         }
@@ -182,6 +180,9 @@ public enum SlopVariableValue: Sendable, Codable, Equatable, Hashable,
 ///   exact insertion order is preserved (matching JavaScript object property order).
 /// - When initialized from a standard Swift `[String: SlopVariableValue]` dictionary, keys are sorted
 ///   lexicographically so Swift's per-process dictionary hash randomization never alters generated URLs.
+/// - In every case, integer-like keys (`"0"`, `"2"`, `"10"`, but not `"01"`) are moved first in ascending
+///   numeric order, exactly as JavaScript orders object keys, so `["b": 1, "2": 2, "1": 3]` serializes
+///   as `{"1":3,"2":2,"b":1}` just like `JSON.stringify` in `@slopmachine/core`.
 public struct SlopVariables: Sendable, Equatable, Hashable, Codable, ExpressibleByDictionaryLiteral {
     /// A single key-value entry in `SlopVariables`.
     public struct Entry: Sendable, Equatable, Hashable {
@@ -215,13 +216,13 @@ public struct SlopVariables: Sendable, Equatable, Hashable, Codable, Expressible
                 result.append(Entry(key: key, value: value))
             }
         }
-        self.entries = result
+        self.entries = jsPropertyOrder(result, key: \.key)
     }
 
     /// Creates `SlopVariables` from a standard Swift `Dictionary`, sorting keys lexicographically
     /// so JSON serialization is deterministic across launches.
     public init(_ dictionary: [String: SlopVariableValue]) {
-        self.entries = dictionary.keys.sorted().compactMap { key in
+        self.entries = jsPropertyOrder(dictionary.keys.sorted(), key: \.self).compactMap { key in
             guard let val = dictionary[key] else { return nil }
             return Entry(key: key, value: val)
         }
@@ -229,7 +230,7 @@ public struct SlopVariables: Sendable, Equatable, Hashable, Codable, Expressible
 
     /// Creates `SlopVariables` from a `[String: String]` dictionary with sorted keys.
     public init(_ dictionary: [String: String]) {
-        self.entries = dictionary.keys.sorted().compactMap { key in
+        self.entries = jsPropertyOrder(dictionary.keys.sorted(), key: \.self).compactMap { key in
             guard let val = dictionary[key] else { return nil }
             return Entry(key: key, value: .string(val))
         }
@@ -363,6 +364,8 @@ public enum SlopJSONValue: Sendable, Equatable, Hashable, Codable,
 
 /// Deterministic JSON object used for `metadata` parameters, preserving insertion order for
 /// dictionary literals and sorting keys lexicographically when constructed from `[String: SlopJSONValue]`.
+/// Integer-like keys are always moved first in ascending numeric order, matching JavaScript's object
+/// key order (and therefore `JSON.stringify` in `@slopmachine/core`).
 public struct SlopMetadata: Sendable, Equatable, Hashable, Codable, ExpressibleByDictionaryLiteral {
     /// A single key-value entry in `SlopMetadata`.
     public struct Entry: Sendable, Equatable, Hashable {
@@ -395,12 +398,12 @@ public struct SlopMetadata: Sendable, Equatable, Hashable, Codable, ExpressibleB
                 result.append(Entry(key: key, value: value))
             }
         }
-        self.entries = result
+        self.entries = jsPropertyOrder(result, key: \.key)
     }
 
     /// Creates `SlopMetadata` from a standard Swift `Dictionary`, sorting keys lexicographically.
     public init(_ dictionary: [String: SlopJSONValue]) {
-        self.entries = dictionary.keys.sorted().compactMap { key in
+        self.entries = jsPropertyOrder(dictionary.keys.sorted(), key: \.self).compactMap { key in
             guard let val = dictionary[key] else { return nil }
             return Entry(key: key, value: val)
         }
@@ -408,7 +411,7 @@ public struct SlopMetadata: Sendable, Equatable, Hashable, Codable, ExpressibleB
 
     /// Creates `SlopMetadata` from a `[String: String]` dictionary with sorted keys.
     public init(_ dictionary: [String: String]) {
-        self.entries = dictionary.keys.sorted().compactMap { key in
+        self.entries = jsPropertyOrder(dictionary.keys.sorted(), key: \.self).compactMap { key in
             guard let val = dictionary[key] else { return nil }
             return Entry(key: key, value: .string(val))
         }
@@ -921,4 +924,34 @@ public struct UploadedAttachment: Codable, Sendable, Equatable {
     public init(url: String) {
         self.url = url
     }
+}
+
+/// Returns the canonical array index for a property key, mirroring ECMAScript's "array index"
+/// definition (a canonical numeric string for an integer in `0 ..< 2^32 - 1`), or `nil`.
+internal func jsArrayIndex(_ key: String) -> UInt32? {
+    guard !key.isEmpty, key.utf8.count <= 10, key.utf8.allSatisfy({ $0 >= 0x30 && $0 <= 0x39 }) else {
+        return nil
+    }
+    // Leading zeros make it a non-canonical string key (e.g. "01"), except "0" itself.
+    if key.utf8.count > 1, key.utf8.first == 0x30 { return nil }
+    guard let value = UInt64(key), value < 0xFFFF_FFFF else { return nil }
+    return UInt32(value)
+}
+
+/// Reorders elements the way JavaScript orders an object's own string keys
+/// (`Object.keys`, `JSON.stringify`): integer-like keys first in ascending numeric order,
+/// then every other key in its existing (insertion) order.
+internal func jsPropertyOrder<T>(_ elements: [T], key: (T) -> String) -> [T] {
+    var indexed: [(UInt32, T)] = []
+    var others: [T] = []
+    for element in elements {
+        if let index = jsArrayIndex(key(element)) {
+            indexed.append((index, element))
+        } else {
+            others.append(element)
+        }
+    }
+    guard !indexed.isEmpty else { return elements }
+    indexed.sort { $0.0 < $1.0 }
+    return indexed.map(\.1) + others
 }

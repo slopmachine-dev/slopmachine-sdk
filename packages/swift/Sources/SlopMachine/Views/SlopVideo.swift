@@ -111,6 +111,8 @@ public struct SlopVideo<LoaderView: View, FailureView: View>: View {
     @State private var looper: AVPlayerLooper?
     @State private var isLoading: Bool = true
     @State private var error: SlopMachineError?
+    // Identifies the load whose errors may still be applied; a newer load replaces it.
+    @State private var activeLoadId: UUID?
 
     /// Creates a `SlopVideo` with custom `@ViewBuilder` loader and error fallback views.
     public init(
@@ -244,10 +246,17 @@ public struct SlopVideo<LoaderView: View, FailureView: View>: View {
         looper = nil
         isLoading = true
         error = nil
+        let loadId = UUID()
+        activeLoadId = loadId
 
         let errorCallback = onGenerationError
-        let monitor = RenderUrlMonitor { reportedError, _ in
+        let monitor = RenderUrlMonitor { reportedError, reportedUrl in
             Task { @MainActor in
+                // The hop to the main actor can land after the URL changed; drop stale errors.
+                guard self.activeLoadId == loadId,
+                      self.debouncedUrlString == urlString,
+                      reportedUrl == urlString
+                else { return }
                 self.player?.pause()
                 self.isLoading = false
                 self.error = reportedError
@@ -292,6 +301,17 @@ public struct SlopVideo<LoaderView: View, FailureView: View>: View {
             if autoPlay {
                 queuePlayer.play()
             }
+
+            // Keep watching while this URL is current: playback can still fail after `isPlayable`
+            // (mirrors `<video onError>` in the React and Svelte SDKs). The task is cancelled when the
+            // URL changes or the view disappears.
+            let failed = await waitForPlaybackFailure(of: queuePlayer, asset: asset)
+            guard failed, !Task.isCancelled else {
+                monitor.stop()
+                return
+            }
+            monitor.mediaFailed(urlString, fallbackMessage: "Failed to load video")
+            await monitor.flush()
             monitor.stop()
         } catch {
             if isSlopCancellationError(error) || Task.isCancelled {
@@ -303,6 +323,73 @@ public struct SlopVideo<LoaderView: View, FailureView: View>: View {
             monitor.stop()
         }
     }
+}
+
+/// Holds the AVFoundation observations for one player so they can be torn down from a `@Sendable` context.
+private final class PlaybackFailureObservations: @unchecked Sendable {
+    private let lock = NSLock()
+    private var observations: [NSKeyValueObservation] = []
+    private var notificationTokens: [NSObjectProtocol] = []
+    weak var player: AVQueuePlayer?
+
+    init(player: AVQueuePlayer) {
+        self.player = player
+    }
+
+    func add(_ observation: NSKeyValueObservation) {
+        lock.withLock { observations.append(observation) }
+    }
+
+    func add(_ token: NSObjectProtocol) {
+        lock.withLock { notificationTokens.append(token) }
+    }
+
+    func invalidate() {
+        let (kvo, tokens) = lock.withLock { () -> ([NSKeyValueObservation], [NSObjectProtocol]) in
+            defer {
+                observations.removeAll()
+                notificationTokens.removeAll()
+            }
+            return (observations, notificationTokens)
+        }
+        kvo.forEach { $0.invalidate() }
+        tokens.forEach { NotificationCenter.default.removeObserver($0) }
+    }
+}
+
+/// Suspends until `player` fails (`AVPlayer.status` or the current `AVPlayerItem.status` becomes
+/// `.failed`, or an item posts `failedToPlayToEndTime`), returning `true`, or until the calling task is
+/// cancelled, returning `false`.
+@MainActor
+private func waitForPlaybackFailure(of player: AVQueuePlayer, asset: AVAsset) async -> Bool {
+    let observations = PlaybackFailureObservations(player: player)
+    let assetId = ObjectIdentifier(asset)
+    let failures = AsyncStream<Void> { continuation in
+        observations.add(player.observe(\.status, options: [.initial, .new]) { observed, _ in
+            if observed.status == .failed { continuation.yield() }
+        })
+        observations.add(player.observe(\.currentItem?.status, options: [.initial, .new]) { observed, _ in
+            if observed.currentItem?.status == .failed { continuation.yield() }
+        })
+        observations.add(NotificationCenter.default.addObserver(
+            forName: AVPlayerItem.failedToPlayToEndTimeNotification,
+            object: nil,
+            queue: .main
+        ) { [observations] notification in
+            guard let item = notification.object as? AVPlayerItem else { return }
+            let isOurs = MainActor.assumeIsolated {
+                // Looping players play copies of the template item, which share its asset.
+                ObjectIdentifier(item.asset) == assetId || observations.player?.items().contains(item) == true
+            }
+            if isOurs { continuation.yield() }
+        })
+        continuation.onTermination = { _ in observations.invalidate() }
+    }
+    defer { observations.invalidate() }
+    for await _ in failures {
+        return true
+    }
+    return false
 }
 
 extension SlopVideo where LoaderView == SlopLoadingOverlay, FailureView == SlopDefaultErrorView {

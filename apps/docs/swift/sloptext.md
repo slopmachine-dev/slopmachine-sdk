@@ -24,6 +24,10 @@ struct ArticleSummaryView: View {
 }
 ```
 
+## Markdown Support
+
+`SlopText` renders Markdown with Foundation's `AttributedString(markdown:)` using the `.inlineOnlyPreservingWhitespace` syntax, so only **inline** Markdown is styled: bold, italics, strikethrough, inline code and links. Line breaks are preserved, but block-level syntax is not rendered: headings, lists, block quotes, tables and fenced code blocks appear as plain text (e.g. a heading keeps its leading `#`). This differs from the React and Svelte `SlopText`, which render full Markdown to sanitized HTML. If you need block-level formatting, fetch the raw text with `fetchRenderedText` and render it with a Markdown library of your choice.
+
 ## Custom Loading & Error Fallbacks
 
 ```swift

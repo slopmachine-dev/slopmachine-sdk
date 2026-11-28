@@ -20,7 +20,10 @@ public final class RenderUrlMonitor: @unchecked Sendable {
     private let onError: ErrorHandler
     private var current: CurrentCheck?
     private var reportedUrl: String?
-    private var listenerTasks: [Task<Void, Never>] = []
+    // Pending listener tasks, keyed so each one can remove itself when it finishes.
+    private var listenerTasks: [UUID: Task<Void, Never>] = [:]
+    // Listeners that finished before they were registered (so they are never inserted).
+    private var finishedListenerIds: Set<UUID> = []
 
     /// Creates a new `RenderUrlMonitor`.
     /// - Parameters:
@@ -46,14 +49,16 @@ public final class RenderUrlMonitor: @unchecked Sendable {
             return ensureCheckLocked(for: url)
         }
 
+        let listenerId = UUID()
         let listener = Task { [weak self] in
             let apiError = await check.checkTask.value
-            guard let self, let apiError else { return }
-            self.report(apiError, for: url, checkId: check.id)
+            guard let self else { return }
+            if let apiError {
+                self.report(apiError, for: url, checkId: check.id)
+            }
+            self.listenerFinished(listenerId)
         }
-        lock.withLock {
-            listenerTasks.append(listener)
-        }
+        registerListener(listener, id: listenerId)
     }
 
     /// Starts checking `url` (`URL` overload).
@@ -70,6 +75,7 @@ public final class RenderUrlMonitor: @unchecked Sendable {
             ensureCheckLocked(for: url)
         }
 
+        let listenerId = UUID()
         let listener = Task { [weak self] in
             let apiError = await check.checkTask.value
             guard let self else { return }
@@ -78,10 +84,9 @@ public final class RenderUrlMonitor: @unchecked Sendable {
                 for: url,
                 checkId: check.id
             )
+            self.listenerFinished(listenerId)
         }
-        lock.withLock {
-            listenerTasks.append(listener)
-        }
+        registerListener(listener, id: listenerId)
     }
 
     /// Called when the image or video view fails to load `url` (`URL` overload).
@@ -91,12 +96,20 @@ public final class RenderUrlMonitor: @unchecked Sendable {
 
     /// Cancels the current check and discards any pending results for it.
     public func stop() {
-        let taskToCancel = lock.withLock { () -> Task<SlopMachineError?, Never>? in
+        let (taskToCancel, listeners) = lock.withLock {
+            () -> (Task<SlopMachineError?, Never>?, [Task<Void, Never>]) in
             let existing = current?.checkTask
             current = nil
-            return existing
+            let pending = Array(listenerTasks.values)
+            listenerTasks.removeAll()
+            finishedListenerIds.removeAll()
+            return (existing, pending)
         }
         taskToCancel?.cancel()
+        // Their results would be dropped anyway (no current check), so release them now.
+        for listener in listeners {
+            listener.cancel()
+        }
     }
 
     /// Waits for all currently scheduled check and listener tasks to settle.
@@ -105,8 +118,36 @@ public final class RenderUrlMonitor: @unchecked Sendable {
             (current?.checkTask, listenerTasks)
         }
         _ = await checkTask?.value
-        for task in tasks {
+        for task in tasks.values {
             await task.value
+        }
+        // Listeners normally remove themselves; also prune any awaited ones (e.g. whose monitor
+        // reference was already gone) so the registry never grows across URL changes.
+        lock.withLock {
+            for id in tasks.keys {
+                listenerTasks.removeValue(forKey: id)
+            }
+        }
+    }
+
+    /// Number of listener tasks still registered (test hook).
+    internal var pendingListenerCount: Int {
+        lock.withLock { listenerTasks.count }
+    }
+
+    private func registerListener(_ task: Task<Void, Never>, id: UUID) {
+        lock.withLock {
+            if finishedListenerIds.remove(id) == nil {
+                listenerTasks[id] = task
+            }
+        }
+    }
+
+    private func listenerFinished(_ id: UUID) {
+        lock.withLock {
+            if listenerTasks.removeValue(forKey: id) == nil {
+                finishedListenerIds.insert(id)
+            }
         }
     }
 

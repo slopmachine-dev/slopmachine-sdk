@@ -69,7 +69,7 @@ Native Swift 6 and SwiftUI views and async/await utilities for iOS 17+, macOS 14
 - **[`SlopVideo` View](/swift/slopvideo)**  
   SwiftUI view backed by `AVQueuePlayer` and `AVPlayerLooper` for rendering generative videos with smooth looping, autoplay, and error inspection.
 - **[`SlopText` View & Core Utilities](/swift/sloptext)**  
-  SwiftUI view for rendering dynamic Markdown text via `AttributedString(markdown:)`, plus `executePipeline`, `uploadTempAttachment`, and `rateResult`.
+  SwiftUI view for rendering dynamic text with inline Markdown styling via `AttributedString(markdown:)` (headings, lists and code blocks are not rendered), plus `executePipeline`, `uploadTempAttachment`, and `rateResult`.
 
 ---
 
