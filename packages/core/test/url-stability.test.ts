@@ -52,6 +52,24 @@ describe("generated URLs are byte-for-byte stable", () => {
     );
   });
 
+  it("buildImageUrl (pipeline with version, aspectRatio, duration, attachments)", () => {
+    expect(
+      buildImageUrl({
+        pipelineId: "p1",
+        siloId: "s1",
+        prompt: "a b",
+        version: 3,
+        aspectRatio: "16:9",
+        duration: { step_video: 6 },
+        variables: full.variables,
+        metadata: full.metadata,
+        attachments: full.attachments,
+      }),
+    ).toBe(
+      `${API}/renderPipeline?pipelineId=p1&redirect=true&siloId=s1&prompt=a+b&variables=%7B%22theme%22%3A%22dark%22%2C%22n%22%3A2%7D&metadata=%7B%22userId%22%3A%22u1%22%7D&version=3&aspectRatio=16%3A9&duration=%7B%22step_video%22%3A6%7D&attachments=%5B%22https%3A%2F%2Fa.dev%2Fx.png%22%5D`,
+    );
+  });
+
   it("buildVideoUrl (bucket)", () => {
     expect(
       buildVideoUrl({
@@ -70,6 +88,21 @@ describe("generated URLs are byte-for-byte stable", () => {
   it("buildVideoUrl (pipeline)", () => {
     expect(buildVideoUrl({ pipelineId: "p1", prompt: "go" })).toBe(
       `${API}/renderPipeline?pipelineId=p1&redirect=true&prompt=go`,
+    );
+  });
+
+  it("buildVideoUrl (pipeline with version, aspectRatio, duration, attachments)", () => {
+    expect(
+      buildVideoUrl({
+        pipelineId: "p1",
+        prompt: "go",
+        version: 2,
+        aspectRatio: { step_1: "9:16" },
+        duration: 5,
+        attachments: { step_1: ["https://a.dev/x.png"] },
+      }),
+    ).toBe(
+      `${API}/renderPipeline?pipelineId=p1&redirect=true&prompt=go&version=2&aspectRatio=%7B%22step_1%22%3A%229%3A16%22%7D&duration=5&attachments=%7B%22step_1%22%3A%5B%22https%3A%2F%2Fa.dev%2Fx.png%22%5D%7D`,
     );
   });
 
@@ -99,6 +132,22 @@ describe("generated URLs are byte-for-byte stable", () => {
     );
   });
 
+  it("buildTextUrl (pipeline with version, aspectRatio, duration, attachments)", () => {
+    expect(
+      buildTextUrl({
+        pipelineId: "p1",
+        siloId: "s1",
+        prompt: "go",
+        version: 4,
+        aspectRatio: "1:1",
+        duration: 4,
+        attachments: ["https://a.dev/x.png"],
+      }),
+    ).toBe(
+      `${API}/renderPipeline?pipelineId=p1&sync=true&siloId=s1&prompt=go&version=4&aspectRatio=1%3A1&duration=4&attachments=%5B%22https%3A%2F%2Fa.dev%2Fx.png%22%5D`,
+    );
+  });
+
   it("buildPipelineUrl", () => {
     expect(
       buildPipelineUrl({
@@ -112,6 +161,24 @@ describe("generated URLs are byte-for-byte stable", () => {
       }),
     ).toBe(
       `${API}/renderPipeline?pipelineId=p1&siloId=s1&prompt=go&resultId=r1&sync=true&redirect=true&variables=%7B%22a%22%3A1%7D&metadata=%7B%22b%22%3A2%7D`,
+    );
+  });
+
+  it("buildPipelineUrl (with version, aspectRatio, duration, attachments)", () => {
+    expect(
+      buildPipelineUrl({
+        pipelineId: "p1",
+        siloId: "s1",
+        prompt: "go",
+        version: 3,
+        aspectRatio: { s1: "16:9" },
+        duration: { s1: 8 },
+        attachments: { s1: ["https://a.dev/x.png"] },
+        variables: { a: 1 },
+        metadata: { b: 2 },
+      }),
+    ).toBe(
+      `${API}/renderPipeline?pipelineId=p1&siloId=s1&prompt=go&sync=true&variables=%7B%22a%22%3A1%7D&metadata=%7B%22b%22%3A2%7D&version=3&aspectRatio=%7B%22s1%22%3A%2216%3A9%22%7D&duration=%7B%22s1%22%3A8%7D&attachments=%7B%22s1%22%3A%5B%22https%3A%2F%2Fa.dev%2Fx.png%22%5D%7D`,
     );
   });
 });

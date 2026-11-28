@@ -23,6 +23,11 @@ export type ImageAspectRatio =
  */
 export type VideoAspectRatio = "9:16" | "16:9";
 
+/**
+ * Union of all supported media aspect ratios across image and video endpoints.
+ */
+export type AspectRatio = ImageAspectRatio | VideoAspectRatio;
+
 const API_URL = "https://us-central1-slopmachine-12bfb.cloudfunctions.net";
 
 // A per-call `baseUrl` is a full endpoint URL that replaces the default one
@@ -49,12 +54,16 @@ function toQuery(entries: Array<[string, QueryValue]>): string {
   return params.toString();
 }
 
-interface PipelineQueryOptions {
+export interface PipelineQueryOptions {
   siloId?: string;
   prompt?: string;
   resultId?: string;
   variables?: Record<string, string | number | undefined | null>;
   metadata?: Record<string, any>;
+  version?: number;
+  aspectRatio?: AspectRatio | Record<string, AspectRatio>;
+  duration?: number | Record<string, number>;
+  attachments?: string[] | Record<string, string[]>;
 }
 
 // Query for a component-driven pipeline run: media redirects to the output, text waits for it
@@ -71,10 +80,34 @@ function pipelineQuery(
     ["resultId", options.resultId],
     ["variables", options.variables],
     ["metadata", options.metadata],
+    ["version", options.version],
+    ["aspectRatio", options.aspectRatio],
+    ["duration", options.duration],
+    ["attachments", options.attachments],
   ]);
 }
 
-const warnedPipelineOptions = new Set<string>();
+const warnedOptions = new Set<string>();
+
+// Components rebuild URLs on every render, so each distinct warning is logged once.
+function warnOnce(id: string, message: string): void {
+  if (warnedOptions.has(id)) return;
+  warnedOptions.add(id);
+  console.warn(message);
+}
+
+// Mirrors what `toQuery` would serialize: empty arrays/objects and falsy values don't count.
+function isOptionSet(value: unknown): boolean {
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === "object" && value !== null) {
+    return Object.keys(value).length > 0;
+  }
+  return Boolean(value);
+}
+
+function isStepMap(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 // renderPipeline has no equivalent for these bucket-only options, so they are
 // dropped from the URL; warn once per option so the omission isn't silent.
@@ -83,19 +116,83 @@ function warnIgnoredPipelineOptions(
   keys: readonly string[],
 ): void {
   for (const key of keys) {
-    const value = (options as Record<string, unknown>)[key];
-    const isSet = Array.isArray(value) ? value.length > 0 : Boolean(value);
-    if (!isSet || warnedPipelineOptions.has(key)) continue;
-    warnedPipelineOptions.add(key);
-    console.warn(
+    if (!isOptionSet((options as Record<string, unknown>)[key])) continue;
+    warnOnce(
+      `pipeline:${key}`,
       `[slopmachine] "${key}" is only supported for buckets (bucketId) and is ignored when pipelineId is set.`,
     );
   }
 }
 
+// Per-step `Record<stepId, …>` maps only make sense for pipelines. In bucket
+// mode they are dropped (never JSON-encoded into the URL) with a one-time
+// warning. Returns `undefined` for a dropped map, otherwise the value unchanged,
+// so URLs for valid bucket inputs are not affected.
+function dropStepMap<T>(
+  key: string,
+  value: T,
+): Exclude<T, Record<string, unknown>> | undefined {
+  if (!isStepMap(value)) return value as Exclude<T, Record<string, unknown>>;
+  if (isOptionSet(value)) {
+    warnOnce(
+      `bucket-map:${key}`,
+      `[slopmachine] A per-step map for "${key}" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.`,
+    );
+  }
+  return undefined;
+}
+
+// Options the bucket endpoint for this media type doesn't accept at all.
+function warnIgnoredBucketOptions(
+  options: object,
+  keys: readonly string[],
+): void {
+  for (const key of keys) {
+    if (!isOptionSet((options as Record<string, unknown>)[key])) continue;
+    warnOnce(
+      `bucket:${key}`,
+      `[slopmachine] "${key}" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.`,
+    );
+  }
+}
+
+/**
+ * Resolves an `aspectRatio` option to a CSS `aspect-ratio` value (e.g. `"16/9"`)
+ * for sizing a component's layout box before the media loads.
+ *
+ * Rule:
+ * - A ratio string (e.g. `"16:9"`) is used as-is.
+ * - A per-step `Record<stepId, AspectRatio>` map uses its **last** non-empty
+ *   value in `Object.values()` order (insertion order for non-numeric keys),
+ *   on the assumption that the final step produces the rendered media.
+ * - Anything else (unset, empty map) uses `fallback`.
+ *
+ * This only affects layout: it never changes what is sent to the API.
+ *
+ * @param aspectRatio - The component's `aspectRatio` option.
+ * @param fallback - The ratio to use when none can be resolved (e.g. `"1:1"` for images, `"16:9"` for videos).
+ * @returns The ratio with `:` replaced by `/`, ready for the CSS `aspect-ratio` property.
+ */
+export function resolveCssAspectRatio(
+  aspectRatio: AspectRatio | Record<string, AspectRatio> | null | undefined,
+  fallback: AspectRatio,
+): string {
+  let ratio: string = fallback;
+  if (typeof aspectRatio === "string" && aspectRatio.length > 0) {
+    ratio = aspectRatio;
+  } else if (isStepMap(aspectRatio)) {
+    const values = Object.values(aspectRatio).filter(
+      (v): v is AspectRatio => typeof v === "string" && v.length > 0,
+    );
+    if (values.length > 0) ratio = values[values.length - 1];
+  }
+  return ratio.replace(":", "/");
+}
+
 export interface PipelineStepResult {
   stepId: string;
   stepName?: string;
+  outputKey?: string;
   type: string;
   outputUrl?: string;
   outputText?: string;
@@ -103,6 +200,7 @@ export interface PipelineStepResult {
   computeTimeMs?: number;
   fuelCost?: number;
   error?: string;
+  warnings?: string[];
 }
 
 export interface PipelineResult {
@@ -115,11 +213,47 @@ export interface PipelineResult {
   resultType: string;
   status: "completed" | "failed" | "pending";
   stepResults: PipelineStepResult[];
+  /**
+   * Dictionary of step results keyed by `stepId` and `outputKey` (when present)
+   * for direct multi-output lookup (e.g. `result.steps.heroVideo?.outputUrl`).
+   */
+  steps?: Record<string, PipelineStepResult>;
   totalComputeTimeMs: number;
   totalFuelCost: number;
   metadata?: Record<string, any>;
   timestamp: any;
   error?: string;
+}
+
+/**
+ * Maps a pipeline result's `stepResults` array into a dictionary keyed by
+ * both `stepId` and `outputKey` (when present) for convenient multi-output lookup.
+ *
+ * @param resultOrSteps - A `PipelineResult` object or `PipelineStepResult[]` array.
+ * @returns A dictionary mapping each step's `stepId` and `outputKey` to its `PipelineStepResult`.
+ */
+export function mapStepResults(
+  resultOrSteps:
+    | Pick<PipelineResult, "stepResults">
+    | PipelineStepResult[]
+    | null
+    | undefined,
+): Record<string, PipelineStepResult> {
+  const list = Array.isArray(resultOrSteps)
+    ? resultOrSteps
+    : resultOrSteps?.stepResults;
+  const steps: Record<string, PipelineStepResult> = {};
+  if (!Array.isArray(list)) return steps;
+  for (const step of list) {
+    if (!step) continue;
+    if (step.stepId) {
+      steps[step.stepId] = step;
+    }
+    if (step.outputKey) {
+      steps[step.outputKey] = step;
+    }
+  }
+  return steps;
 }
 
 export interface SlopPipelineOptions {
@@ -143,6 +277,26 @@ export interface SlopPipelineOptions {
    * Arbitrary user metadata to attach to the pipeline result document.
    */
   metadata?: Record<string, any>;
+  /**
+   * The specific version of the pipeline to execute or retrieve from.
+   * If omitted, the pipeline's current version is used.
+   */
+  version?: number;
+  /**
+   * Runtime aspect ratio override(s) — either a single ratio string for a single-step
+   * pipeline or a `Record<stepId, AspectRatio>` map for multi-step pipelines.
+   */
+  aspectRatio?: AspectRatio | Record<string, AspectRatio>;
+  /**
+   * Runtime duration override(s) in seconds — either a number for a single-step
+   * pipeline or a `Record<stepId, number>` map for multi-step pipelines.
+   */
+  duration?: number | Record<string, number>;
+  /**
+   * Runtime attachment URLs — either a `string[]` array or a `Record<stepId, string[]>`
+   * map for multi-step pipelines.
+   */
+  attachments?: string[] | Record<string, string[]>;
   /**
    * Whether to wait for full execution (default true) or return a job ID immediately.
    */
@@ -176,6 +330,30 @@ export interface ExecutePipelineOptions {
    */
   prompt?: string;
   /**
+   * Result ID to retrieve a specific previously generated pipeline result.
+   */
+  resultId?: string;
+  /**
+   * The specific version of the pipeline to execute or retrieve from.
+   * If omitted, the pipeline's current version is used.
+   */
+  version?: number;
+  /**
+   * Runtime aspect ratio override(s) — either a single ratio string for a single-step
+   * pipeline or a `Record<stepId, AspectRatio>` map for multi-step pipelines.
+   */
+  aspectRatio?: AspectRatio | Record<string, AspectRatio>;
+  /**
+   * Runtime duration override(s) in seconds — either a number for a single-step
+   * pipeline or a `Record<stepId, number>` map for multi-step pipelines.
+   */
+  duration?: number | Record<string, number>;
+  /**
+   * Runtime attachment URLs — either a `string[]` array or a `Record<stepId, string[]>`
+   * map for multi-step pipelines.
+   */
+  attachments?: string[] | Record<string, string[]>;
+  /**
    * Variables to interpolate into prompt or step configs.
    */
   variables?: Record<string, string | number | undefined | null>;
@@ -188,6 +366,10 @@ export interface ExecutePipelineOptions {
    * production `renderPipeline` endpoint.
    */
   baseUrl?: string;
+  /**
+   * Optional `AbortSignal` to cancel the pipeline execution request.
+   */
+  signal?: AbortSignal;
 }
 
 export interface SlopImageOptions {
@@ -224,10 +406,18 @@ export interface SlopImageOptions {
    */
   resultId?: string;
   /**
-   * The aspect ratio of the generated image. Defaults to "1:1".
+   * The aspect ratio of the generated image. For buckets, defaults to "1:1";
+   * with `pipelineId`, nothing is sent unless set.
    * Common values: "1:1", "16:9", "9:16", "4:3", "3:4".
+   * When `pipelineId` is set, may also be a `Record<stepId, AspectRatio>` map
+   * (a map is ignored with a console warning for buckets).
    */
-  aspectRatio?: ImageAspectRatio;
+  aspectRatio?: ImageAspectRatio | Record<string, AspectRatio>;
+  /**
+   * Runtime duration override(s) in seconds when targeting a pipeline (`pipelineId`).
+   * Ignored with a console warning for buckets.
+   */
+  duration?: number | Record<string, number>;
   /**
    * Overrides the AI model used for generation.
    * If omitted, the bucket version's configured model is used.
@@ -250,9 +440,10 @@ export interface SlopImageOptions {
    */
   original?: boolean;
   /**
-   * Array of attachment URLs to include with the request.
+   * Array of attachment URLs (or a `Record<stepId, string[]>` map for pipelines) to include with the request.
+   * A map is ignored with a console warning for buckets.
    */
-  attachments?: string[];
+  attachments?: string[] | Record<string, string[]>;
 }
 
 /**
@@ -477,23 +668,20 @@ export function interpolatePrompt(
  * @returns A string containing the fully constructed URL.
  */
 export function buildImageUrl(options: SlopImageOptions): string {
-  const {
-    bucketId,
-    pipelineId,
-    resultId,
-    aspectRatio = "1:1",
-    baseUrl,
-  } = options;
+  const { bucketId, pipelineId, resultId, baseUrl } = options;
 
   if (pipelineId) {
-    warnIgnoredPipelineOptions(options, [
-      "model",
-      "version",
-      "original",
-      "attachments",
-    ]);
+    warnIgnoredPipelineOptions(options, ["model", "original"]);
     return `${endpoint("renderPipeline", baseUrl)}?${pipelineQuery(pipelineId, "redirect", options)}`;
   }
+
+  // A dropped step map falls back to the default, exactly as if it were unset
+  const { aspectRatio = "1:1" } = {
+    aspectRatio: dropStepMap("aspectRatio", options.aspectRatio),
+  };
+  const attachments = dropStepMap("attachments", options.attachments);
+  // renderImage has no duration parameter (pipelines only)
+  warnIgnoredBucketOptions(options, ["duration"]);
 
   const query = resultId
     ? toQuery([
@@ -508,7 +696,7 @@ export function buildImageUrl(options: SlopImageOptions): string {
         ["original", options.original],
         ["variables", options.variables],
         ["metadata", options.metadata],
-        ["attachments", options.attachments],
+        ["attachments", attachments],
       ]);
   return `${endpoint("renderImage", baseUrl)}?${query}`;
 }
@@ -568,20 +756,23 @@ export interface SlopVideoOptions {
    */
   resultId?: string;
   /**
-   * The aspect ratio of the generated video. Defaults to "16:9".
-   * Common values: "1:1", "16:9", "9:16", "4:3", "3:4".
+   * The aspect ratio of the generated video. For buckets, defaults to "16:9";
+   * with `pipelineId`, nothing is sent unless set.
+   * When `pipelineId` is set, may also be a `Record<stepId, AspectRatio>` map
+   * (a map is ignored with a console warning for buckets).
    */
-  aspectRatio?: VideoAspectRatio;
+  aspectRatio?: VideoAspectRatio | Record<string, AspectRatio>;
   /**
    * Dynamic variables to interpolate into the prompt.
    * E.g., if prompt is "A video of a {color} dog", pass { color: "brown" }.
    */
   variables?: Record<string, string | number | undefined | null>;
   /**
-   * The duration of the generated video in seconds.
-   * If not specified, defaults to the bucket version's configured duration (or 4).
+   * The duration of the generated video in seconds (or a `Record<stepId, number>` map for pipelines).
+   * If not specified, defaults to the bucket/pipeline version's configured duration (or 4).
+   * For buckets, a map is ignored with a console warning, and the value is ignored when `resultId` is set.
    */
-  duration?: number;
+  duration?: number | Record<string, number>;
   /**
    * Full endpoint URL to send this request to instead of the default
    * production `renderVideo` endpoint.
@@ -593,10 +784,11 @@ export interface SlopVideoOptions {
    */
   original?: boolean;
   /**
-   * Array of runtime image attachments (URLs) to use with the video model.
-   * Only allowed if the bucket version has runtime attachments enabled.
+   * Array of runtime image attachments (URLs) or a `Record<stepId, string[]>` map for pipelines.
+   * Only allowed if the bucket or pipeline step has runtime attachments enabled.
+   * A map is ignored with a console warning for buckets.
    */
-  attachments?: string[];
+  attachments?: string[] | Record<string, string[]>;
 }
 
 /**
@@ -607,23 +799,19 @@ export interface SlopVideoOptions {
  * @returns A string containing the fully constructed URL.
  */
 export function buildVideoUrl(options: SlopVideoOptions): string {
-  const {
-    bucketId,
-    pipelineId,
-    resultId,
-    aspectRatio = "16:9",
-    baseUrl,
-  } = options;
+  const { bucketId, pipelineId, resultId, baseUrl } = options;
 
   if (pipelineId) {
-    warnIgnoredPipelineOptions(options, [
-      "version",
-      "duration",
-      "original",
-      "attachments",
-    ]);
+    warnIgnoredPipelineOptions(options, ["original"]);
     return `${endpoint("renderPipeline", baseUrl)}?${pipelineQuery(pipelineId, "redirect", options)}`;
   }
+
+  // A dropped step map falls back to the default, exactly as if it were unset
+  const { aspectRatio = "16:9" } = {
+    aspectRatio: dropStepMap("aspectRatio", options.aspectRatio),
+  };
+  const duration = dropStepMap("duration", options.duration);
+  const attachments = dropStepMap("attachments", options.attachments);
 
   const query = resultId
     ? toQuery([
@@ -634,11 +822,11 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
         ["bucketId", bucketId],
         ["aspectRatio", aspectRatio],
         ["version", options.version],
-        ["duration", options.duration],
+        ["duration", duration],
         ["original", options.original],
         ["variables", options.variables],
         ["metadata", options.metadata],
-        ["attachments", options.attachments],
+        ["attachments", attachments],
       ]);
   return `${endpoint("renderVideo", baseUrl)}?${query}`;
 }
@@ -697,6 +885,16 @@ export interface SlopTextOptions {
    */
   resultId?: string;
   /**
+   * Runtime aspect ratio override(s) when targeting a pipeline (`pipelineId`).
+   * Ignored with a console warning for buckets.
+   */
+  aspectRatio?: AspectRatio | Record<string, AspectRatio>;
+  /**
+   * Runtime duration override(s) in seconds when targeting a pipeline (`pipelineId`).
+   * Ignored with a console warning for buckets.
+   */
+  duration?: number | Record<string, number>;
+  /**
    * Overrides the AI model used for generation.
    * If omitted, the bucket version's configured model is used.
    */
@@ -713,9 +911,10 @@ export interface SlopTextOptions {
    */
   baseUrl?: string;
   /**
-   * Array of attachment URLs to include with the request.
+   * Array of attachment URLs (or a `Record<stepId, string[]>` map for pipelines) to include with the request.
+   * A map is ignored with a console warning for buckets.
    */
-  attachments?: string[];
+  attachments?: string[] | Record<string, string[]>;
 }
 
 /**
@@ -730,9 +929,13 @@ export function buildTextUrl(options: SlopTextOptions): string {
   const { bucketId, pipelineId, resultId, baseUrl } = options;
 
   if (pipelineId) {
-    warnIgnoredPipelineOptions(options, ["model", "version", "attachments"]);
+    warnIgnoredPipelineOptions(options, ["model"]);
     return `${endpoint("renderPipeline", baseUrl)}?${pipelineQuery(pipelineId, "sync", options)}`;
   }
+
+  // renderText has no aspectRatio or duration parameters (pipelines only)
+  warnIgnoredBucketOptions(options, ["aspectRatio", "duration"]);
+  const attachments = dropStepMap("attachments", options.attachments);
 
   const query = resultId
     ? toQuery([
@@ -745,7 +948,7 @@ export function buildTextUrl(options: SlopTextOptions): string {
         ["version", options.version],
         ["variables", options.variables],
         ["metadata", options.metadata],
-        ["attachments", options.attachments],
+        ["attachments", attachments],
       ]);
   return `${endpoint("renderText", baseUrl)}?${query}`;
 }
@@ -827,6 +1030,10 @@ export function buildPipelineUrl(options: SlopPipelineOptions): string {
     ["redirect", options.redirect],
     ["variables", options.variables],
     ["metadata", options.metadata],
+    ["version", options.version],
+    ["aspectRatio", options.aspectRatio],
+    ["duration", options.duration],
+    ["attachments", options.attachments],
   ]);
   return `${endpoint("renderPipeline", options.baseUrl)}?${query}`;
 }
@@ -834,45 +1041,84 @@ export function buildPipelineUrl(options: SlopPipelineOptions): string {
 /**
  * Executes a Slop Machine multi-step Pipeline programmatically and returns the full typed result payload.
  *
- * @param options - Execution parameters including the pipelineId and runtime prompt/variables/metadata.
- * @returns A promise resolving to the completed PipelineResult document.
+ * @param options - Execution parameters including the pipelineId and runtime prompt/variables/metadata/overrides.
+ * @param init - Optional `AbortSignal` to cancel the request.
+ * @returns A promise resolving to the completed PipelineResult document with `steps` mapped by `stepId` and `outputKey`.
  */
 export async function executePipeline(
   options: ExecutePipelineOptions,
+  init?: { signal?: AbortSignal },
 ): Promise<PipelineResult> {
-  const { pipelineId, siloId, prompt, variables, metadata, baseUrl } = options;
+  const {
+    pipelineId,
+    siloId,
+    prompt,
+    resultId,
+    version,
+    aspectRatio,
+    duration,
+    attachments,
+    variables,
+    metadata,
+    baseUrl,
+    signal,
+  } = options;
 
-  const response = await fetch(endpoint("renderPipeline", baseUrl), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      pipelineId,
-      ...(siloId ? { siloId } : {}),
-      ...(prompt ? { prompt } : {}),
-      variables,
-      metadata,
-      sync: true,
-    }),
-  });
+  const hasAspectRatio =
+    typeof aspectRatio === "string"
+      ? aspectRatio.length > 0
+      : Boolean(aspectRatio && Object.keys(aspectRatio).length > 0);
+  const hasDuration =
+    typeof duration === "number"
+      ? duration > 0
+      : Boolean(duration && Object.keys(duration).length > 0);
+  const hasAttachments = Array.isArray(attachments)
+    ? attachments.length > 0
+    : Boolean(attachments && Object.keys(attachments).length > 0);
 
-  if (!response.ok) {
-    let errorDetail = response.statusText;
-    try {
-      const errorJson = await response.json();
-      if (errorJson.error) {
-        errorDetail = errorJson.error;
-      }
-    } catch {
-      // Use statusText
-    }
-    throw new Error(
-      `Pipeline execution failed (${response.status}): ${errorDetail}`,
+  const effectiveSignal = init?.signal ?? signal;
+  let response: Response;
+  try {
+    response = await fetch(endpoint("renderPipeline", baseUrl), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      ...(effectiveSignal ? { signal: effectiveSignal } : {}),
+      body: JSON.stringify({
+        pipelineId,
+        ...(siloId ? { siloId } : {}),
+        ...(prompt ? { prompt } : {}),
+        ...(resultId ? { resultId } : {}),
+        ...(version ? { version } : {}),
+        ...(hasAspectRatio ? { aspectRatio } : {}),
+        ...(hasDuration ? { duration } : {}),
+        ...(hasAttachments ? { attachments } : {}),
+        variables,
+        metadata,
+        sync: true,
+      }),
+    });
+  } catch (err) {
+    if (isAbortError(err)) throw err;
+    throw new SlopMachineError(
+      err instanceof Error ? err.message : "Pipeline execution failed",
     );
   }
 
-  return (await response.json()) as PipelineResult;
+  if (!response.ok) {
+    const errorDetail = await readErrorMessage(response, response.statusText);
+    throw new SlopMachineError(
+      `Pipeline execution failed (${response.status}): ${errorDetail}`,
+      response.status,
+    );
+  }
+
+  const rawResult = (await response.json()) as PipelineResult;
+  return {
+    ...rawResult,
+    steps: mapStepResults(rawResult),
+  };
 }
 
 /**

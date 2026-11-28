@@ -39,7 +39,8 @@ Ideal when prompt templates and guardrails are defined in advance in the Slop Ma
 ### 2. Pipelines (Developer Runtime Control)
 Ideal when external processes or users supply dynamic prompts on demand, or when multi-step chaining (e.g., text generation &rarr; video generation &rarr; audio &rarr; video text compositing) is required.
 - Identified by `pipelineId` (and optional `siloId`).
-- Developers supply the runtime `prompt`, optional `variables`, and arbitrary `metadata`.
+- Developers supply the runtime `prompt`, optional `version`, `aspectRatio`, `duration`, `attachments`, `variables`, and arbitrary `metadata`.
+- Multi-output pipelines can be consumed declaratively via `useSlopPipeline` (React) or `createSlopPipeline` (Svelte), with `steps` keyed by `stepId` and `outputKey`.
 - Results are tracked and organized in the Silo's Pipeline repository.
 
 Under the hood, `SlopImage`, `SlopVideo`, and `SlopText` handle:

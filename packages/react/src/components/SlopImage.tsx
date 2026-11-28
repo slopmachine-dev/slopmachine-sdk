@@ -5,6 +5,8 @@ import { twMerge } from "tailwind-merge";
 import {
   buildImageUrl,
   createRenderUrlMonitor,
+  resolveCssAspectRatio,
+  type AspectRatio,
   type SlopMachineError,
   type SlopImageOptions,
   type ImageAspectRatio,
@@ -23,9 +25,12 @@ export interface SlopImageProps
     Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src">,
     Omit<SlopImageOptions, "aspectRatio"> {
   /**
-   * The aspect ratio of the generated image. Defaults to "1:1".
+   * The aspect ratio of the generated image (or a `Record<stepId, AspectRatio>` map for pipelines).
+   * Defaults to "1:1". With `pipelineId`, that default only sizes the layout box
+   * and is not sent to the API. A step map sizes the box by its last value
+   * (see `resolveCssAspectRatio`) and is ignored, with a warning, for buckets.
    */
-  aspectRatio?: ImageAspectRatio;
+  aspectRatio?: ImageAspectRatio | Record<string, AspectRatio>;
   /**
    * Alternative text describing the image, for screen readers and when the image
    * can't be shown. Defaults to "Image produced by Slop Machine (slopmachine.dev)".
@@ -93,7 +98,8 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   prompt,
   metadata,
   className,
-  aspectRatio = "1:1",
+  aspectRatio,
+  duration,
   alt = DEFAULT_ALT,
   model,
   version,
@@ -112,6 +118,12 @@ export const SlopImage: React.FC<SlopImageProps> = ({
   onError,
   ...props
 }) => {
+  const serializedAspectRatio = JSON.stringify(aspectRatio);
+  const serializedDuration = JSON.stringify(duration);
+  const serializedVariables = JSON.stringify(variables);
+  const serializedMetadata = JSON.stringify(metadata);
+  const serializedAttachments = JSON.stringify(attachments);
+
   // Construct API URL
   const rawSrc = useMemo(
     () =>
@@ -122,6 +134,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
         prompt,
         metadata,
         aspectRatio,
+        duration,
         model,
         version,
         resultId,
@@ -135,15 +148,16 @@ export const SlopImage: React.FC<SlopImageProps> = ({
       pipelineId,
       siloId,
       prompt,
-      metadata,
-      aspectRatio,
+      serializedMetadata,
+      serializedAspectRatio,
+      serializedDuration,
       model,
       version,
       resultId,
-      variables,
+      serializedVariables,
       baseUrl,
       original,
-      attachments,
+      serializedAttachments,
     ],
   );
 
@@ -213,7 +227,7 @@ export const SlopImage: React.FC<SlopImageProps> = ({
         <div
           className="slop-wrapper relative overflow-hidden w-full h-full"
           style={{
-            aspectRatio: String(aspectRatio).replace(":", "/"),
+            aspectRatio: resolveCssAspectRatio(aspectRatio, "1:1"),
             position: "relative",
             overflow: "hidden",
             width: "100%",

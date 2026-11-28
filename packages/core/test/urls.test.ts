@@ -89,6 +89,10 @@ describe("buildImageUrl", () => {
           pipelineId: "p1",
           siloId: "s1",
           prompt: "a robot",
+          version: 3,
+          aspectRatio: "16:9",
+          duration: 5,
+          attachments: ["https://a.dev/x.png"],
           variables: { mood: "happy" },
           metadata: { userId: "u1" },
         }),
@@ -102,6 +106,10 @@ describe("buildImageUrl", () => {
         prompt: "a robot",
         variables: '{"mood":"happy"}',
         metadata: '{"userId":"u1"}',
+        version: "3",
+        aspectRatio: "16:9",
+        duration: "5",
+        attachments: '["https://a.dev/x.png"]',
       },
     });
   });
@@ -127,6 +135,32 @@ describe("buildVideoUrl", () => {
     );
     expect(params).toEqual({ bucketId: "b1", resultId: "r1" });
   });
+
+  it("forwards version, aspectRatio, duration and attachments in pipelineId mode", () => {
+    expect(
+      parse(
+        buildVideoUrl({
+          pipelineId: "p1",
+          prompt: "cyberpunk rain",
+          version: 2,
+          aspectRatio: { step_video: "9:16" },
+          duration: { step_video: 6 },
+          attachments: { step_video: ["https://a.dev/frame.png"] },
+        }),
+      ),
+    ).toEqual({
+      endpoint: `${API}/renderPipeline`,
+      params: {
+        pipelineId: "p1",
+        redirect: "true",
+        prompt: "cyberpunk rain",
+        version: "2",
+        aspectRatio: '{"step_video":"9:16"}',
+        duration: '{"step_video":6}',
+        attachments: '{"step_video":["https://a.dev/frame.png"]}',
+      },
+    });
+  });
 });
 
 describe("buildTextUrl", () => {
@@ -146,15 +180,26 @@ describe("buildTextUrl", () => {
     expect(params).toEqual({ bucketId: "b1", resultId: "r1" });
   });
 
-  it("requests a synchronous pipeline run instead of a redirect", () => {
+  it("requests a synchronous pipeline run instead of a redirect and forwards pipeline options", () => {
     const { endpoint, params } = parse(
-      buildTextUrl({ pipelineId: "p1", prompt: "a haiku" }),
+      buildTextUrl({
+        pipelineId: "p1",
+        prompt: "a haiku",
+        version: 4,
+        aspectRatio: "1:1",
+        duration: 4,
+        attachments: ["https://a.dev/ref.png"],
+      }),
     );
     expect(endpoint).toBe(`${API}/renderPipeline`);
     expect(params).toEqual({
       pipelineId: "p1",
       sync: "true",
       prompt: "a haiku",
+      version: "4",
+      aspectRatio: "1:1",
+      duration: "4",
+      attachments: '["https://a.dev/ref.png"]',
     });
   });
 });
@@ -167,13 +212,17 @@ describe("buildPipelineUrl", () => {
     });
   });
 
-  it("serializes all options", () => {
+  it("serializes all options including version, aspectRatio, duration and attachments", () => {
     const { params } = parse(
       buildPipelineUrl({
         pipelineId: "p1",
         siloId: "s1",
         prompt: "go",
         resultId: "r1",
+        version: 5,
+        aspectRatio: { s1: "16:9" },
+        duration: { s1: 8 },
+        attachments: { s1: ["https://a.dev/1.png"] },
         sync: false,
         redirect: true,
         variables: { a: 1 },
@@ -189,6 +238,10 @@ describe("buildPipelineUrl", () => {
       redirect: "true",
       variables: '{"a":1}',
       metadata: '{"b":2}',
+      version: "5",
+      aspectRatio: '{"s1":"16:9"}',
+      duration: '{"s1":8}',
+      attachments: '{"s1":["https://a.dev/1.png"]}',
     });
   });
 });
