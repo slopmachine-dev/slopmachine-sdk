@@ -34,9 +34,10 @@
     "url": "git+https://github.com/slopmachine-dev/slopmachine-sdk.git"
   },
   "devDependencies": {
+    "@types/node": "^24.19.4",
     "jsdom": "^31.0.1",
     "tsup": "^9.0.0",
-    "typescript": "^5.0.0",
+    "typescript": "~6.0.3",
     "vitest": "^5.1.1"
   },
   "dependencies": {
