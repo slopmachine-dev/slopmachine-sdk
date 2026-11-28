@@ -87,7 +87,27 @@ function pipelineQuery(
   ]);
 }
 
-const warnedPipelineOptions = new Set<string>();
+const warnedOptions = new Set<string>();
+
+// Components rebuild URLs on every render, so each distinct warning is logged once.
+function warnOnce(id: string, message: string): void {
+  if (warnedOptions.has(id)) return;
+  warnedOptions.add(id);
+  console.warn(message);
+}
+
+// Mirrors what `toQuery` would serialize: empty arrays/objects and falsy values don't count.
+function isOptionSet(value: unknown): boolean {
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === "object" && value !== null) {
+    return Object.keys(value).length > 0;
+  }
+  return Boolean(value);
+}
+
+function isStepMap(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 // renderPipeline has no equivalent for these bucket-only options, so they are
 // dropped from the URL; warn once per option so the omission isn't silent.
@@ -96,18 +116,77 @@ function warnIgnoredPipelineOptions(
   keys: readonly string[],
 ): void {
   for (const key of keys) {
-    const value = (options as Record<string, unknown>)[key];
-    const isSet = Array.isArray(value)
-      ? value.length > 0
-      : typeof value === "object" && value !== null
-        ? Object.keys(value).length > 0
-        : Boolean(value);
-    if (!isSet || warnedPipelineOptions.has(key)) continue;
-    warnedPipelineOptions.add(key);
-    console.warn(
+    if (!isOptionSet((options as Record<string, unknown>)[key])) continue;
+    warnOnce(
+      `pipeline:${key}`,
       `[slopmachine] "${key}" is only supported for buckets (bucketId) and is ignored when pipelineId is set.`,
     );
   }
+}
+
+// Per-step `Record<stepId, …>` maps only make sense for pipelines. In bucket
+// mode they are dropped (never JSON-encoded into the URL) with a one-time
+// warning. Returns `undefined` for a dropped map, otherwise the value unchanged,
+// so URLs for valid bucket inputs are not affected.
+function dropStepMap<T>(
+  key: string,
+  value: T,
+): Exclude<T, Record<string, unknown>> | undefined {
+  if (!isStepMap(value)) return value as Exclude<T, Record<string, unknown>>;
+  if (isOptionSet(value)) {
+    warnOnce(
+      `bucket-map:${key}`,
+      `[slopmachine] A per-step map for "${key}" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.`,
+    );
+  }
+  return undefined;
+}
+
+// Options the bucket endpoint for this media type doesn't accept at all.
+function warnIgnoredBucketOptions(
+  options: object,
+  keys: readonly string[],
+): void {
+  for (const key of keys) {
+    if (!isOptionSet((options as Record<string, unknown>)[key])) continue;
+    warnOnce(
+      `bucket:${key}`,
+      `[slopmachine] "${key}" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.`,
+    );
+  }
+}
+
+/**
+ * Resolves an `aspectRatio` option to a CSS `aspect-ratio` value (e.g. `"16/9"`)
+ * for sizing a component's layout box before the media loads.
+ *
+ * Rule:
+ * - A ratio string (e.g. `"16:9"`) is used as-is.
+ * - A per-step `Record<stepId, AspectRatio>` map uses its **last** non-empty
+ *   value in `Object.values()` order (insertion order for non-numeric keys),
+ *   on the assumption that the final step produces the rendered media.
+ * - Anything else (unset, empty map) uses `fallback`.
+ *
+ * This only affects layout: it never changes what is sent to the API.
+ *
+ * @param aspectRatio - The component's `aspectRatio` option.
+ * @param fallback - The ratio to use when none can be resolved (e.g. `"1:1"` for images, `"16:9"` for videos).
+ * @returns The ratio with `:` replaced by `/`, ready for the CSS `aspect-ratio` property.
+ */
+export function resolveCssAspectRatio(
+  aspectRatio: AspectRatio | Record<string, AspectRatio> | null | undefined,
+  fallback: AspectRatio,
+): string {
+  let ratio: string = fallback;
+  if (typeof aspectRatio === "string" && aspectRatio.length > 0) {
+    ratio = aspectRatio;
+  } else if (isStepMap(aspectRatio)) {
+    const values = Object.values(aspectRatio).filter(
+      (v): v is AspectRatio => typeof v === "string" && v.length > 0,
+    );
+    if (values.length > 0) ratio = values[values.length - 1];
+  }
+  return ratio.replace(":", "/");
 }
 
 export interface PipelineStepResult {
@@ -327,13 +406,16 @@ export interface SlopImageOptions {
    */
   resultId?: string;
   /**
-   * The aspect ratio of the generated image. Defaults to "1:1".
+   * The aspect ratio of the generated image. For buckets, defaults to "1:1";
+   * with `pipelineId`, nothing is sent unless set.
    * Common values: "1:1", "16:9", "9:16", "4:3", "3:4".
-   * When `pipelineId` is set, may also be a `Record<stepId, AspectRatio>` map.
+   * When `pipelineId` is set, may also be a `Record<stepId, AspectRatio>` map
+   * (a map is ignored with a console warning for buckets).
    */
   aspectRatio?: ImageAspectRatio | Record<string, AspectRatio>;
   /**
    * Runtime duration override(s) in seconds when targeting a pipeline (`pipelineId`).
+   * Ignored with a console warning for buckets.
    */
   duration?: number | Record<string, number>;
   /**
@@ -359,6 +441,7 @@ export interface SlopImageOptions {
   original?: boolean;
   /**
    * Array of attachment URLs (or a `Record<stepId, string[]>` map for pipelines) to include with the request.
+   * A map is ignored with a console warning for buckets.
    */
   attachments?: string[] | Record<string, string[]>;
 }
@@ -585,18 +668,20 @@ export function interpolatePrompt(
  * @returns A string containing the fully constructed URL.
  */
 export function buildImageUrl(options: SlopImageOptions): string {
-  const {
-    bucketId,
-    pipelineId,
-    resultId,
-    aspectRatio = "1:1",
-    baseUrl,
-  } = options;
+  const { bucketId, pipelineId, resultId, baseUrl } = options;
 
   if (pipelineId) {
     warnIgnoredPipelineOptions(options, ["model", "original"]);
     return `${endpoint("renderPipeline", baseUrl)}?${pipelineQuery(pipelineId, "redirect", options)}`;
   }
+
+  // A dropped step map falls back to the default, exactly as if it were unset
+  const { aspectRatio = "1:1" } = {
+    aspectRatio: dropStepMap("aspectRatio", options.aspectRatio),
+  };
+  const attachments = dropStepMap("attachments", options.attachments);
+  // renderImage has no duration parameter (pipelines only)
+  warnIgnoredBucketOptions(options, ["duration"]);
 
   const query = resultId
     ? toQuery([
@@ -611,7 +696,7 @@ export function buildImageUrl(options: SlopImageOptions): string {
         ["original", options.original],
         ["variables", options.variables],
         ["metadata", options.metadata],
-        ["attachments", options.attachments],
+        ["attachments", attachments],
       ]);
   return `${endpoint("renderImage", baseUrl)}?${query}`;
 }
@@ -671,9 +756,10 @@ export interface SlopVideoOptions {
    */
   resultId?: string;
   /**
-   * The aspect ratio of the generated video. Defaults to "16:9".
-   * Common values: "1:1", "16:9", "9:16", "4:3", "3:4".
-   * When `pipelineId` is set, may also be a `Record<stepId, AspectRatio>` map.
+   * The aspect ratio of the generated video. For buckets, defaults to "16:9";
+   * with `pipelineId`, nothing is sent unless set.
+   * When `pipelineId` is set, may also be a `Record<stepId, AspectRatio>` map
+   * (a map is ignored with a console warning for buckets).
    */
   aspectRatio?: VideoAspectRatio | Record<string, AspectRatio>;
   /**
@@ -684,6 +770,7 @@ export interface SlopVideoOptions {
   /**
    * The duration of the generated video in seconds (or a `Record<stepId, number>` map for pipelines).
    * If not specified, defaults to the bucket/pipeline version's configured duration (or 4).
+   * For buckets, a map is ignored with a console warning, and the value is ignored when `resultId` is set.
    */
   duration?: number | Record<string, number>;
   /**
@@ -699,6 +786,7 @@ export interface SlopVideoOptions {
   /**
    * Array of runtime image attachments (URLs) or a `Record<stepId, string[]>` map for pipelines.
    * Only allowed if the bucket or pipeline step has runtime attachments enabled.
+   * A map is ignored with a console warning for buckets.
    */
   attachments?: string[] | Record<string, string[]>;
 }
@@ -711,18 +799,19 @@ export interface SlopVideoOptions {
  * @returns A string containing the fully constructed URL.
  */
 export function buildVideoUrl(options: SlopVideoOptions): string {
-  const {
-    bucketId,
-    pipelineId,
-    resultId,
-    aspectRatio = "16:9",
-    baseUrl,
-  } = options;
+  const { bucketId, pipelineId, resultId, baseUrl } = options;
 
   if (pipelineId) {
-    warnIgnoredPipelineOptions(options, ["model", "original"]);
+    warnIgnoredPipelineOptions(options, ["original"]);
     return `${endpoint("renderPipeline", baseUrl)}?${pipelineQuery(pipelineId, "redirect", options)}`;
   }
+
+  // A dropped step map falls back to the default, exactly as if it were unset
+  const { aspectRatio = "16:9" } = {
+    aspectRatio: dropStepMap("aspectRatio", options.aspectRatio),
+  };
+  const duration = dropStepMap("duration", options.duration);
+  const attachments = dropStepMap("attachments", options.attachments);
 
   const query = resultId
     ? toQuery([
@@ -733,11 +822,11 @@ export function buildVideoUrl(options: SlopVideoOptions): string {
         ["bucketId", bucketId],
         ["aspectRatio", aspectRatio],
         ["version", options.version],
-        ["duration", options.duration],
+        ["duration", duration],
         ["original", options.original],
         ["variables", options.variables],
         ["metadata", options.metadata],
-        ["attachments", options.attachments],
+        ["attachments", attachments],
       ]);
   return `${endpoint("renderVideo", baseUrl)}?${query}`;
 }
@@ -797,10 +886,12 @@ export interface SlopTextOptions {
   resultId?: string;
   /**
    * Runtime aspect ratio override(s) when targeting a pipeline (`pipelineId`).
+   * Ignored with a console warning for buckets.
    */
   aspectRatio?: AspectRatio | Record<string, AspectRatio>;
   /**
    * Runtime duration override(s) in seconds when targeting a pipeline (`pipelineId`).
+   * Ignored with a console warning for buckets.
    */
   duration?: number | Record<string, number>;
   /**
@@ -821,6 +912,7 @@ export interface SlopTextOptions {
   baseUrl?: string;
   /**
    * Array of attachment URLs (or a `Record<stepId, string[]>` map for pipelines) to include with the request.
+   * A map is ignored with a console warning for buckets.
    */
   attachments?: string[] | Record<string, string[]>;
 }
@@ -837,9 +929,13 @@ export function buildTextUrl(options: SlopTextOptions): string {
   const { bucketId, pipelineId, resultId, baseUrl } = options;
 
   if (pipelineId) {
-    warnIgnoredPipelineOptions(options, ["model", "original"]);
+    warnIgnoredPipelineOptions(options, ["model"]);
     return `${endpoint("renderPipeline", baseUrl)}?${pipelineQuery(pipelineId, "sync", options)}`;
   }
+
+  // renderText has no aspectRatio or duration parameters (pipelines only)
+  warnIgnoredBucketOptions(options, ["aspectRatio", "duration"]);
+  const attachments = dropStepMap("attachments", options.attachments);
 
   const query = resultId
     ? toQuery([
@@ -852,7 +948,7 @@ export function buildTextUrl(options: SlopTextOptions): string {
         ["version", options.version],
         ["variables", options.variables],
         ["metadata", options.metadata],
-        ["attachments", options.attachments],
+        ["attachments", attachments],
       ]);
   return `${endpoint("renderText", baseUrl)}?${query}`;
 }

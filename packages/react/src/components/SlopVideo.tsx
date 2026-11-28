@@ -5,6 +5,7 @@ import { twMerge } from "tailwind-merge";
 import {
   buildVideoUrl,
   createRenderUrlMonitor,
+  resolveCssAspectRatio,
   type AspectRatio,
   type SlopMachineError,
   type SlopVideoOptions,
@@ -17,31 +18,15 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-function resolveCssAspectRatio(
-  aspectRatio: VideoAspectRatio | Record<string, AspectRatio> | undefined,
-  fallback: string,
-): string {
-  if (typeof aspectRatio === "string") {
-    return aspectRatio.replace(":", "/");
-  }
-  if (aspectRatio && typeof aspectRatio === "object") {
-    const values = Object.values(aspectRatio).filter(
-      (v): v is AspectRatio => typeof v === "string" && v.length > 0,
-    );
-    if (values.length > 0) {
-      return values[values.length - 1].replace(":", "/");
-    }
-  }
-  return fallback.replace(":", "/");
-}
-
 export interface SlopVideoProps
   extends
     Omit<React.VideoHTMLAttributes<HTMLVideoElement>, "src">,
     Omit<SlopVideoOptions, "aspectRatio"> {
   /**
    * The aspect ratio of the generated video (or a `Record<stepId, AspectRatio>` map for pipelines).
-   * Defaults to "16:9".
+   * Defaults to "16:9". With `pipelineId`, that default only sizes the layout box
+   * and is not sent to the API. A step map sizes the box by its last value
+   * (see `resolveCssAspectRatio`) and is ignored, with a warning, for buckets.
    */
   aspectRatio?: VideoAspectRatio | Record<string, AspectRatio>;
   /**

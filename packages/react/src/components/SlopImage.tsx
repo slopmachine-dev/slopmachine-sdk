@@ -5,6 +5,7 @@ import { twMerge } from "tailwind-merge";
 import {
   buildImageUrl,
   createRenderUrlMonitor,
+  resolveCssAspectRatio,
   type AspectRatio,
   type SlopMachineError,
   type SlopImageOptions,
@@ -19,31 +20,15 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-function resolveCssAspectRatio(
-  aspectRatio: ImageAspectRatio | Record<string, AspectRatio> | undefined,
-  fallback: string,
-): string {
-  if (typeof aspectRatio === "string") {
-    return aspectRatio.replace(":", "/");
-  }
-  if (aspectRatio && typeof aspectRatio === "object") {
-    const values = Object.values(aspectRatio).filter(
-      (v): v is AspectRatio => typeof v === "string" && v.length > 0,
-    );
-    if (values.length > 0) {
-      return values[values.length - 1].replace(":", "/");
-    }
-  }
-  return fallback.replace(":", "/");
-}
-
 export interface SlopImageProps
   extends
     Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src">,
     Omit<SlopImageOptions, "aspectRatio"> {
   /**
    * The aspect ratio of the generated image (or a `Record<stepId, AspectRatio>` map for pipelines).
-   * Defaults to "1:1".
+   * Defaults to "1:1". With `pipelineId`, that default only sizes the layout box
+   * and is not sent to the API. A step map sizes the box by its last value
+   * (see `resolveCssAspectRatio`) and is ignored, with a warning, for buckets.
    */
   aspectRatio?: ImageAspectRatio | Record<string, AspectRatio>;
   /**

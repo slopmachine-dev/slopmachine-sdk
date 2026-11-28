@@ -21,6 +21,7 @@
   import {
     buildImageUrl,
     createRenderUrlMonitor,
+    resolveCssAspectRatio,
     type AspectRatio,
     type SlopMachineError,
     type SlopImageOptions,
@@ -29,31 +30,15 @@
   import { untrack, type Snippet } from "svelte";
   import ErrorOverlay from "./ErrorOverlay.svelte";
 
-  function resolveCssAspectRatio(
-    ratio: ImageAspectRatio | Record<string, AspectRatio> | undefined,
-    fallback: string,
-  ): string {
-    if (typeof ratio === "string") {
-      return ratio.replace(":", "/");
-    }
-    if (ratio && typeof ratio === "object") {
-      const values = Object.values(ratio).filter(
-        (v): v is AspectRatio => typeof v === "string" && v.length > 0,
-      );
-      if (values.length > 0) {
-        return values[values.length - 1].replace(":", "/");
-      }
-    }
-    return fallback.replace(":", "/");
-  }
-
   export interface SlopImageProps extends Omit<
     SlopImageOptions,
     "aspectRatio"
   > {
     /**
      * The aspect ratio of the generated image (or a `Record<stepId, AspectRatio>` map for pipelines).
-     * Defaults to "1:1".
+     * Defaults to "1:1". With `pipelineId`, that default only sizes the layout box
+     * and is not sent to the API. A step map sizes the box by its last value
+     * (see `resolveCssAspectRatio`) and is ignored, with a warning, for buckets.
      */
     aspectRatio?: ImageAspectRatio | Record<string, AspectRatio>;
     /**
@@ -194,10 +179,7 @@
 </script>
 
 <div class={className}>
-  <div
-    class="slop-wrapper"
-    style="aspect-ratio: {cssAspectRatio};"
-  >
+  <div class="slop-wrapper" style="aspect-ratio: {cssAspectRatio};">
     {#if isLoading}
       {#if loader}
         <div class="custom-loader-wrapper">

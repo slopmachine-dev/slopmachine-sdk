@@ -24,6 +24,7 @@
   import {
     buildVideoUrl,
     createRenderUrlMonitor,
+    resolveCssAspectRatio,
     type AspectRatio,
     type SlopMachineError,
     type SlopVideoOptions,
@@ -32,31 +33,15 @@
   import { untrack, type Snippet } from "svelte";
   import ErrorOverlay from "./ErrorOverlay.svelte";
 
-  function resolveCssAspectRatio(
-    ratio: VideoAspectRatio | Record<string, AspectRatio> | undefined,
-    fallback: string,
-  ): string {
-    if (typeof ratio === "string") {
-      return ratio.replace(":", "/");
-    }
-    if (ratio && typeof ratio === "object") {
-      const values = Object.values(ratio).filter(
-        (v): v is AspectRatio => typeof v === "string" && v.length > 0,
-      );
-      if (values.length > 0) {
-        return values[values.length - 1].replace(":", "/");
-      }
-    }
-    return fallback.replace(":", "/");
-  }
-
   export interface SlopVideoProps extends Omit<
     SlopVideoOptions,
     "aspectRatio"
   > {
     /**
      * The aspect ratio of the generated video (or a `Record<stepId, AspectRatio>` map for pipelines).
-     * Defaults to "16:9".
+     * Defaults to "16:9". With `pipelineId`, that default only sizes the layout box
+     * and is not sent to the API. A step map sizes the box by its last value
+     * (see `resolveCssAspectRatio`) and is ignored, with a warning, for buckets.
      */
     aspectRatio?: VideoAspectRatio | Record<string, AspectRatio>;
     /**
@@ -192,10 +177,7 @@
 </script>
 
 <div class={className}>
-  <div
-    class="slop-wrapper"
-    style="aspect-ratio: {cssAspectRatio};"
-  >
+  <div class="slop-wrapper" style="aspect-ratio: {cssAspectRatio};">
     {#if isLoading}
       {#if loader}
         <div class="custom-loader-wrapper">
