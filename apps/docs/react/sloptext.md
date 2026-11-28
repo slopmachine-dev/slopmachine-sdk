@@ -75,25 +75,35 @@ preloadText({ bucketId: "my-unique-bucket-id" });
 
 The `SlopText` component takes parameters to build the URL and fetch the Markdown text, adding `fallback` and `errorFallback` properties and taking standard HTML `div` attributes for the wrapper.
 
-### `bucketId`
+### `bucketId` / `pipelineId`
 
-**Type:** `string` (Required)
-The unique identifier for the specific text generation session/bucket.
+**Type:** `string` (One of `bucketId` or `pipelineId` is required)
+The unique identifier for the specific text generation bucket (`bucketId`) or multi-step pipeline (`pipelineId`).
 
 ### `model`
 
 **Type:** `string` (Optional, e.g. `"gemini-pro"`)
-Overrides the AI model used for generation. Defaults to the bucket version's configured model. Ignored if `resultId` is provided.
+Overrides the AI model used for generation (buckets only). Defaults to the bucket version's configured model. Ignored if `resultId` or `pipelineId` is provided.
 
 ### `version`
 
 **Type:** `number` (Optional)
-Useful for cache-busting or fetching a specific generation iteration.
+Pins execution or retrieval to a specific immutable bucket or pipeline version.
 
 ### `resultId`
 
 **Type:** `string` (Optional)
 If a specific result ID is known, it can be fetched directly.
+
+### `aspectRatio`
+
+**Type:** `AspectRatio | Record<string, AspectRatio>` (Optional, pipelines only)
+Runtime aspect ratio override forwarded to `renderPipeline` when `pipelineId` is set, either a single ratio or a per-step map such as `{ step_1: "16:9" }`. Text has no layout box, so this only affects what the pipeline generates. Ignored (with a one-time console warning) for buckets.
+
+### `duration`
+
+**Type:** `number | Record<string, number>` (Optional, pipelines only)
+Runtime duration override in seconds forwarded to `renderPipeline` when `pipelineId` is set, either a single number or a per-step map such as `{ step_1: 6 }`. Ignored (with a one-time console warning) for buckets.
 
 ### `variables`
 
@@ -107,8 +117,8 @@ Arbitrary custom metadata to attach to the generation request and resulting docu
 
 ### `attachments`
 
-**Type:** `string[]` (Optional)
-An array of string URLs representing temporary file attachments to be used by the generative AI model.
+**Type:** `string[] | Record<string, string[]>` (Optional)
+Temporary file attachment URLs to be used by the generative AI model (or a `Record<stepId, string[]>` map when targeting a multi-step pipeline). A step map is ignored (with a one-time console warning) for buckets.
 
 ### `baseUrl`
 

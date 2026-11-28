@@ -19,6 +19,18 @@ pnpm add @slopmachine/core
 - **Multi-Step Pipelines**: Programmatic execution via `executePipeline({ pipelineId, prompt, variables, metadata })`.
 - **Result Rating (Server-Side)**: Rate generated outputs via `rateResult(resultId, rating, { apiKey })`.
 - **Buckets & Pipelines Support**: Seamlessly switch between pre-templated Buckets and dynamic runtime Pipelines.
+- **CLI Onboarding (`init` / `login`)**: Authenticate via `/connect`, configure the Slop Machine remote MCP server, and install the open-source Agent Skill in one command (`npx @slopmachine/core init`).
+
+## Agent Skill & CLI Bootstrap
+
+```bash
+# Interactive device-code login (/connect), MCP setup, and skill installation
+npx @slopmachine/core init
+
+# Non-interactive setup with an existing API key (read from the environment)
+export SLOPMACHINE_API_KEY=slop_live_YOUR_API_KEY
+npx @slopmachine/core init
+```
 
 ## Programmatic Pipeline Execution
 

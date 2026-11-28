@@ -48,6 +48,18 @@ targets: [
 The Swift package is not tagged with SwiftPM-compatible versions yet (the repository's tags are npm changesets tags such as `@slopmachine/core@0.9.0`), so depend on the `main` branch for now. Versioned tags will come later.
 :::
 
+### AI Agent Skill & MCP CLI Bootstrap
+
+Using an AI coding agent (Claude Code, Cursor, Antigravity, Windsurf, Codex)? Install the open-source Slop Machine Agent Skill and configure the remote MCP server in one command:
+
+```bash
+npx skills add slopmachine-dev/slopmachine-sdk
+# or run the interactive CLI bootstrapper:
+npx @slopmachine/core init
+```
+
+See the **[Agent Skill & MCP Setup Guide](/agent-skill)** for `/connect` device-code authentication, MCP server configuration, and zero-UI pipeline authoring.
+
 ## Core Concepts: Buckets vs Pipelines
 
 Slop Machine provides two powerful paradigms for AI generation:
@@ -61,7 +73,8 @@ Ideal when prompt templates and guardrails are defined in advance in the Slop Ma
 ### 2. Pipelines (Developer Runtime Control)
 Ideal when external processes or users supply dynamic prompts on demand, or when multi-step chaining (e.g., text generation &rarr; video generation &rarr; audio &rarr; video text compositing) is required.
 - Identified by `pipelineId` (and optional `siloId`).
-- Developers supply the runtime `prompt`, optional `variables`, and arbitrary `metadata`.
+- Developers supply the runtime `prompt`, optional `version`, `aspectRatio`, `duration`, `attachments`, `variables`, and arbitrary `metadata`.
+- Multi-output pipelines can be consumed declaratively via `useSlopPipeline` (React) or `createSlopPipeline` (Svelte), with `steps` keyed by `stepId` and `outputKey`.
 - Results are tracked and organized in the Silo's Pipeline repository.
 
 Under the hood, `SlopImage`, `SlopVideo`, and `SlopText` handle:

@@ -54,7 +54,7 @@ export interface SlopTextProps
  * />
  * ```
  *
- * @version 1.0.0
+ * @version 1.2.0
  */
 export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
   (
@@ -66,6 +66,8 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
       metadata,
       version,
       resultId,
+      aspectRatio,
+      duration,
       model,
       variables,
       baseUrl,
@@ -91,6 +93,8 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
           metadata,
           version,
           resultId,
+          aspectRatio,
+          duration,
           model,
           variables,
           baseUrl,
@@ -104,6 +108,8 @@ export const SlopText = React.forwardRef<HTMLDivElement, SlopTextProps>(
         JSON.stringify(metadata),
         version,
         resultId,
+        JSON.stringify(aspectRatio),
+        JSON.stringify(duration),
         model,
         JSON.stringify(variables),
         baseUrl,

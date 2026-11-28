@@ -5,6 +5,8 @@ import { twMerge } from "tailwind-merge";
 import {
   buildVideoUrl,
   createRenderUrlMonitor,
+  resolveCssAspectRatio,
+  type AspectRatio,
   type SlopMachineError,
   type SlopVideoOptions,
   type VideoAspectRatio,
@@ -21,9 +23,12 @@ export interface SlopVideoProps
     Omit<React.VideoHTMLAttributes<HTMLVideoElement>, "src">,
     Omit<SlopVideoOptions, "aspectRatio"> {
   /**
-   * The aspect ratio of the generated video. Defaults to "16:9".
+   * The aspect ratio of the generated video (or a `Record<stepId, AspectRatio>` map for pipelines).
+   * Defaults to "16:9". With `pipelineId`, that default only sizes the layout box
+   * and is not sent to the API. A step map sizes the box by its last value
+   * (see `resolveCssAspectRatio`) and is ignored, with a warning, for buckets.
    */
-  aspectRatio?: VideoAspectRatio;
+  aspectRatio?: VideoAspectRatio | Record<string, AspectRatio>;
   /**
    * Custom React node to display while the video is loading.
    * If not provided, a default spinner and shimmer effect will be shown.
@@ -74,7 +79,7 @@ export interface SlopVideoProps
  * />
  * ```
  *
- * @version 1.0.0
+ * @version 1.2.0
  */
 export const SlopVideo: React.FC<SlopVideoProps> = ({
   bucketId,
@@ -83,7 +88,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
   prompt,
   metadata,
   className,
-  aspectRatio = "16:9",
+  aspectRatio,
   version,
   resultId,
   variables = {},
@@ -103,6 +108,12 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
   onError,
   ...props
 }) => {
+  const serializedAspectRatio = JSON.stringify(aspectRatio);
+  const serializedDuration = JSON.stringify(duration);
+  const serializedVariables = JSON.stringify(variables);
+  const serializedMetadata = JSON.stringify(metadata);
+  const serializedAttachments = JSON.stringify(attachments);
+
   // Construct API URL
   const rawSrc = useMemo(
     () =>
@@ -126,15 +137,15 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
       pipelineId,
       siloId,
       prompt,
-      metadata,
-      aspectRatio,
+      serializedMetadata,
+      serializedAspectRatio,
       version,
       resultId,
-      variables,
-      duration,
+      serializedVariables,
+      serializedDuration,
       baseUrl,
       original,
-      attachments,
+      serializedAttachments,
     ],
   );
 
@@ -205,7 +216,7 @@ export const SlopVideo: React.FC<SlopVideoProps> = ({
         <div
           className="slop-wrapper relative overflow-hidden w-full h-full"
           style={{
-            aspectRatio: String(aspectRatio).replace(":", "/"),
+            aspectRatio: resolveCssAspectRatio(aspectRatio, "16:9"),
             position: "relative",
             overflow: "hidden",
             width: "100%",

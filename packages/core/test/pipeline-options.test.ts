@@ -27,7 +27,7 @@ afterEach(() => {
 });
 
 describe("bucket-only options with pipelineId", () => {
-  it("warns once per ignored option and leaves the URL unchanged", async () => {
+  it("warns once per ignored bucket-only option (model, original) and forwards supported pipeline options", async () => {
     const core = await loadCore();
     const url = core.buildImageUrl({
       pipelineId: "p",
@@ -36,30 +36,47 @@ describe("bucket-only options with pipelineId", () => {
       original: true,
       attachments: ["a"],
     });
-    expect(url).toBe(`${PROD}/renderPipeline?pipelineId=p&redirect=true`);
+    expect(url).toBe(
+      `${PROD}/renderPipeline?pipelineId=p&redirect=true&version=2&attachments=%5B%22a%22%5D`,
+    );
     expect(warn.mock.calls.map((c) => c[0])).toEqual([
       '[slopmachine] "model" is only supported for buckets (bucketId) and is ignored when pipelineId is set.',
-      '[slopmachine] "version" is only supported for buckets (bucketId) and is ignored when pipelineId is set.',
       '[slopmachine] "original" is only supported for buckets (bucketId) and is ignored when pipelineId is set.',
-      '[slopmachine] "attachments" is only supported for buckets (bucketId) and is ignored when pipelineId is set.',
     ]);
 
     // Components rebuild URLs on every render: don't repeat the warnings
-    core.buildImageUrl({ pipelineId: "p", model: "m" });
+    core.buildImageUrl({ pipelineId: "p", model: "m", original: true });
     core.buildTextUrl({ pipelineId: "p", model: "m" });
-    expect(warn).toHaveBeenCalledTimes(4);
-  });
-
-  it("warns for video duration and text model", async () => {
-    const core = await loadCore();
-    core.buildVideoUrl({ pipelineId: "p", duration: 6 });
-    core.buildTextUrl({ pipelineId: "p", model: "m" });
+    core.buildVideoUrl({ pipelineId: "p", original: true });
     expect(warn).toHaveBeenCalledTimes(2);
-    expect(warn.mock.calls[0][0]).toContain('"duration"');
-    expect(warn.mock.calls[1][0]).toContain('"model"');
   });
 
-  it("does not warn for aspectRatio (it sizes the component) or empty values", async () => {
+  it("does not warn for version, duration, attachments, or aspectRatio on pipelines", async () => {
+    const core = await loadCore();
+    const videoUrl = core.buildVideoUrl({
+      pipelineId: "p",
+      version: 3,
+      aspectRatio: "9:16",
+      duration: 6,
+      attachments: ["https://a.dev/ref.png"],
+    });
+    const textUrl = core.buildTextUrl({
+      pipelineId: "p",
+      version: 4,
+      aspectRatio: { step_1: "16:9" },
+      duration: { step_1: 5 },
+      attachments: { step_1: ["https://a.dev/doc.png"] },
+    });
+    expect(videoUrl).toBe(
+      `${PROD}/renderPipeline?pipelineId=p&redirect=true&version=3&aspectRatio=9%3A16&duration=6&attachments=%5B%22https%3A%2F%2Fa.dev%2Fref.png%22%5D`,
+    );
+    expect(textUrl).toBe(
+      `${PROD}/renderPipeline?pipelineId=p&sync=true&version=4&aspectRatio=%7B%22step_1%22%3A%2216%3A9%22%7D&duration=%7B%22step_1%22%3A5%7D&attachments=%7B%22step_1%22%3A%5B%22https%3A%2F%2Fa.dev%2Fdoc.png%22%5D%7D`,
+    );
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("does not warn for empty values", async () => {
     const core = await loadCore();
     core.buildImageUrl({
       pipelineId: "p",
@@ -68,7 +85,11 @@ describe("bucket-only options with pipelineId", () => {
       attachments: [],
       variables: {},
     });
-    core.buildVideoUrl({ pipelineId: "p", aspectRatio: "9:16" });
+    core.buildVideoUrl({
+      pipelineId: "p",
+      aspectRatio: "9:16",
+      original: false,
+    });
     expect(warn).not.toHaveBeenCalled();
   });
 
@@ -81,5 +102,116 @@ describe("bucket-only options with pipelineId", () => {
       attachments: ["a"],
     });
     expect(warn).not.toHaveBeenCalled();
+  });
+});
+
+describe("pipeline-only options with bucketId", () => {
+  it("drops per-step maps from bucket image URLs with a one-time warning", async () => {
+    const core = await loadCore();
+    const url = core.buildImageUrl({
+      bucketId: "b",
+      aspectRatio: { step_1: "16:9" },
+      attachments: { step_1: ["https://a.dev/x.png"] },
+    });
+    // Same URL as if aspectRatio and attachments were unset
+    expect(url).toBe(core.buildImageUrl({ bucketId: "b" }));
+    expect(url).toBe(`${PROD}/renderImage?bucketId=b&aspectRatio=1%3A1`);
+    expect(warn.mock.calls.map((c) => c[0])).toEqual([
+      '[slopmachine] A per-step map for "aspectRatio" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.',
+      '[slopmachine] A per-step map for "attachments" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.',
+    ]);
+
+    core.buildImageUrl({ bucketId: "b", aspectRatio: { s: "4:3" } });
+    core.buildVideoUrl({ bucketId: "b", attachments: { s: ["x"] } });
+    expect(warn).toHaveBeenCalledTimes(2);
+  });
+
+  it("warns that image duration is ignored for buckets", async () => {
+    const core = await loadCore();
+    expect(core.buildImageUrl({ bucketId: "b", duration: 6 })).toBe(
+      `${PROD}/renderImage?bucketId=b&aspectRatio=1%3A1`,
+    );
+    expect(warn.mock.calls.map((c) => c[0])).toEqual([
+      '[slopmachine] "duration" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.',
+    ]);
+  });
+
+  it("drops per-step maps from bucket video URLs, keeping the default aspect ratio", async () => {
+    const core = await loadCore();
+    const url = core.buildVideoUrl({
+      bucketId: "b",
+      aspectRatio: { step_1: "9:16" },
+      duration: { step_1: 6 },
+      attachments: { step_1: ["https://a.dev/x.png"] },
+    });
+    expect(url).toBe(core.buildVideoUrl({ bucketId: "b" }));
+    expect(url).toBe(`${PROD}/renderVideo?bucketId=b&aspectRatio=16%3A9`);
+    expect(warn.mock.calls.map((c) => c[0])).toEqual([
+      '[slopmachine] A per-step map for "aspectRatio" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.',
+      '[slopmachine] A per-step map for "duration" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.',
+      '[slopmachine] A per-step map for "attachments" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.',
+    ]);
+  });
+
+  it("warns that text aspectRatio and duration are ignored for buckets and drops attachment maps", async () => {
+    const core = await loadCore();
+    const url = core.buildTextUrl({
+      bucketId: "b",
+      aspectRatio: "16:9",
+      duration: { step_1: 4 },
+      attachments: { step_1: ["https://a.dev/x.png"] },
+    });
+    expect(url).toBe(`${PROD}/renderText?bucketId=b`);
+    expect(warn.mock.calls.map((c) => c[0])).toEqual([
+      '[slopmachine] "aspectRatio" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.',
+      '[slopmachine] "duration" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.',
+      '[slopmachine] A per-step map for "attachments" is only supported for pipelines (pipelineId) and is ignored when bucketId is set.',
+    ]);
+  });
+
+  it("leaves valid bucket inputs untouched and silent", async () => {
+    const core = await loadCore();
+    expect(
+      core.buildImageUrl({
+        bucketId: "b",
+        aspectRatio: "16:9",
+        attachments: ["https://a.dev/x.png"],
+      }),
+    ).toBe(
+      `${PROD}/renderImage?bucketId=b&aspectRatio=16%3A9&attachments=%5B%22https%3A%2F%2Fa.dev%2Fx.png%22%5D`,
+    );
+    expect(
+      core.buildVideoUrl({
+        bucketId: "b",
+        aspectRatio: "9:16",
+        duration: 6,
+        attachments: ["https://a.dev/x.png"],
+      }),
+    ).toBe(
+      `${PROD}/renderVideo?bucketId=b&aspectRatio=9%3A16&duration=6&attachments=%5B%22https%3A%2F%2Fa.dev%2Fx.png%22%5D`,
+    );
+    expect(
+      core.buildTextUrl({
+        bucketId: "b",
+        attachments: ["https://a.dev/x.png"],
+      }),
+    ).toBe(
+      `${PROD}/renderText?bucketId=b&attachments=%5B%22https%3A%2F%2Fa.dev%2Fx.png%22%5D`,
+    );
+    // Empty maps would never be serialized, so they don't warn
+    core.buildVideoUrl({ bucketId: "b", duration: {}, attachments: {} });
+    expect(warn).not.toHaveBeenCalled();
+  });
+});
+
+describe("resolveCssAspectRatio", () => {
+  it("uses a ratio string, the last value of a step map, or the fallback", async () => {
+    const { resolveCssAspectRatio } = await loadCore();
+    expect(resolveCssAspectRatio("16:9", "1:1")).toBe("16/9");
+    expect(resolveCssAspectRatio({ first: "1:1", last: "9:16" }, "16:9")).toBe(
+      "9/16",
+    );
+    expect(resolveCssAspectRatio({}, "16:9")).toBe("16/9");
+    expect(resolveCssAspectRatio(undefined, "1:1")).toBe("1/1");
   });
 });

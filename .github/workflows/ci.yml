@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
       # Fails only if a publishable package changed without a changeset in this PR.
       # Docs/demo/CI-only PRs pass; use `npx changeset add --empty` to opt out explicitly.
       - name: Check for changeset on PRs

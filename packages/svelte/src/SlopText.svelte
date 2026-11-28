@@ -18,7 +18,7 @@
   </SlopText>
   ```
 
-  @version 1.0.0
+  @version 1.2.0
 -->
 <script lang="ts">
   import {
@@ -67,6 +67,8 @@
     metadata = undefined,
     version = undefined,
     resultId = undefined,
+    aspectRatio = undefined,
+    duration = undefined,
     model = undefined,
     variables = undefined,
     baseUrl = undefined,
@@ -92,6 +94,8 @@
       metadata,
       version,
       resultId,
+      aspectRatio,
+      duration,
       model,
       variables,
       baseUrl,

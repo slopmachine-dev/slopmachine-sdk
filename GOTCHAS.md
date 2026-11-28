@@ -137,3 +137,39 @@ When adding a new entry, use the following structure:
 - **Symptoms / Error:** Swift-built URLs differ from `@slopmachine/core` for some inputs (busting CDN caches): `1e-7` becomes `1e-07`, `0.00001` becomes `1e-05`, `1e19` becomes `1e+19`, `2**60` prints all 19 exact digits, and keys like `"2"` or `"10"` stay where they were inserted.
 - **Root Cause:** Swift's `Double.description` uses different layout rules from ECMAScript `Number::toString` (two-digit exponents, exponent notation from `1e16` and below `1e-4`), and converting whole doubles through `Int` prints exact digits where JS prints the shortest round-trip digits padded with zeros. JavaScript objects also enumerate integer-like keys (`"0"`–`"4294967294"`, no leading zeros) first in ascending numeric order, before all other keys in insertion order.
 - **Solution / Workaround:** Format numbers only through `formatJSNumber` / `serializeNumber` in `SlopURLBuilder.swift` (never `String(double)`), and keep `jsPropertyOrder` applied in every `SlopVariables`/`SlopMetadata` initializer. `URLStabilityTests.swift` pins cases generated with node from the built core; regenerate them from `packages/core/dist/index.mjs` if you add more.
+
+---
+
+### Keep CLI / Node built-ins out of `packages/core/src/index.ts`, and keep `src/cli.ts` side-effect free
+
+- **Affected Area:** `packages/core` (`src/cli.ts`, `src/bin.ts`, `tsup.config.ts`, `package.json` `bin`)
+- **Symptoms / Error:** Importing `node:fs` or `node:path` in `src/index.ts` breaks browser builds in VitePress, React, and Svelte demos. Using `import.meta.url` in CLI code triggers a `tsup` `[empty-import-meta]` warning on the CJS build. An earlier version auto-ran the CLI when `process.argv[1]` was named `cli.*`, so any user script called `cli.js` that imported the module started the onboarding flow.
+- **Root Cause:** `src/index.ts` is imported directly by client-side browser bundles. "Is this the main module?" checks based on file names are unreliable once code is bundled or imported by someone else.
+- **Solution / Workaround:** Keep all Node-specific CLI logic in `src/cli.ts`, with no top-level side effects. The executable is `src/bin.ts` (shebang plus `runCli()`), built to `dist/bin.js` and exposed only as the `slopmachine` bin. `cli.ts` is not a package export and gets no `.d.ts` (`dts.entry` is `src/index.ts` only). Keep `shims: true` in `packages/core/tsup.config.ts`, and keep the `onSuccess` copy of `skills/slopmachine` into `dist/skills/slopmachine` so the bin can find the bundled skill when installed from npm.
+
+---
+
+### CLI `--symlink` must never delete real files
+
+- **Affected Area:** `packages/core` (`installSkillFiles` / `planSkillInstall` in `src/cli.ts`)
+- **Symptoms / Error:** `npx @slopmachine/core init --symlink --skills-dir src` deleted the user's `src/` directory and replaced it with a symlink. Separately, symlinks created by `npx` pointed into `~/.npm/_npx/...` and broke when the npx cache was cleared.
+- **Root Cause:** The installer called `fs.rmSync(dest, { recursive: true, force: true })` before linking, `--skills-dir` wasn't confined to the project, and the npx cache is temporary.
+- **Solution / Workaround:** Check targets with `fs.lstatSync` before doing anything (including before the browser handshake): only an existing symlink may be removed, and anything else makes the CLI refuse with an error. `--skills-dir` must resolve (also after `realpath`) to a subdirectory of the project. `--symlink` is refused when the bundled skill lives in an `_npx` cache directory. In copy mode, unlink a previous symlink first instead of copying through it into the package.
+
+---
+
+### Svelte 5 `.svelte.ts` modules built with `@sveltejs/package`
+
+- **Affected Area:** `packages/svelte` (`createSlopPipeline.svelte.ts`, `src/index.ts`, Vitest tests)
+- **Symptoms / Error:** Re-exporting a `.svelte.ts` module from `src/index.ts` without the `.svelte.js` extension produces `from "./module.svelte"` in `dist/index.js` while the emitted file is `dist/module.svelte.js`. In addition, calling `$effect` in a Vitest environment without `resolve.conditions: ["browser"]` compiles `$effect` to a server no-op (`$.noop`), and mutating `$state` or reading it to notify store subscribers inside `$effect` without `untrack` registers those `$state` fields as dependencies of the effect itself.
+- **Root Cause:** `@sveltejs/package` strips `.ts` from `.svelte.ts` to emit `.svelte.js`, Vite resolves `svelte` to its SSR bundle unless `"browser"` is in `resolve.conditions`, and Svelte 5 tracks all `$state` reads during synchronous `$effect` execution.
+- **Solution / Workaround:** Re-export `.svelte.ts` modules using the `.svelte.js` specifier in `src/index.ts`, wrap side-effectful state mutations/notifications inside `$effect` with `untrack(() => ...)`, fall back to direct execution when `$effect` does not run synchronously on initialization, and configure `resolve: { conditions: ["browser"] }` in `packages/svelte/vitest.config.ts`.
+
+---
+
+### Svelte `.svelte.ts` fallbacks that run outside `$effect` also run during SSR
+
+- **Affected Area:** `packages/svelte` (`createSlopPipeline.svelte.ts`), Vitest tests
+- **Symptoms / Error:** A pipeline POST fires once while server-rendering and again on hydration. Separately, a test that only reassigns a plain variable and calls `refetch()` passes without exercising reactivity at all.
+- **Root Cause:** In server output `$effect` compiles to a no-op, so any "effect didn't run yet, so run it now" fallback executes on the server. Runes (`$state`, `$effect.root`) only compile in files named `*.svelte.ts` / `*.svelte.test.ts`; a plain `.test.ts` can't drive real reactive state.
+- **Solution / Workaround:** Guard client-only work with `typeof window !== "undefined"` (keep `isLoading` at its initial value so SSR markup matches the first client render). Put rune-based tests in `*.svelte.test.ts`, create the store inside `$effect.root(...)`, change `$state` and call `flushSync()` to run effects, and call the root's cleanup to simulate unmount. For SSR, a test file with `// @vitest-environment node` is transformed for SSR, so `.svelte.ts` modules are compiled with `generate: "server"`.

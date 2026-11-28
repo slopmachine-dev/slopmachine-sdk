@@ -18,12 +18,14 @@
   />
   ```
 
-  @version 1.0.0
+  @version 1.2.0
 -->
 <script lang="ts">
   import {
     buildVideoUrl,
     createRenderUrlMonitor,
+    resolveCssAspectRatio,
+    type AspectRatio,
     type SlopMachineError,
     type SlopVideoOptions,
     type VideoAspectRatio,
@@ -36,9 +38,12 @@
     "aspectRatio"
   > {
     /**
-     * The aspect ratio of the generated video. Defaults to "16:9".
+     * The aspect ratio of the generated video (or a `Record<stepId, AspectRatio>` map for pipelines).
+     * Defaults to "16:9". With `pipelineId`, that default only sizes the layout box
+     * and is not sent to the API. A step map sizes the box by its last value
+     * (see `resolveCssAspectRatio`) and is ignored, with a warning, for buckets.
      */
-    aspectRatio?: VideoAspectRatio;
+    aspectRatio?: VideoAspectRatio | Record<string, AspectRatio>;
     /**
      * Additional CSS classes to apply to the wrapper element.
      */
@@ -76,7 +81,7 @@
     siloId = undefined,
     prompt = undefined,
     metadata = undefined,
-    aspectRatio = "16:9",
+    aspectRatio = undefined,
     version = undefined,
     resultId = undefined,
     model,
@@ -101,6 +106,8 @@
 
   let isLoading = $state(true);
   let error = $state<SlopMachineError | null>(null);
+
+  let cssAspectRatio = $derived(resolveCssAspectRatio(aspectRatio, "16:9"));
 
   let computedSrc = $derived(
     buildVideoUrl({
@@ -170,10 +177,7 @@
 </script>
 
 <div class={className}>
-  <div
-    class="slop-wrapper"
-    style="aspect-ratio: {aspectRatio?.replace(':', '/')};"
-  >
+  <div class="slop-wrapper" style="aspect-ratio: {cssAspectRatio};">
     {#if isLoading}
       {#if loader}
         <div class="custom-loader-wrapper">
