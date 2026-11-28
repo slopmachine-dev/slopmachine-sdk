@@ -7,6 +7,9 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "bin": {
+    "slopmachine": "./dist/bin.js"
+  },
   "exports": {
     ".": {
       "import": {

@@ -26,6 +26,18 @@ npm install @slopmachine/react @slopmachine/core
 npm install @slopmachine/svelte @slopmachine/core
 ```
 
+### AI Agent Skill & MCP CLI Bootstrap
+
+Using an AI coding agent (Claude Code, Cursor, Antigravity, Windsurf, Codex)? Install the open-source Slop Machine Agent Skill and configure the remote MCP server in one command:
+
+```bash
+npx skills add slopmachine-dev/slopmachine-sdk
+# or run the interactive CLI bootstrapper:
+npx @slopmachine/core init
+```
+
+See the **[Agent Skill & MCP Setup Guide](/agent-skill)** for `/connect` device-code authentication, MCP server configuration, and zero-UI pipeline authoring.
+
 ## Core Concepts: Buckets vs Pipelines
 
 Slop Machine provides two powerful paradigms for AI generation:

@@ -37,6 +37,18 @@ npm install @slopmachine/svelte
 npm install @slopmachine/core
 ```
 
+### AI Agent Skill & MCP Setup
+
+Give your coding agent (Claude Code, Cursor, Antigravity, Windsurf, Codex) end-to-end access to Slop Machine workspaces, multi-step pipelines, and SDK components without needing the web UI:
+
+```bash
+# Install the open-source Agent Skill (skills/slopmachine/SKILL.md)
+npx skills add slopmachine-dev/slopmachine-sdk
+
+# Or authenticate (/connect), configure MCP, and install the skill in one step
+npx @slopmachine/core init
+```
+
 ## Quick Start
 
 ### React
