@@ -6,7 +6,7 @@ This document outlines the coding conventions, architecture, and patterns used i
 
 ## 1. Svelte 5 Runes
 
-The SDK utilizes **Svelte 5** and exclusively relies on **runes** for state management and reactivity.
+The SDK utilizes **Svelte 5** and exclusively relies on **runes** for state management and reactivity (legacy `export let`, `$:`, `on:*`, and `<slot />` are blocked by `npm run lint`).
 
 - `$props()`: Used for defining component properties. Ensure default values are handled here, and `...restProps` is utilized to spread unused properties onto underlying DOM elements (e.g., `<img>`).
 - `$state()`: Used for localized component state (e.g., loading states, URLs).
@@ -15,23 +15,23 @@ The SDK utilizes **Svelte 5** and exclusively relies on **runes** for state mana
 
 ## 2. TypeScript and Typing
 
-- All Svelte components must use `<script lang="ts">`.
+- All Svelte components must use `<script lang="ts">` (enforced by `npm run lint`).
 - Props should be strictly typed. Interfaces should extend the base option types provided by the core package. For example, `SlopImageProps` extends `SlopImageOptions` from `@slopmachine/core`.
 - Custom markup passed as props (e.g., a custom loader) should utilize the Svelte 5 `Snippet` type imported from `svelte`.
 
 ## 3. Dependency Management
 
-- **Core SDK Logic**: Do not duplicate core logic (like URL generation). Always import utility functions and base types from the `@slopmachine/core` package.
+- **Core SDK Logic**: Do not duplicate core logic (like URL generation). Always import utility functions and base types from the `@slopmachine/core` package (deep/relative core imports are blocked by `npm run lint`).
 - **Peer Dependencies**: The Svelte package lists `svelte` (version `^5.0.0`) as a peer dependency.
 
 ## 4. Component Structure
 
 Components should follow a clear top-to-bottom structure:
 
-1.  **Block Comments**: A descriptive JSDoc/HTML block comment at the top of the file outlining the `@component`, its description, `@example`, and `@version`.
+1.  **Block Comments**: A leading `<!-- @component ... -->` comment (plus `@example` and `@version` on `Slop*.svelte`, enforced by `npm run lint`).
 2.  **Script Tag**: `<script lang="ts">` containing imports, type definitions, runes (`$props`, `$state`, etc.), and local functions.
 3.  **Markup**: The Svelte HTML template using Svelte 5 logic blocks (`{#if}`, `{@render snippet()}`).
-4.  **Styles**: A `<style>` tag scoped to the component. Use namespaced `--slop-*` CSS variables that fall back to the host theme and then a literal default (e.g., `var(--slop-muted, var(--muted, #f3f4f6))`), so consumers can theme the components independently while keeping a good default appearance. The variables are documented under "Theming" in `apps/docs/getting-started.md`.
+4.  **Styles**: A `<style>` tag scoped to the component using namespaced `--slop-*` CSS variables with a fallback (e.g., `var(--slop-muted, var(--muted, #f3f4f6))`, enforced by `npm run lint`). The variables are documented under "Theming" in `apps/docs/getting-started.md`.
 
 ## 5. Exporting Patterns
 

@@ -46,12 +46,14 @@ Components and hooks tailored for React applications with built-in loading state
   Render generative videos with looping, autoplay, shimmer loading states, and poster fallbacks.
 - **[`<SlopText />` Component](/react/sloptext)**  
   Render dynamic generative copy with custom loading skeletons and fallback support.
+- **[`useSlopPipeline` Hook](/api/render-pipeline#multi-output-pipelines-usesloppipeline-createsloppipeline)**  
+  Declarative React hook for executing multi-output pipelines and reading step outputs via `steps` keyed by `stepId` or `outputKey`.
 
 ---
 
 ## 🟧 Svelte SDK (`@slopmachine/svelte`)
 
-Idiomatic Svelte components for rendering generative media:
+Idiomatic Svelte components and rune/store helpers for rendering generative media:
 
 - **[`<SlopImage />` Component](/svelte/slopimage)**  
   Svelte component for rendering generative images with shimmer loading animations and aspect ratio retention.
@@ -59,6 +61,8 @@ Idiomatic Svelte components for rendering generative media:
   Svelte component for rendering generative videos with smooth playback and loading states.
 - **[`<SlopText />` Component](/svelte/sloptext)**  
   Svelte component for rendering dynamic text and copywriting.
+- **[`createSlopPipeline` Helper](/api/render-pipeline#multi-output-pipelines-usesloppipeline-createsloppipeline)**  
+  Svelte 5 rune and store helper for executing multi-output pipelines and reading step outputs via `steps` keyed by `stepId` or `outputKey`.
 
 ---
 
@@ -68,7 +72,7 @@ Shared TypeScript utilities, types, and client-side execution helpers:
 
 - **URL Builders**: `buildImageUrl`, `buildVideoUrl`, `buildTextUrl`, `buildPipelineUrl`
 - **Preloading Utilities**: `preloadImage`, `preloadVideo`, `preloadText`
-- **Pipeline Execution**: `executePipeline` for programmatic, typed server/client pipeline execution
+- **Pipeline Execution**: `executePipeline` and `mapStepResults` for programmatic, typed server/client pipeline execution with `steps` lookup by `stepId` and `outputKey`
 - **File Upload Helpers**: `uploadTempAttachment` for base64 file uploads
 
 ---

@@ -128,3 +128,21 @@ When adding a new entry, use the following structure:
 - **Symptoms / Error:** `npx @slopmachine/core init --symlink --skills-dir src` deleted the user's `src/` directory and replaced it with a symlink. Separately, symlinks created by `npx` pointed into `~/.npm/_npx/...` and broke when the npx cache was cleared.
 - **Root Cause:** The installer called `fs.rmSync(dest, { recursive: true, force: true })` before linking, `--skills-dir` wasn't confined to the project, and the npx cache is temporary.
 - **Solution / Workaround:** Check targets with `fs.lstatSync` before doing anything (including before the browser handshake): only an existing symlink may be removed, and anything else makes the CLI refuse with an error. `--skills-dir` must resolve (also after `realpath`) to a subdirectory of the project. `--symlink` is refused when the bundled skill lives in an `_npx` cache directory. In copy mode, unlink a previous symlink first instead of copying through it into the package.
+
+---
+
+### Svelte 5 `.svelte.ts` modules built with `@sveltejs/package`
+
+- **Affected Area:** `packages/svelte` (`createSlopPipeline.svelte.ts`, `src/index.ts`, Vitest tests)
+- **Symptoms / Error:** Re-exporting a `.svelte.ts` module from `src/index.ts` without the `.svelte.js` extension produces `from "./module.svelte"` in `dist/index.js` while the emitted file is `dist/module.svelte.js`. In addition, calling `$effect` in a Vitest environment without `resolve.conditions: ["browser"]` compiles `$effect` to a server no-op (`$.noop`), and mutating `$state` or reading it to notify store subscribers inside `$effect` without `untrack` registers those `$state` fields as dependencies of the effect itself.
+- **Root Cause:** `@sveltejs/package` strips `.ts` from `.svelte.ts` to emit `.svelte.js`, Vite resolves `svelte` to its SSR bundle unless `"browser"` is in `resolve.conditions`, and Svelte 5 tracks all `$state` reads during synchronous `$effect` execution.
+- **Solution / Workaround:** Re-export `.svelte.ts` modules using the `.svelte.js` specifier in `src/index.ts`, wrap side-effectful state mutations/notifications inside `$effect` with `untrack(() => ...)`, fall back to direct execution when `$effect` does not run synchronously on initialization, and configure `resolve: { conditions: ["browser"] }` in `packages/svelte/vitest.config.ts`.
+
+---
+
+### Svelte `.svelte.ts` fallbacks that run outside `$effect` also run during SSR
+
+- **Affected Area:** `packages/svelte` (`createSlopPipeline.svelte.ts`), Vitest tests
+- **Symptoms / Error:** A pipeline POST fires once while server-rendering and again on hydration. Separately, a test that only reassigns a plain variable and calls `refetch()` passes without exercising reactivity at all.
+- **Root Cause:** In server output `$effect` compiles to a no-op, so any "effect didn't run yet, so run it now" fallback executes on the server. Runes (`$state`, `$effect.root`) only compile in files named `*.svelte.ts` / `*.svelte.test.ts`; a plain `.test.ts` can't drive real reactive state.
+- **Solution / Workaround:** Guard client-only work with `typeof window !== "undefined"` (keep `isLoading` at its initial value so SSR markup matches the first client render). Put rune-based tests in `*.svelte.test.ts`, create the store inside `$effect.root(...)`, change `$state` and call `flushSync()` to run effects, and call the root's cleanup to simulate unmount. For SSR, a test file with `// @vitest-environment node` is transformed for SSR, so `.svelte.ts` modules are compiled with `generate: "server"`.
