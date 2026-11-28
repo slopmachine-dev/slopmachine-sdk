@@ -94,7 +94,7 @@ private struct SlopPlayerLayerRepresentable: NSViewRepresentable {
 /// )
 /// ```
 ///
-/// @version 1.0.0
+/// @version 1.2.0
 public struct SlopVideo<LoaderView: View, FailureView: View>: View {
     public let options: SlopVideoOptions
     public let contentMode: ContentMode

@@ -49,7 +49,7 @@ public func renderMarkdownAttributedString(_ markdown: String) -> AttributedStri
 /// }
 /// ```
 ///
-/// @version 1.0.0
+/// @version 1.2.0
 public struct SlopText<FallbackView: View, FailureView: View>: View {
     public let options: SlopTextOptions
     public let onGenerationError: (@Sendable (SlopMachineError) -> Void)?

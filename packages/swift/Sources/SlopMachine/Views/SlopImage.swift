@@ -51,7 +51,7 @@ internal func makeSwiftUIImage(from data: Data) -> Image? {
 /// }
 /// ```
 ///
-/// @version 1.0.0
+/// @version 1.2.0
 public struct SlopImage<LoaderView: View, FailureView: View>: View {
     public let options: SlopImageOptions
     public let alt: String
