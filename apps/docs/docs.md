@@ -66,6 +66,19 @@ Idiomatic Svelte components and rune/store helpers for rendering generative medi
 
 ---
 
+## 🐦 Swift / SwiftUI SDK (`SlopMachine`)
+
+Native Swift 6 and SwiftUI views and async/await utilities for iOS 17+, macOS 14+, tvOS 17+, and visionOS 1+:
+
+- **[`SlopImage` View](/swift/slopimage)**  
+  SwiftUI view for rendering generative images with zero-layout-shift aspect ratio reservation, shimmer loading animations, custom `@ViewBuilder` loaders/error fallbacks, and `URLCache` preloading.
+- **[`SlopVideo` View](/swift/slopvideo)**  
+  SwiftUI view backed by `AVQueuePlayer` and `AVPlayerLooper` for rendering generative videos with smooth looping, autoplay, and error inspection.
+- **[`SlopText` View & Core Utilities](/swift/sloptext)**  
+  SwiftUI view for rendering dynamic text with inline Markdown styling via `AttributedString(markdown:)` (headings, lists and code blocks are not rendered), plus `executePipeline`, `uploadTempAttachment`, and `rateResult`.
+
+---
+
 ## 🛠️ Core Package (`@slopmachine/core`)
 
 Shared TypeScript utilities, types, and client-side execution helpers:

@@ -14,6 +14,7 @@ This monorepo contains the following packages:
 - [`@slopmachine/core`](packages/core/README.md) - Core utility functions and API client for Slop Machine.
 - [`@slopmachine/react`](packages/react/README.md) - React components (`<SlopImage />`, `<SlopVideo />`) with built-in loading states and layout shift prevention.
 - [`@slopmachine/svelte`](packages/svelte/README.md) - Svelte components (`<SlopImage />`, `<SlopVideo />`) for seamless integration in Svelte/SvelteKit projects.
+- [`SlopMachine` (Swift / SwiftUI)](packages/swift) - Native Swift 6 / SwiftUI package (`SlopImage`, `SlopVideo`, `SlopText`) distributed via Swift Package Manager for iOS, macOS, tvOS, and visionOS.
 
 ## Installation
 
@@ -36,6 +37,17 @@ npm install @slopmachine/svelte
 ```bash
 npm install @slopmachine/core
 ```
+
+### Swift / SwiftUI (Swift Package Manager)
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/slopmachine-dev/slopmachine-sdk.git", branch: "main")
+]
+```
+
+> [!NOTE]
+> The Swift package is not tagged with SwiftPM-compatible versions yet (the repository's tags are npm changesets tags such as `@slopmachine/core@0.9.0`), so depend on the `main` branch for now. Versioned tags will come later.
 
 ### AI Agent Skill & MCP Setup
 
@@ -89,6 +101,31 @@ function App() {
 
   <SlopVideo bucketId="my-video-bucket" aspectRatio="16:9" />
 </div>
+```
+
+### Swift / SwiftUI
+
+```swift
+import SwiftUI
+import SlopMachine
+
+struct ContentView: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            SlopImage(
+                bucketId: "my-unique-bucket-id",
+                aspectRatio: .landscape16x9,
+                variables: ["theme": "cyberpunk"]
+            )
+
+            SlopVideo(
+                bucketId: "my-video-bucket",
+                aspectRatio: .landscape16x9
+            )
+        }
+        .frame(width: 300)
+    }
+}
 ```
 
 ## Demos

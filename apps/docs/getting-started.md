@@ -26,6 +26,28 @@ npm install @slopmachine/react @slopmachine/core
 npm install @slopmachine/svelte @slopmachine/core
 ```
 
+### Swift / SwiftUI (Swift Package Manager)
+
+Add `slopmachine-sdk` to your `Package.swift` or via Xcode (**File &rarr; Add Package Dependencies...**):
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/slopmachine-dev/slopmachine-sdk.git", branch: "main")
+],
+targets: [
+    .target(
+        name: "MyApp",
+        dependencies: [
+            .product(name: "SlopMachine", package: "slopmachine-sdk")
+        ]
+    )
+]
+```
+
+::: info
+The Swift package is not tagged with SwiftPM-compatible versions yet (the repository's tags are npm changesets tags such as `@slopmachine/core@0.9.0`), so depend on the `main` branch for now. Versioned tags will come later.
+:::
+
 ### AI Agent Skill & MCP CLI Bootstrap
 
 Using an AI coding agent (Claude Code, Cursor, Antigravity, Windsurf, Codex)? Install the open-source Slop Machine Agent Skill and configure the remote MCP server in one command:
@@ -102,3 +124,6 @@ Head over to the specific documentation for your framework to see usage examples
 - [Svelte `SlopImage` Component](/svelte/slopimage)
 - [Svelte `SlopVideo` Component](/svelte/slopvideo)
 - [Svelte `SlopText` Component](/svelte/sloptext)
+- [SwiftUI `SlopImage` View](/swift/slopimage)
+- [SwiftUI `SlopVideo` View](/swift/slopvideo)
+- [SwiftUI `SlopText` View & Core Utilities](/swift/sloptext)

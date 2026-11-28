@@ -45,3 +45,28 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+  swift:
+    name: Swift Package Tests (macOS)
+    runs-on: macos-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Cache SwiftPM build
+        uses: actions/cache@v6
+        with:
+          path: .build
+          key: spm-${{ runner.os }}-${{ hashFiles('Package.swift', 'packages/swift/Sources/SlopMachine/**/*.swift') }}
+          restore-keys: |
+            spm-${{ runner.os }}-
+
+      - name: Run SlopMachine Swift Tests
+        run: swift test
+
+      - name: Build for iOS Simulator
+        run: xcodebuild -scheme SlopMachine -destination 'generic/platform=iOS Simulator' build
