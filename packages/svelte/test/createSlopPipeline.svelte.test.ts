@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createSlopPipeline, type SlopPipelineState } from "../src/index";
+import { flushSync } from "svelte";
+import {
+  createSlopPipeline,
+  type SlopPipelineState,
+  type SlopPipelineStore,
+} from "../src/index";
 
 type Handler = (url: string, init?: RequestInit) => Promise<Response>;
 
@@ -157,46 +162,116 @@ describe("createSlopPipeline", () => {
     expect(pipeline.data?.id).toBe("res_manual");
   });
 
-  it("re-executes reactively when a getter function's dependencies change", async () => {
-    const calls: Array<Record<string, unknown>> = [];
-    mockFetch(async (_url, init) => {
+  it("re-executes reactively when a getter's $state dependencies change, and aborts on cleanup", async () => {
+    const calls: Array<{ body: Record<string, unknown>; signal: AbortSignal }> =
+      [];
+    // Only the first two requests resolve; the third stays in flight until aborted
+    mockFetch((_url, init) => {
       const body = JSON.parse(init?.body as string);
-      calls.push(body);
-      return json({
-        id: `res_${calls.length}`,
-        pipelineId: body.pipelineId,
-        siloId: "s1",
-        status: "completed",
-        resultType: "image",
-        stepResults: [
-          {
-            stepId: "s_img",
-            outputKey: "poster",
-            type: "image_generation",
-            outputUrl: `https://cdn/${calls.length}.webp`,
-          },
-        ],
-        totalComputeTimeMs: 100,
-        totalFuelCost: 1,
-        timestamp: 1,
-      });
+      const signal = init?.signal as AbortSignal;
+      calls.push({ body, signal });
+      const n = calls.length;
+      if (n === 3) {
+        return new Promise<Response>((_resolve, reject) => {
+          signal.addEventListener("abort", () =>
+            reject(new DOMException("Aborted", "AbortError")),
+          );
+        });
+      }
+      return Promise.resolve(
+        json({
+          id: `res_${n}`,
+          pipelineId: body.pipelineId,
+          siloId: "s1",
+          status: "completed",
+          resultType: "image",
+          stepResults: [
+            {
+              stepId: "s_img",
+              outputKey: "poster",
+              type: "image_generation",
+              outputUrl: `https://cdn/${n}.webp`,
+            },
+          ],
+          totalComputeTimeMs: 100,
+          totalFuelCost: 1,
+          timestamp: 1,
+        }),
+      );
     });
 
-    let currentVersion = 1;
-    const pipeline = createSlopPipeline(() => ({
-      pipelineId: "pipe_reactive",
-      version: currentVersion,
-    }));
+    const options = $state({ version: 1, enabled: true });
+    let pipeline!: SlopPipelineStore;
 
+    const cleanup = $effect.root(() => {
+      pipeline = createSlopPipeline(() => ({
+        pipelineId: "pipe_reactive",
+        version: options.version,
+        enabled: options.enabled,
+      }));
+    });
+
+    flushSync();
     await flush();
     expect(calls).toHaveLength(1);
-    expect(calls[0].version).toBe(1);
+    expect(calls[0].body.version).toBe(1);
     expect(pipeline.steps.poster?.outputUrl).toBe("https://cdn/1.webp");
 
-    currentVersion = 2;
-    await pipeline.refetch();
+    // A $state change re-runs the effect without any manual refetch()
+    options.version = 2;
+    flushSync();
+    await flush();
     expect(calls).toHaveLength(2);
-    expect(calls[1].version).toBe(2);
+    expect(calls[1].body.version).toBe(2);
     expect(pipeline.steps.poster?.outputUrl).toBe("https://cdn/2.webp");
+
+    // Re-running with unchanged options doesn't re-execute
+    options.enabled = true;
+    flushSync();
+    await flush();
+    expect(calls).toHaveLength(2);
+
+    options.version = 3;
+    flushSync();
+    expect(calls).toHaveLength(3);
+    expect(pipeline.isLoading).toBe(true);
+    expect(calls[2].signal.aborted).toBe(false);
+
+    // Tearing down the effect root (e.g. component unmount) aborts the in-flight run
+    cleanup();
+    expect(calls[2].signal.aborted).toBe(true);
+    await flush();
+    expect(pipeline.error).toBeNull();
+    expect(pipeline.steps.poster?.outputUrl).toBe("https://cdn/2.webp");
+  });
+
+  it("aborts the previous run when options change mid-flight", async () => {
+    const signals: AbortSignal[] = [];
+    mockFetch(
+      (_url, init) =>
+        new Promise<Response>((_resolve, reject) => {
+          const signal = init?.signal as AbortSignal;
+          signals.push(signal);
+          signal.addEventListener("abort", () =>
+            reject(new DOMException("Aborted", "AbortError")),
+          );
+        }),
+    );
+
+    const options = $state({ prompt: "a" });
+    const cleanup = $effect.root(() => {
+      createSlopPipeline(() => ({ pipelineId: "p", prompt: options.prompt }));
+    });
+    flushSync();
+    expect(signals).toHaveLength(1);
+
+    options.prompt = "b";
+    flushSync();
+    expect(signals).toHaveLength(2);
+    expect(signals[0].aborted).toBe(true);
+    expect(signals[1].aborted).toBe(false);
+
+    cleanup();
+    expect(signals[1].aborted).toBe(true);
   });
 });

@@ -227,6 +227,120 @@ describe("useSlopPipeline", () => {
   });
 });
 
+describe("useSlopPipeline refetch overrides and cleanup", () => {
+  it("merges refetch(overrideOptions) over the current options for that run only", async () => {
+    const bodies: Array<Record<string, unknown>> = [];
+    mockFetch(async (_url, init) => {
+      const body = JSON.parse(init?.body as string);
+      bodies.push(body);
+      return json({
+        id: `res_${bodies.length}`,
+        pipelineId: body.pipelineId,
+        siloId: "s1",
+        status: "completed",
+        resultType: "text",
+        stepResults: [],
+        totalComputeTimeMs: 1,
+        totalFuelCost: 1,
+        timestamp: 1,
+      });
+    });
+
+    let latestState: UseSlopPipelineResult | null = null;
+    const onSuccess = vi.fn();
+    const onOverrideSuccess = vi.fn();
+
+    function TestView() {
+      latestState = useSlopPipeline({
+        pipelineId: "pipe_o",
+        prompt: "original",
+        version: 1,
+        onSuccess,
+      });
+      return null;
+    }
+
+    await act(async () => {
+      root.render(<TestView />);
+    });
+    expect(bodies).toHaveLength(1);
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await latestState?.refetch({
+        prompt: "override",
+        duration: { step_1: 6 },
+        onSuccess: onOverrideSuccess,
+      });
+    });
+
+    expect(bodies[1]).toMatchObject({
+      pipelineId: "pipe_o",
+      prompt: "override",
+      version: 1,
+      duration: { step_1: 6 },
+    });
+    expect(onOverrideSuccess).toHaveBeenCalledTimes(1);
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(latestState?.data?.id).toBe("res_2");
+
+    // Overrides don't stick
+    await act(async () => {
+      await latestState?.refetch();
+    });
+    expect(bodies[2]).toMatchObject({ prompt: "original", version: 1 });
+    expect(bodies[2]).not.toHaveProperty("duration");
+  });
+
+  it("aborts an in-flight manual refetch on unmount when enabled is false", async () => {
+    const signals: AbortSignal[] = [];
+    mockFetch(
+      (_url, init) =>
+        new Promise<Response>((_resolve, reject) => {
+          const signal = init?.signal as AbortSignal;
+          signals.push(signal);
+          signal.addEventListener("abort", () =>
+            reject(new DOMException("Aborted", "AbortError")),
+          );
+        }),
+    );
+
+    let latestState: UseSlopPipelineResult | null = null;
+    const onError = vi.fn();
+
+    function TestView() {
+      latestState = useSlopPipeline({
+        pipelineId: "pipe_manual",
+        enabled: false,
+        onGenerationError: onError,
+      });
+      return null;
+    }
+
+    await act(async () => {
+      root.render(<TestView />);
+    });
+
+    let pending: Promise<unknown> | undefined;
+    await act(async () => {
+      pending = latestState?.refetch();
+    });
+    expect(signals).toHaveLength(1);
+    expect(signals[0].aborted).toBe(false);
+    expect(latestState?.isLoading).toBe(true);
+
+    await act(async () => {
+      root.unmount();
+    });
+    expect(signals[0].aborted).toBe(true);
+    await expect(pending).resolves.toBeNull();
+    expect(onError).not.toHaveBeenCalled();
+
+    // afterEach unmounts again
+    root = createRoot(container);
+  });
+});
+
 describe("React components in pipelineId mode", () => {
   it("forwards version, aspectRatio, duration and attachments in SlopImage, SlopVideo and SlopText", async () => {
     mockFetch(async (url, init) => {

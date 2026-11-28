@@ -10,7 +10,7 @@ import {
 
 export interface UseSlopPipelineOptions extends Omit<
   ExecutePipelineOptions,
-  "signal"
+  "signal" | "baseUrl"
 > {
   /**
    * When `false`, suppresses automatic execution on mount and dependency changes.
@@ -47,11 +47,28 @@ export interface UseSlopPipelineResult {
   error: SlopMachineError | null;
   /**
    * Re-executes the pipeline with the current options and returns the resolved result.
+   * Pass `overrideOptions` to change options for this run only (they are merged
+   * over the current options; `enabled` is ignored). Runs even when `enabled` is `false`.
    */
-  refetch: () => Promise<PipelineResult | null>;
+  refetch: (
+    overrideOptions?: Partial<UseSlopPipelineOptions>,
+  ) => Promise<PipelineResult | null>;
 }
 
 const EMPTY_STEPS: Record<string, PipelineStepResult> = {};
+
+const EXECUTE_OPTION_KEYS = [
+  "pipelineId",
+  "siloId",
+  "prompt",
+  "resultId",
+  "version",
+  "aspectRatio",
+  "duration",
+  "attachments",
+  "variables",
+  "metadata",
+] as const satisfies ReadonlyArray<keyof UseSlopPipelineOptions>;
 
 /**
  * Declarative React hook for executing a multi-step Slop Machine pipeline and
@@ -92,7 +109,6 @@ export function useSlopPipeline(
     attachments,
     variables,
     metadata,
-    baseUrl,
     enabled = true,
     onSuccess,
     onGenerationError,
@@ -144,7 +160,6 @@ export function useSlopPipeline(
         serializedMetadata !== undefined
           ? JSON.parse(serializedMetadata)
           : undefined,
-      baseUrl,
     }),
     [
       pipelineId,
@@ -157,57 +172,78 @@ export function useSlopPipeline(
       serializedAttachments,
       serializedVariables,
       serializedMetadata,
-      baseUrl,
     ],
   );
 
   const activeControllerRef = useRef<AbortController | null>(null);
 
-  const runExecution = useCallback(async (): Promise<PipelineResult | null> => {
-    if (!stableOptions.pipelineId) {
-      setIsLoading(false);
-      return null;
-    }
+  const runExecution = useCallback(
+    async (
+      overrideOptions?: Partial<UseSlopPipelineOptions>,
+    ): Promise<PipelineResult | null> => {
+      // Pick known keys only, so e.g. `onClick={refetch}` can't leak an event in
+      const executeOptions: ExecutePipelineOptions = { ...stableOptions };
+      if (overrideOptions) {
+        for (const key of EXECUTE_OPTION_KEYS) {
+          if (key in overrideOptions) {
+            (executeOptions as unknown as Record<string, unknown>)[key] =
+              overrideOptions[key];
+          }
+        }
+      }
+      const onSuccessCallback =
+        overrideOptions?.onSuccess ?? onSuccessRef.current;
+      const onErrorCallback =
+        overrideOptions?.onGenerationError ?? onGenerationErrorRef.current;
 
-    activeControllerRef.current?.abort();
-    const controller = new AbortController();
-    activeControllerRef.current = controller;
+      if (!executeOptions.pipelineId) {
+        setIsLoading(false);
+        return null;
+      }
 
-    setIsLoading(true);
-    setError(null);
+      activeControllerRef.current?.abort();
+      const controller = new AbortController();
+      activeControllerRef.current = controller;
 
-    try {
-      const result = await executePipeline(stableOptions, {
-        signal: controller.signal,
-      });
-      if (controller.signal.aborted) return null;
-      const enrichedResult: PipelineResult = {
-        ...result,
-        steps: result.steps ?? mapStepResults(result),
-      };
-      setData(enrichedResult);
-      setIsLoading(false);
-      onSuccessRef.current?.(enrichedResult);
-      return enrichedResult;
-    } catch (err) {
-      if (controller.signal.aborted) return null;
-      const finalError =
-        err instanceof SlopMachineError
-          ? err
-          : new SlopMachineError(
-              err instanceof Error ? err.message : "Pipeline execution failed",
-            );
-      console.error(
-        "useSlopPipeline error:",
-        finalError.status ?? "",
-        finalError.message,
-      );
-      setError(finalError);
-      setIsLoading(false);
-      onGenerationErrorRef.current?.(finalError);
-      return null;
-    }
-  }, [stableOptions]);
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const result = await executePipeline(executeOptions, {
+          signal: controller.signal,
+        });
+        if (controller.signal.aborted) return null;
+        const enrichedResult: PipelineResult = {
+          ...result,
+          steps: result.steps ?? mapStepResults(result),
+        };
+        setData(enrichedResult);
+        setIsLoading(false);
+        onSuccessCallback?.(enrichedResult);
+        return enrichedResult;
+      } catch (err) {
+        if (controller.signal.aborted) return null;
+        const finalError =
+          err instanceof SlopMachineError
+            ? err
+            : new SlopMachineError(
+                err instanceof Error
+                  ? err.message
+                  : "Pipeline execution failed",
+              );
+        console.error(
+          "useSlopPipeline error:",
+          finalError.status ?? "",
+          finalError.message,
+        );
+        setError(finalError);
+        setIsLoading(false);
+        onErrorCallback?.(finalError);
+        return null;
+      }
+    },
+    [stableOptions],
+  );
 
   useEffect(() => {
     if (!canRun) {
@@ -224,6 +260,16 @@ export function useSlopPipeline(
       activeControllerRef.current = null;
     };
   }, [canRun, runExecution]);
+
+  // Abort any in-flight run on unmount, including a manual `refetch()` made
+  // while `enabled` is `false` (the effect above has no cleanup in that case).
+  useEffect(
+    () => () => {
+      activeControllerRef.current?.abort();
+      activeControllerRef.current = null;
+    },
+    [],
+  );
 
   const steps = useMemo(
     () => (data ? (data.steps ?? mapStepResults(data)) : EMPTY_STEPS),

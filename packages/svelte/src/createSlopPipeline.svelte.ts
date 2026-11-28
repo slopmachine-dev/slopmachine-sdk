@@ -10,7 +10,7 @@ import { untrack } from "svelte";
 
 export interface CreateSlopPipelineOptions extends Omit<
   ExecutePipelineOptions,
-  "signal"
+  "signal" | "baseUrl"
 > {
   /**
    * When `false`, suppresses automatic execution on initialization and reactive updates.
@@ -47,6 +47,8 @@ export interface SlopPipelineState {
   readonly error: SlopMachineError | null;
   /**
    * Re-executes the pipeline and returns a promise resolving to the result.
+   * Pass `overrideOptions` to change options for this run only (they are merged
+   * over the current options; `enabled` is ignored). Runs even when `enabled` is `false`.
    */
   readonly refetch: (
     overrideOptions?: Partial<CreateSlopPipelineOptions>,
@@ -76,7 +78,6 @@ function serializeOptionsKey(opts: CreateSlopPipelineOptions): string {
     attachments: opts.attachments,
     variables: opts.variables,
     metadata: opts.metadata,
-    baseUrl: opts.baseUrl,
     enabled: opts.enabled ?? true,
   });
 }
@@ -183,7 +184,6 @@ export function createSlopPipeline(
           attachments: opts.attachments,
           variables: opts.variables,
           metadata: opts.metadata,
-          baseUrl: opts.baseUrl,
         },
         { signal: controller.signal },
       );
@@ -268,7 +268,11 @@ export function createSlopPipeline(
     // Called outside a Svelte component initialization effect root (e.g. unit tests or plain TS)
   }
 
-  if (!effectRan && initialCanRun) {
+  // Effects are scheduled, not run synchronously, so start the first run now
+  // rather than after mount. Never on the server: `$effect` is a no-op there, so
+  // this would POST once during SSR and again on hydration. `isLoading` stays at
+  // its initial value there, matching the first client render.
+  if (!effectRan && initialCanRun && typeof window !== "undefined") {
     lastKey = serializeOptionsKey(initialOpts);
     void executeWithOptions(initialOpts);
   }
