@@ -1,6 +1,6 @@
 {
   "name": "@slopmachine/react",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "llms": "https://docs.slopmachine.dev/llms.txt",
   "llmsFull": "https://docs.slopmachine.dev/llms-full.txt",
   "description": "The official React SDK for Slop Machine",
@@ -53,7 +53,7 @@
     "vitest": "^5.1.1"
   },
   "dependencies": {
-    "@slopmachine/core": "^1.0.0",
+    "@slopmachine/core": "^1.1.0",
     "clsx": "^2.1.1",
     "tailwind-merge": "^3.7.1"
   },
